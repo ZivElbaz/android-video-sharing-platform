@@ -33,7 +33,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
         // Load video items from JSON file
         try (InputStream inputStream = getResources().openRawResource(R.raw.db)) {
-            List<VideoItem> videoItems = VideoItemParser.parseVideoItems(inputStream);
+            List<VideoItem> videoItems = VideoItemParser.parseVideoItems(inputStream, this); // Pass the context
             if (videoItems != null) {
                 videoList.setVideoItems(videoItems);
             } else {
@@ -47,6 +47,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
