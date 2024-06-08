@@ -1,24 +1,30 @@
 package com.example.viewtube;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.example.viewtube.LoginActivity;
+import com.example.viewtube.R;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        // Example: Navigate to the LoginActivity if the user is not logged in
+        if (!isLoggedIn()) {
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish(); // Finish the MainActivity to prevent the user from returning to it
+        }
+    }
+
+    private boolean isLoggedIn() {
+        // Implement logic to check if the user is logged in
+        // For example, check if there is a user session or token
+        return false; // Replace with your authentication logic
     }
 }
