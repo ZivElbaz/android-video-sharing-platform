@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ViewTube</string>
+    <string name="logo_description">Logo</string>
+    <string name="username_hint">Enter your username</string>
+    <string name="password_hint">Enter your password</string>
+    <string name="login_button_text">Login</string>
 </resources>
