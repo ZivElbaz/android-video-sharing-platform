@@ -7,9 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
+public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
 
     private List<VideoItem> videoItems;
+
+    public VideoList(HomeActivity homeActivity) {
+    }
 
     public void setVideoItems(List<VideoItem> videoItems) {
         this.videoItems = videoItems;
@@ -32,6 +35,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     @Override
     public int getItemCount() {
         return videoItems != null ? videoItems.size() : 0;
+    }
+
+    public interface VideoItemClickListener {
+        void onVideoItemClick(VideoItem videoItem);
     }
 
     static class VideoViewHolder extends RecyclerView.ViewHolder {
