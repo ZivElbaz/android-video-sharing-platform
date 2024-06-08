@@ -2,10 +2,8 @@ package com.example.viewtube;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.viewtube.LoginActivity;
-import com.example.viewtube.R;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -14,17 +12,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Example: Navigate to the LoginActivity if the user is not logged in
-        if (!isLoggedIn()) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
-            finish(); // Finish the MainActivity to prevent the user from returning to it
-        }
-    }
+        // Start the HomeActivity when MainActivity is created
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
 
-    private boolean isLoggedIn() {
-        // Implement logic to check if the user is logged in
-        // For example, check if there is a user session or token
-        return false; // Replace with your authentication logic
+        // Finish the MainActivity so that pressing back won't return to it
+        finish();
     }
 }

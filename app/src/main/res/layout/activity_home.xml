@@ -10,24 +10,10 @@
         android:id="@+id/youtube_logo"
         android:layout_width="130dp"
         android:layout_height="70dp"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"
         android:contentDescription="YouTube Logo"
         android:src="@drawable/logo" />
-
-    <!-- Navigation Bar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:contentInsetStart="0dp"
-        android:contentInsetLeft="0dp"
-        android:contentInsetEnd="0dp"
-        android:contentInsetRight="0dp"
-        android:layout_below="@id/youtube_logo" />
 
     <!-- Search Bar -->
     <EditText
@@ -44,33 +30,14 @@
         android:paddingEnd="8dp"
         android:drawablePadding="8dp"
         android:imeOptions="actionSearch"
-        android:layout_below="@id/toolbar" />
+        android:layout_below="@id/youtube_logo" />
 
-    <!-- Featured Videos -->
+    <!-- Video Feed RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/featured_videos_recycler_view"
+        android:id="@+id/video_feed_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/search_bar"
         android:layout_marginTop="16dp" />
-
-    <!-- Categories -->
-    <TextView
-        android:id="@+id/categories_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Categories"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_below="@id/featured_videos_recycler_view" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categories_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/categories_title"
-        android:layout_marginTop="8dp" />
 
 </RelativeLayout>
