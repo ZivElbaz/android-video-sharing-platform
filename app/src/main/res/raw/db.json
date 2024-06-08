@@ -8,107 +8,115 @@
     "likes": 6,
     "date": "26/05/2021",
     "duration": "01:24:43",
-    "videoURL": "/media/feel.mp4"
+    "videoURL": "media/feel",
+    "thumbnail": "bibi"
   },
-    {
-      "id": 2,
-      "title": "Feel So Close x Roses x Summer x I Love It MASHUP", 
-      "description": "Summer Mashup Vol.1 (Feel so Close Hudszn Remix)",
-      "author": "Ziv Elbaz",
-      "views": 100,
-      "likes": 354,
-      "date": "26/05/2021", 
-      "duration": "01:10:23",
-      "videoURL": "/media/deep.mp4"
-    },
-    {
-      "id": 3,
-      "title": "נס X סטילה - חרבו דרבו (Prod. By Stilla)", 
-      "description": "מילים ולחן: דור סורוקר, נסיה לוי, אנדרדוג (אוראל שמאילוב) ורוישה (רוי שני כרמל)",
-      "author": "Ness Ve Stilla",
-      "views": 40,
-      "likes": 200,
-      "date": "26/05/2021", 
-      "duration": "52:39",
-      "videoURL": "/media/video2.mp4"
-    },
-    {
-      "id": 4,
-      "title": "AM I WRONG || REMIX 2024", 
-      "description": "check this🔥",
-      "author": "Author 404",
-      "views": 999,
-      "likes": 200,
-      "date": "26/05/2021", 
-      "duration": "01:10:23",
-      "videoURL": "/media/wrong.mp4"
-    },
-    {
-      "id": 5,
-      "title": "Jonas Blue, Galantis, Zoe Wees - Mountains (Official Audio)", 
-      "description": "Jonas Blue, Galantis, Zoe Wees - Mountains (Official Lyric Video)",
-      "author": "CS biu",
-      "views": 111,
-      "likes": 1111,
-      "date": "11/11/2021", 
-      "duration": "01:11:11",
-      "videoURL": "/media/mountains.mp4"
-    },
-    {
-      "id": 6,
-      "title": "Payphone - Maroon 5 (Lyrics - No rap)", 
-      "description": "Jonas Blue, Galantis, Zoe Wees - Mountains (Official Lyric Video)",
-      "author": "Maroon 5",
-      "views": 106,
-      "likes": 124,
-      "date": "19/01/2024", 
-      "duration": "03:11",
-      "videoURL": "/media/payphone.mp4"
-    },
-    {
-      "id": 7,
-      "title": "Calvin Harris - Summer (Lyrics)", 
-      "description": "🎵 Follow the official 7clouds playlist on Spotify : http://spoti.fi/2SJsUcZ ​🎧 Calvin Harris - Summer (Lyrics)⏬ Download / Stream: https://open.spotify.com/track/6YUTL4...🔔 Turn on notifications to stay updated with new uploads!",
-      "author": "Calvin Harris",
-      "views": 106,
-      "likes": 124,
-      "date": "19/01/2024", 
-      "duration": "03:11",
-      "videoURL": "/media/summer.mp4"
-    },
-    {
-      "id": 8,
-      "title": "Wake Me Up x Beautiful life remix", 
-      "description": "🎵 Follow the official 7clouds playlist on Spotify ",
-      "author": "CS biu",
-      "views": 106,
-      "likes": 124,
-      "date": "19/01/2024", 
-      "duration": "03:11",
-      "videoURL": "/media/wake.mp4"
-    },
-    {
-      "id": 9,
-      "title": "Whistle - Flo Rida [Vietsub + Lyrics]", 
-      "description": "🎵 Follow the official 7clouds playlist on Spotify ",
-      "author": "CS biu",
-      "views": 106,
-      "likes": 124,
-      "date": "19/01/2024", 
-      "duration": "03:11",
-      "videoURL": "/media/whistle.mp4"
-    },
-    {
-      "id": 10,
-      "title": "Pantropiko x Shape of You remix", 
-      "description": "🎵 Follow the official 7clouds playlist on Spotify ",
-      "author": "CS biu",
-      "views": 106,
-      "likes": 124,
-      "date": "19/01/2024", 
-      "duration": "03:11",
-      "videoURL": "/media/shape.mp4"
-    }
-    
+  {
+    "id": 2,
+    "title": "Feel So Close x Roses x Summer x I Love It MASHUP",
+    "description": "Summer Mashup Vol.1 (Feel so Close Hudszn Remix)",
+    "author": "Ziv Elbaz",
+    "views": 100,
+    "likes": 354,
+    "date": "26/05/2021",
+    "duration": "01:10:23",
+    "videoURL": "app/src/main/res/raw/media/deep.mp4",
+    "thumbnail": "lahav"
+  },
+  {
+    "id": 3,
+    "title": "נס X סטילה - חרבו דרבו (Prod. By Stilla)",
+    "description": "מילים ולחן: דור סורוקר, נסיה לוי, אנדרדוג (אוראל שמאילוב) ורוישה (רוי שני כרמל)",
+    "author": "Ness Ve Stilla",
+    "views": 40,
+    "likes": 200,
+    "date": "26/05/2021",
+    "duration": "52:39",
+    "videoURL": "app/src/main/res/raw/media/video2.mp4",
+    "thumbnail": "mecg"
+  },
+  {
+    "id": 4,
+    "title": "AM I WRONG || REMIX 2024",
+    "description": "check this🔥",
+    "author": "Author 404",
+    "views": 999,
+    "likes": 200,
+    "date": "26/05/2021",
+    "duration": "01:10:23",
+    "videoURL": "app/src/main/res/raw/media/wrong.mp4",
+    "thumbnail": "bibi"
+  },
+  {
+    "id": 5,
+    "title": "Jonas Blue, Galantis, Zoe Wees - Mountains (Official Audio)",
+    "description": "Jonas Blue, Galantis, Zoe Wees - Mountains (Official Lyric Video)",
+    "author": "CS biu",
+    "views": 111,
+    "likes": 1111,
+    "date": "11/11/2021",
+    "duration": "01:11:11",
+    "videoURL": "app/src/main/res/raw/media/mountains.mp4",
+    "thumbnail": "bibi"
+  },
+  {
+    "id": 6,
+    "title": "Payphone - Maroon 5 (Lyrics - No rap)",
+    "description": "Jonas Blue, Galantis, Zoe Wees - Mountains (Official Lyric Video)",
+    "author": "Maroon 5",
+    "views": 106,
+    "likes": 124,
+    "date": "19/01/2024",
+    "duration": "03:11",
+    "videoURL": "app/src/main/res/raw/media/payphone.mp4",
+    "thumbnail": "lahav"
+  },
+  {
+    "id": 7,
+    "title": "Calvin Harris - Summer (Lyrics)",
+    "description": "🎵 Follow the official 7clouds playlist on Spotify : http://spoti.fi/2SJsUcZ ​🎧 Calvin Harris - Summer (Lyrics)⏬ Download / Stream: https://open.spotify.com/track/6YUTL4...🔔 Turn on notifications to stay updated with new uploads!",
+    "author": "Calvin Harris",
+    "views": 106,
+    "likes": 124,
+    "date": "19/01/2024",
+    "duration": "03:11",
+    "videoURL": "app/src/main/res/raw/media/summer.mp4",
+    "thumbnail": "mecg"
+  },
+  {
+    "id": 8,
+    "title": "Wake Me Up x Beautiful life remix",
+    "description": "🎵 Follow the official 7clouds playlist on Spotify ",
+    "author": "CS biu",
+    "views": 106,
+    "likes": 124,
+    "date": "19/01/2024",
+    "duration": "03:11",
+    "videoURL": "app/src/main/res/raw/media/wake.mp4",
+    "thumbnail": "lahav"
+  },
+  {
+    "id": 9,
+    "title": "Whistle - Flo Rida [Vietsub + Lyrics]",
+    "description": "🎵 Follow the official 7clouds playlist on Spotify ",
+    "author": "CS biu",
+    "views": 106,
+    "likes": 124,
+    "date": "19/01/2024",
+    "duration": "03:11",
+    "videoURL": "app/src/main/res/raw/media/whistle.mp4",
+    "thumbnail": "mecg"
+  },
+  {
+    "id": 10,
+    "title": "Pantropiko x Shape of You remix",
+    "description": "🎵 Follow the official 7clouds playlist on Spotify ",
+    "author": "CS biu",
+    "views": 106,
+    "likes": 124,
+    "date": "19/01/2024",
+    "duration": "03:11",
+    "videoURL": "app/src/main/res/raw/media/shape.mp4",
+    "thumbnail": "bibi"
+  }
 ]
-  

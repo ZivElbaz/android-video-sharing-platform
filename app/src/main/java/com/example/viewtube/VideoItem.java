@@ -10,8 +10,9 @@ public class VideoItem {
     private String date;
     private String duration;
     private String videoURL;
+    private int thumbnailResId;
 
-    public VideoItem(int id, String title, String description, String author, int views, int likes, String date, String duration, String videoURL) {
+    public VideoItem(int id, String title, String description, String author, int views, int likes, String date, String duration, String videoURL, int thumbnailResId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -21,7 +22,10 @@ public class VideoItem {
         this.date = date;
         this.duration = duration;
         this.videoURL = videoURL;
+        this.thumbnailResId = thumbnailResId;
     }
+
+    // Getters and Setters
 
     public int getId() {
         return id;
@@ -93,5 +97,13 @@ public class VideoItem {
 
     public void setVideoURL(String videoURL) {
         this.videoURL = videoURL;
+    }
+
+    public int getThumbnailResId() {
+        return thumbnailResId;
+    }
+
+    public void setThumbnailResId(int thumbnailResId) {
+        this.thumbnailResId = thumbnailResId;
     }
 }
