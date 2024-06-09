@@ -1,24 +1,17 @@
 package com.example.viewtube;
 
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import android.widget.TextView;
 import android.widget.VideoView;
-import android.net.Uri;
-
+import androidx.appcompat.app.AppCompatActivity;
 
 public class VideoWatchActivity extends AppCompatActivity {
 
     private VideoView videoPlayer;
     private TextView videoTitle;
     private TextView videoDescription;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,14 +22,15 @@ public class VideoWatchActivity extends AppCompatActivity {
         videoTitle = findViewById(R.id.videoTitle);
         videoDescription = findViewById(R.id.videoDescription);
 
-        String videoUrl = getIntent().getStringExtra("video_url");
+        String videoResourceName = getIntent().getStringExtra("video_resource_name");
         String title = getIntent().getStringExtra("video_title");
         String description = getIntent().getStringExtra("video_description");
 
         videoTitle.setText(title);
         videoDescription.setText(description);
 
-        Uri videoUri = Uri.parse(videoUrl);
+        int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
+        Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
         videoPlayer.setVideoURI(videoUri);
         videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -51,6 +45,5 @@ public class VideoWatchActivity extends AppCompatActivity {
                 videoPlayer.start();   // Start playing again
             }
         });
-
     }
 }

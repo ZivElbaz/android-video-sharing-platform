@@ -1,16 +1,12 @@
 package com.example.viewtube;
 
-
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-
 import org.json.JSONException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -26,7 +22,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         setContentView(R.layout.activity_home);
 
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
-        videoList = new VideoList(this);
+        videoList = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         videoRecyclerView.setLayoutManager(layoutManager);
         videoRecyclerView.setAdapter(videoList);
@@ -48,12 +44,15 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         }
     }
 
-
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
-        // Handle click on a video item
-        // Start VideoWatchActivity and pass the video item data
-        // For now, let's just display a toast with the video title
-        Toast.makeText(this, "Clicked on video: " + videoItem.getTitle(), Toast.LENGTH_SHORT).show();
+        String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
+        String videoTitle = videoItem.getTitle();
+        String videoDescription = videoItem.getDescription();
+        Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
+        moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
+        moveToWatch.putExtra("video_title", videoTitle);
+        moveToWatch.putExtra("video_description", videoDescription);
+        startActivity(moveToWatch);
     }
 }
