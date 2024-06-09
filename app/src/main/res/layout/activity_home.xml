@@ -1,21 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeActivity">
 
     <!-- YouTube Logo -->
-    <ImageView
-        android:id="@+id/youtube_logo"
-        android:layout_width="130dp"
-        android:layout_height="70dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="16dp"
-        android:contentDescription="YouTube Logo"
-        android:src="@drawable/logo" />
 
     <!-- Search Bar -->
+
+    <ImageView
+        android:id="@+id/youtube_logo"
+        android:layout_width="123dp"
+        android:layout_height="67dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="YouTube Logo"
+        android:src="@drawable/logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/register_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:contentDescription="Register Page"
+        android:hint="Register"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.906"
+        app:layout_constraintStart_toStartOf="@+id/youtube_logo"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
@@ -23,21 +40,23 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:hint="Search"
-        android:inputType="text"
         android:background="@drawable/search_background"
+        android:drawablePadding="8dp"
+        android:hint="Search"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:drawablePadding="8dp"
-        android:imeOptions="actionSearch"
-        android:layout_below="@id/youtube_logo" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/youtube_logo" />
 
     <!-- Video Feed RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/video_feed_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/search_bar"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_bar" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

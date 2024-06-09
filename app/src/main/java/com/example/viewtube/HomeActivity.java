@@ -2,6 +2,8 @@ package com.example.viewtube;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,11 +17,14 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
+    private Button registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        registerButton = (Button)findViewById(R.id.register_button);
 
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
         videoList = new VideoList(this, this); // Pass the context and the listener
@@ -42,6 +47,14 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             // Show an error message or take appropriate action
             Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
         }
+
+        registerButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent=new Intent(HomeActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
