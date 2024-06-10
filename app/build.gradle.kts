@@ -37,4 +37,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // ExoPlayer dependency
+    implementation("com.google.android.exoplayer:exoplayer:2.15.1")
 }
