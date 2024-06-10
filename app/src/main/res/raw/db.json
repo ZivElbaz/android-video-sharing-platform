@@ -8,7 +8,7 @@
     "likes": 6,
     "date": "26/05/2021",
     "duration": "01:24:43",
-    "videoURL": "feel.mp4",
+    "videoURL": "feel",
     "thumbnail": "bibi"
   },
   {
@@ -80,7 +80,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/summer.mp4",
+    "videoURL": "summer",
     "thumbnail": "mecg"
   },
   {
@@ -92,7 +92,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/wake.mp4",
+    "videoURL": "wake",
     "thumbnail": "lahav"
   },
   {
@@ -104,7 +104,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/whistle.mp4",
+    "videoURL": "whistle",
     "thumbnail": "mecg"
   },
   {
@@ -116,7 +116,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/shape.mp4",
+    "videoURL": "shape",
     "thumbnail": "bibi"
   }
 ]
