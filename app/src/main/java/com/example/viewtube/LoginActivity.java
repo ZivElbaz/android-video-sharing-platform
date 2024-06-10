@@ -1,43 +1,67 @@
 package com.example.viewtube;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.viewtube.managers.UsersManager;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText usernameEditText;
-    private EditText passwordEditText;
-    private Button loginButton;
+    EditText username;
+    EditText password;
+    Button login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize UI components
-        usernameEditText = findViewById(R.id.edit_text_username);
-        passwordEditText = findViewById(R.id.edit_text_password);
-        loginButton = findViewById(R.id.button_login);
+        username = findViewById(R.id.username);
+        password = findViewById(R.id.password);
+        login = findViewById(R.id.login);
 
-        // Set click listener for login button
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        login.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                // Perform login logic here
-                String username = usernameEditText.getText().toString().trim();
-                String password = passwordEditText.getText().toString().trim();
-
-                // You can add validation logic here before proceeding with login
-                // For example, check if username and password are not empty
-
-                // For now, simply print the username and password to logcat
-                // You can replace this with actual login implementation
-                System.out.println("Username: " + username);
-                System.out.println("Password: " + password);
+            public void onClick(View view) {
+                authenticateUser();
             }
         });
+    }
+
+    boolean isEmpty(EditText text) {
+        CharSequence str = text.getText().toString();
+        return TextUtils.isEmpty(str);
+    }
+
+    void authenticateUser() {
+        if (isEmpty(username)) {
+            username.setError("Username is required!");
+            return;
+        }
+
+        if (isEmpty(password)) {
+            password.setError("Password is required!");
+            return;
+        }
+
+        String user = username.getText().toString();
+        String pass = password.getText().toString();
+
+        if (UsersManager.getInstance().authenticate(user, pass)) {
+            Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, "Invalid username or password!", Toast.LENGTH_SHORT).show();
+        }
     }
 }
