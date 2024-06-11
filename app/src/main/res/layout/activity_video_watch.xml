@@ -15,7 +15,7 @@
         app:resize_mode="fit"
         app:show_timeout="5000"
         app:use_controller="true"
-        app:player_layout_id="@layout/exo_player_view" />
+        app:controller_layout_id="@layout/exo_player_custom_controller" />
 
     <!-- ScrollView to make the content scrollable -->
     <ScrollView

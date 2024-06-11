@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Player Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:layout_gravity="center">
+
+        <!-- Control Buttons -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_gravity="center">
+
+            <!-- Rewind 10 seconds -->
+            <ImageButton
+                android:id="@+id/exo_rew"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/rewind"
+                android:background="@null"
+                android:contentDescription="@string/exo_controls_rewind_description"
+                android:padding="8dp"
+                android:scaleType="centerInside" />
+
+            <!-- Play/Pause Button -->
+            <ImageButton
+                android:id="@+id/exo_play_pause"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/pause"
+                android:background="@null"
+                android:layout_marginStart="25dp"
+                android:contentDescription="@string/exo_controls_play_description"
+                android:padding="8dp"
+                android:scaleType="centerInside" />
+
+            <!-- Forward 10 seconds -->
+            <ImageButton
+                android:id="@+id/exo_ffwd"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="25dp"
+                android:src="@drawable/forward"
+                android:background="@null"
+                android:contentDescription="@string/exo_controls_fastforward_description"
+                android:padding="8dp"
+                android:scaleType="centerInside" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <!-- Seek Bar -->
+    <com.google.android.exoplayer2.ui.DefaultTimeBar
+        android:id="@+id/exo_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="bottom"
+        app:played_color="@color/exo_played_color"
+        app:scrubber_color="@color/exo_played_color"
+        app:buffered_color="@color/exo_unplayed_color"
+        app:unplayed_color="@android:color/transparent"
+        app:ad_marker_color="@color/exo_ad_marker_color"
+        app:played_ad_marker_color="@color/exo_played_ad_marker_color" />
+
+    <!-- Fullscreen Button at Bottom Left -->
+    <ImageButton
+        android:id="@+id/exo_fullscreen"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/fullscreen"
+        android:background="@null"
+        android:contentDescription="@string/exo_controls_fullscreen_description"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp" />
+
+    <!-- Player Control View -->
+    <com.google.android.exoplayer2.ui.PlayerControlView
+        android:id="@+id/exo_controller"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:visibility="gone" />
+
+</FrameLayout>
