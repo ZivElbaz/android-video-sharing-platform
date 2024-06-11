@@ -1,4 +1,7 @@
+
 package com.example.viewtube;
+
+import android.content.Context;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,7 +16,7 @@ import java.util.List;
 
 public class VideoItemParser {
 
-    public static List<VideoItem> parseVideoItems(InputStream inputStream, HomeActivity context) throws IOException, JSONException {
+    public static List<VideoItem> parseVideoItems(InputStream inputStream, Context context) throws IOException, JSONException {
         List<VideoItem> videoItems = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder stringBuilder = new StringBuilder();
@@ -31,7 +34,7 @@ public class VideoItemParser {
         return videoItems;
     }
 
-    private static VideoItem parseVideoItem(JSONObject jsonObject, HomeActivity context) throws JSONException {
+    private static VideoItem parseVideoItem(JSONObject jsonObject, Context context) throws JSONException {
         int id = jsonObject.getInt("id");
         String title = jsonObject.getString("title");
         String description = jsonObject.getString("description");

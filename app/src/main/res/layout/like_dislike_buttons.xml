@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+
+    android:layout_gravity="center"
+    android:background="@drawable/rounded_button_background">
+
+    <!-- Like Button -->
+    <Button
+        android:id="@+id/btnLike"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:drawableLeft="@drawable/like"
+        android:drawablePadding="0dp"
+        android:textColor="#000"
+        android:textSize="12sp"
+        android:background="@android:color/transparent"
+        android:padding="8dp"
+        android:gravity="center"/>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#D3D3D3" />
+
+    <!-- Dislike Button -->
+    <Button
+        android:id="@+id/btnDislike"
+        android:layout_width="40dp"
+        android:layout_height="38dp"
+        android:drawableLeft="@drawable/dislike"
+        android:drawablePadding="0dp"
+        android:text=""
+        android:textColor="#000"
+        android:background="@android:color/transparent"
+        android:padding="8dp" />
+</LinearLayout>

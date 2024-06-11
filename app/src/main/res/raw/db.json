@@ -8,7 +8,7 @@
     "likes": 6,
     "date": "26/05/2021",
     "duration": "01:24:43",
-    "videoURL": "media/feel",
+    "videoURL": "feel",
     "thumbnail": "bibi"
   },
   {
@@ -20,7 +20,7 @@
     "likes": 354,
     "date": "26/05/2021",
     "duration": "01:10:23",
-    "videoURL": "app/src/main/res/raw/media/deep.mp4",
+    "videoURL": "deep",
     "thumbnail": "lahav"
   },
   {
@@ -32,7 +32,7 @@
     "likes": 200,
     "date": "26/05/2021",
     "duration": "52:39",
-    "videoURL": "app/src/main/res/raw/media/video2.mp4",
+    "videoURL": "video2",
     "thumbnail": "mecg"
   },
   {
@@ -44,7 +44,7 @@
     "likes": 200,
     "date": "26/05/2021",
     "duration": "01:10:23",
-    "videoURL": "app/src/main/res/raw/media/wrong.mp4",
+    "videoURL": "wrong",
     "thumbnail": "bibi"
   },
   {
@@ -56,7 +56,7 @@
     "likes": 1111,
     "date": "11/11/2021",
     "duration": "01:11:11",
-    "videoURL": "app/src/main/res/raw/media/mountains.mp4",
+    "videoURL": "mountains",
     "thumbnail": "bibi"
   },
   {
@@ -68,7 +68,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/payphone.mp4",
+    "videoURL": "payphone",
     "thumbnail": "lahav"
   },
   {
@@ -80,7 +80,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/summer.mp4",
+    "videoURL": "summer",
     "thumbnail": "mecg"
   },
   {
@@ -92,7 +92,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/wake.mp4",
+    "videoURL": "wake",
     "thumbnail": "lahav"
   },
   {
@@ -104,7 +104,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/whistle.mp4",
+    "videoURL": "whistle",
     "thumbnail": "mecg"
   },
   {
@@ -116,7 +116,7 @@
     "likes": 124,
     "date": "19/01/2024",
     "duration": "03:11",
-    "videoURL": "app/src/main/res/raw/media/shape.mp4",
+    "videoURL": "shape",
     "thumbnail": "bibi"
   }
 ]
