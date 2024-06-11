@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -14,9 +14,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import org.json.JSONException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
     private Button registerButton;
-    private EditText searchBar;
+    private TextInputEditText searchBar;
     private BottomNavigationView bottomNavBar;
     private List<VideoItem> allVideoItems;
 
@@ -63,19 +63,16 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
         }
 
-        registerButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                Intent intent=new Intent(HomeActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
+        registerButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, RegisterActivity.class);
+            startActivity(intent);
         });
 
         bottomNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
-                // Scroll to the top of the RecyclerView
-                videoRecyclerView.smoothScrollToPosition(0);
+                // Render all videos when the home button is clicked
+                videoList.setVideoItems(allVideoItems);
                 return true;
             } else if (itemId == R.id.nav_upload) {
                 // Navigate to UploadActivity
@@ -89,10 +86,29 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         searchBar.setOnEditorActionListener((TextView v, int actionId, KeyEvent event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 filter(v.getText().toString());
+                hideKeyboard();
                 return true;
             }
             return false;
         });
+
+        // Handle text changes and clear button click
+        TextInputLayout searchInputLayout = findViewById(R.id.search_input_layout);
+        searchInputLayout.setEndIconOnClickListener(view -> {
+            searchBar.setText("");
+            searchBar.clearFocus();
+            filter("");
+            hideKeyboard();
+        });
+
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+            searchBar.clearFocus();
+        }
     }
 
     private void filter(String text) {
