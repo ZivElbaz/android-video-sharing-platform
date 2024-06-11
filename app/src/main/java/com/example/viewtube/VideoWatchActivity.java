@@ -112,7 +112,28 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        releasePlayer();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        releasePlayer();
+    }
+
+
+    private void releasePlayer() {
+        if (simpleExoPlayer != null) {
+            simpleExoPlayer.release();
+            simpleExoPlayer = null;
+        }
+    }
+
+    @Override
     public void onVideoItemClick(VideoItem videoItem) {
+        releasePlayer();
         String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
