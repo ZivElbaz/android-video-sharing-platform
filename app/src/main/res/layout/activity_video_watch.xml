@@ -1,26 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".VideoWatchActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <VideoView
+    <!-- VideoView to play the video -->
+    <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/videoPlayer"
-        android:layout_width="wrap_content"
-        android:layout_height="186dp" />
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:background="#000"
+        app:hide_on_touch="true"
+        app:resize_mode="fit"
+        app:show_timeout="5000"
+        app:use_controller="true"
+        app:player_layout_id="@layout/exo_player_view" />
 
-    <TextView
-        android:id="@+id/videoTitle"
+    <!-- ScrollView to make the content scrollable -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         />
+        android:layout_below="@id/videoPlayer">
 
-    <TextView
-        android:id="@+id/videoDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-         />
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <!-- Title of the video -->
+            <TextView
+                android:id="@+id/videoTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
+                android:textColor="#000" />
+
+            <!-- views, date and description of the video -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/videoViews"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:textColor="#666"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/videoDate"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:textSize="13sp"
+                android:textColor="#666" />
+
+            <TextView
+                android:id="@+id/videoDescription"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="12sp"
+                android:textColor="#666" />
+
+
+        </LinearLayout>
+
+            <!-- Action buttons: Like, Share, Download -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <include
+                    android:id="@+id/likeDislikeLayout"
+                    layout="@layout/like_dislike_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <!-- Share Button -->
+                <Button
+                    android:id="@+id/btnShare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="16dp"
+                    android:drawableLeft="@drawable/share"
+                    android:drawablePadding="8dp"
+                    android:text="Share"
+                    android:textColor="#000"
+                    app:backgroundTint="#ECECEC"
+                    android:textSize="12sp"
+                    android:background="@drawable/rounded_button_background"
+                    android:padding="8dp" />
+
+                <!-- Download Button -->
+                <Button
+                    android:id="@+id/btnDownload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="16dp"
+                    android:drawableLeft="@drawable/download"
+                    android:drawablePadding="8dp"
+                    android:text="Download"
+                    android:textColor="#000"
+                    app:backgroundTint="#ECECEC"
+                    android:textSize="12sp"
+                    android:background="@drawable/rounded_button_background"
+                    android:padding="8dp" />
+            </LinearLayout>
+
+            <!-- Comments section label -->
+            <TextView
+                android:id="@+id/commentsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Comments"
+                android:textSize="18sp"
+                android:textColor="#000" />
+
+            <!-- Input for adding a comment -->
+            <EditText
+                android:id="@+id/commentInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Add a comment" />
+
+            <!-- Button to post a comment -->
+            <Button
+                android:id="@+id/btnPostComment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Post" />
+
+            <!-- RecyclerView for displaying comments -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/commentsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:padding="8dp" />
+
+            <!-- RecyclerView for related videos -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="8dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>
