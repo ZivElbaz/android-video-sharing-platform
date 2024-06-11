@@ -37,7 +37,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     PlayerView playerView;
     SimpleExoPlayer simpleExoPlayer;
     private TextView videoTitle;
-    private TextView videoDescription;
+    private TextView videoDescription, videoDate, videoViews;
     private RecyclerView recyclerView;
     private RecyclerView commentsRecyclerView;
    // private CommentsAdapter commentsAdapter;
@@ -55,6 +55,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         playerView = findViewById(R.id.videoPlayer);
         videoTitle = findViewById(R.id.videoTitle);
         videoDescription = findViewById(R.id.videoDescription);
+        videoViews = findViewById(R.id.videoViews);
+        videoDate = findViewById(R.id.videoDate);
         recyclerView = findViewById(R.id.recyclerView);
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView);
         commentInput = findViewById(R.id.commentInput);
@@ -69,9 +71,17 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         String videoResourceName = getIntent().getStringExtra("video_resource_name");
         String title = getIntent().getStringExtra("video_title");
         String description = getIntent().getStringExtra("video_description");
+        String date = getIntent().getStringExtra("video_date");
+        int likes = getIntent().getIntExtra("video_likes", 1);
+        int views = getIntent().getIntExtra("video_views", 1);
+        String videoLikes = Integer.toString(likes);
+        String videoViewsString = Integer.toString(views) + "Views";
 
         videoTitle.setText(title);
         videoDescription.setText(description);
+        videoViews.setText(videoViewsString);
+        videoDate.setText(date);
+        btnLike.setText(videoLikes);
 
         int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
         Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
@@ -106,10 +116,16 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
+        int videoLikes = videoItem.getLikes();
+        int videoViews = videoItem.getViews();
+        String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
         moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
+        moveToWatch.putExtra("video_likes", videoLikes);
+        moveToWatch.putExtra("video_date", videoDate);
+        moveToWatch.putExtra("video_views", videoViews);
         startActivity(moveToWatch);
     }
 

@@ -15,7 +15,6 @@
         android:layout_height="38dp"
         android:drawableLeft="@drawable/like"
         android:drawablePadding="0dp"
-        android:text="748"
         android:textColor="#000"
         android:textSize="12sp"
         android:background="@android:color/transparent"

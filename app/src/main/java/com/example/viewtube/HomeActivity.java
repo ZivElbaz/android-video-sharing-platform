@@ -62,10 +62,16 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
+        int videoLikes = videoItem.getLikes();
+        int videoViews = videoItem.getViews();
+        String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
         moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
+        moveToWatch.putExtra("video_likes", videoLikes);
+        moveToWatch.putExtra("video_date", videoDate);
+        moveToWatch.putExtra("video_views", videoViews);
         startActivity(moveToWatch);
     }
 }
