@@ -1,46 +1,88 @@
 package com.example.viewtube;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
 import org.json.JSONException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.viewtube.managers.CurrentUserManager;
+import com.example.viewtube.models.User;
+
 public class HomeActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
+
+    private static final String TAG = "HomeActivity";
 
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
-    private Button registerButton;
+    private Button uploadButton;
     private TextInputEditText searchBar;
     private BottomNavigationView bottomNavBar;
     private List<VideoItem> allVideoItems;
+
+    private NavigationView sideBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        registerButton = findViewById(R.id.register_button);
-        bottomNavBar = findViewById(R.id.bottomNavigationView);
+        Log.d(TAG, "onCreate: Initializing components");
+
+        sideBar = findViewById(R.id.navigation_view);
+        uploadButton = findViewById(R.id.upload_button_home);
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
         searchBar = findViewById(R.id.search_bar);
+        bottomNavBar = findViewById(R.id.bottomNavigationView);
+
+        // Initialize side bar header views
+        View headerView = sideBar.getHeaderView(0);
+        ImageView profileImageView = headerView.findViewById(R.id.current_profile);
+        TextView usernameView = headerView.findViewById(R.id.current_user);
+
+        if (CurrentUserManager.getInstance().getCurrentUser() == null) {
+            // If no current user, show the login item
+            bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
+            bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
+            profileImageView.setImageResource(R.drawable.ic_profile);
+            usernameView.setText("Guest");
+        } else {
+            // If there is a current user, hide the login item
+            bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
+            bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
+            String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
+            if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
+                Uri profilePictureUri = Uri.parse(profilePictureUriString);
+                profileImageView.setImageURI(profilePictureUri); // Set profile image using URI
+            } else {
+                profileImageView.setImageResource(R.drawable.ic_profile); // Set default profile image
+            }
+            usernameView.setText(CurrentUserManager.getInstance().getCurrentUser().getUsername());
+        }
 
         videoList = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -63,8 +105,8 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
         }
 
-        registerButton.setOnClickListener(view -> {
-            Intent intent = new Intent(HomeActivity.this, RegisterActivity.class);
+        uploadButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, UploadActivity.class);
             startActivity(intent);
         });
 
@@ -73,12 +115,16 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             if (itemId == R.id.nav_home) {
                 // Render all videos when the home button is clicked
                 videoList.setVideoItems(allVideoItems);
+                searchBar.setText("");
+                searchBar.clearFocus();
+                videoRecyclerView.smoothScrollToPosition(0);
                 return true;
+            } else if (itemId == R.id.nav_login) {
+                Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+                startActivity(loginIntent);
             } else if (itemId == R.id.nav_upload) {
-                // Navigate to UploadActivity
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
                 startActivity(uploadIntent);
-                return true;
             }
             return false;
         });
@@ -100,7 +146,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             filter("");
             hideKeyboard();
         });
-
     }
 
     private void hideKeyboard() {
@@ -137,5 +182,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         moveToWatch.putExtra("video_date", videoDate);
         moveToWatch.putExtra("video_views", videoViews);
         startActivity(moveToWatch);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // Exit the app
+        CurrentUserManager.getInstance().logout();
+        finishAffinity();
     }
 }

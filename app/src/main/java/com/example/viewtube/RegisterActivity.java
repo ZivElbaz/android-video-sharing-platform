@@ -126,12 +126,12 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        if (!isPasswordValid(password)) {
+        /*if (!isPasswordValid(password)) {
             Toast.makeText(this, "Password must be at least 8 characters and contain" +
                     " at least one uppercase letter, one lowercase letter, one number," +
                     " and one special character!", Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
 
         if (!isPasswordsMatch(password, confirmPassword)) {
             confirmPassword.setError("Passwords do not match!");
@@ -155,6 +155,5 @@ public class RegisterActivity extends AppCompatActivity {
         // Redirect to login or home activity
         Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
         startActivity(intent);
-        finish();
     }
 }
