@@ -5,4 +5,8 @@
     <string name="password_hint">Enter your password</string>
     <string name="login_button_text">Login</string>
     <string name="clear_search">Clear Search</string>
+    <string name="exo_controls_rewind_description">Rewind 10 seconds</string>
+    <string name="exo_controls_play_description">Play</string>
+    <string name="exo_controls_fastforward_description">Fast forward 10 seconds</string>
+    <string name="exo_controls_fullscreen_description">Fullscreen</string>
 </resources>

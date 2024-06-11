@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
@@ -45,6 +50,9 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private List<String> comments;
     private EditText commentInput;
     private Button btnLike, btnShare, btnDownload, btnPostComment;
+    private ImageButton playPauseButton, rewindButton, forwardButton, fullscreenButton;
+
+    private boolean isFullscreen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +72,10 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         btnShare = findViewById(R.id.btnShare);
         btnDownload = findViewById(R.id.btnDownload);
         btnPostComment = findViewById(R.id.btnPostComment);
+        playPauseButton = findViewById(R.id.exo_play_pause);
+        rewindButton = findViewById(R.id.exo_rew);
+        forwardButton = findViewById(R.id.exo_ffwd);
+        fullscreenButton = findViewById(R.id.exo_fullscreen);
 
 
 
@@ -96,6 +108,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         simpleExoPlayer.setPlayWhenReady(true);
 
 
+
+
         // initialize the RecyclerView with related videos
         relatedVideos = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -109,6 +123,23 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
+
+        playPauseButton.setOnClickListener(view -> togglePlayPause());
+        rewindButton.setOnClickListener(view -> simpleExoPlayer.seekBack());
+        forwardButton.setOnClickListener(view -> simpleExoPlayer.seekForward());
+        fullscreenButton.setOnClickListener(view -> toggleFullscreen());
+
+        // Listen for player state changes to update the play/pause button
+        simpleExoPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
+                if (playWhenReady) {
+                    playPauseButton.setImageResource(R.drawable.pause);
+                } else {
+                    playPauseButton.setImageResource(R.drawable.play);
+                }
+            }
+        });
     }
 
     @Override
@@ -121,6 +152,56 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     protected void onStop() {
         super.onStop();
         releasePlayer();
+    }
+
+    private void toggleFullscreen() {
+        if (isFullscreen) {
+            exitFullscreen();
+        } else {
+            enterFullscreen();
+        }
+    }
+
+    private void enterFullscreen() {
+        isFullscreen = true;
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+        // Hide other UI elements (e.g., ActionBar)
+        getSupportActionBar().hide();
+
+        // Adjust the player view layout
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) playerView.getLayoutParams();
+        params.width = FrameLayout.LayoutParams.MATCH_PARENT;
+        params.height = FrameLayout.LayoutParams.MATCH_PARENT;
+        playerView.setLayoutParams(params);
+    }
+
+    private void exitFullscreen() {
+        isFullscreen = false;
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
+        // Show other UI elements (e.g., ActionBar)
+        getSupportActionBar().show();
+
+        // Adjust the player view layout
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) playerView.getLayoutParams();
+        params.width = FrameLayout.LayoutParams.MATCH_PARENT;
+        params.height = FrameLayout.LayoutParams.WRAP_CONTENT;
+        playerView.setLayoutParams(params);
+    }
+
+    private void togglePlayPause() {
+        if (simpleExoPlayer != null) {
+            if (simpleExoPlayer.getPlayWhenReady()) {
+                simpleExoPlayer.setPlayWhenReady(false);
+            } else {
+                simpleExoPlayer.setPlayWhenReady(true);
+            }
+        }
     }
 
 
