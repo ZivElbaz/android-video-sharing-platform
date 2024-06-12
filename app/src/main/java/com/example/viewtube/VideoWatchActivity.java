@@ -1,14 +1,19 @@
 package com.example.viewtube;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,8 +25,11 @@ import com.example.viewtube.managers.VideoDetailsManager;
 import com.example.viewtube.managers.VideoPlayerManager;
 import com.google.android.exoplayer2.ui.PlayerView;
 import org.json.JSONException;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VideoWatchActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
@@ -35,6 +43,9 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private boolean liked = false;
     private RecyclerView recyclerView;
     private VideoList relatedVideos;
+    private ArrayList<VideoItem> mergedList;
+
+    private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +82,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         String date = getIntent().getStringExtra("video_date");
         int initialLikes = getIntent().getIntExtra("video_likes", 1);
         int views = getIntent().getIntExtra("video_views", 1);
+        int id = getIntent().getIntExtra("video_id", 1);
 
         // Check if session has likes and liked status
         int likes = SessionManager.getInstance().getLikes(videoResourceName) == 0 ? initialLikes : SessionManager.getInstance().getLikes(videoResourceName);
@@ -81,11 +93,27 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
         btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
 
-        // Initialize video player
-        int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
-        videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
+        Log.d("VideoWatchActivity", "Video re name: " + videoResourceName + " and video id: " + id);
+
+        if (id >= 1 && id <= 10) {
+            // Local resource video
+            int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
+            videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
+            videoPlayerManager.initializePlayer(this, videoUri);
+        } else {
+            // Newly added video
+            videoUri = Uri.parse(videoResourceName);
+            checkAndRequestPermission(videoUri);
+        }
+
+        Log.d("VideoWatchActivity", "Video URI: " + videoUri.toString());
+
         videoFileName = videoResourceName + ".mp4";
-        videoPlayerManager.initializePlayer(this, videoUri);
+
+//        int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
+//        videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
+//        videoFileName = videoResourceName + ".mp4";
+//        videoPlayerManager.initializePlayer(this, videoUri);
 
         // Set button listeners
         btnLike.setOnClickListener(view -> {
@@ -109,20 +137,25 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             FileUtils.checkAndRequestPermission(this);
         });
 
-        btnShare.setOnClickListener(view -> FileUtils.shareVideo(this, videoResourceId, videoFileName, title));
+        //btnShare.setOnClickListener(view -> FileUtils.shareVideo(this, videoResourceId, videoFileName, title));
 
         // Initialize the RecyclerView with related videos
         relatedVideos = new VideoList(this, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(relatedVideos);
 
-        // Load video items
-        try {
-            InputStream inputStream = getResources().openRawResource(R.raw.db);
-            List<VideoItem> videoItems = VideoItemParser.parseVideoItems(inputStream, this);
-            relatedVideos.setVideoItems(videoItems);
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
+
+        ArrayList<VideoItem> videoItems = getIntent().getParcelableArrayListExtra("video_items");
+        relatedVideos.setVideoItems(videoItems);
+        mergedList = videoItems;
+
+    }
+
+    private void checkAndRequestPermission(Uri videoUri) {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_READ_EXTERNAL_STORAGE);
+        } else {
+            videoPlayerManager.initializePlayer(this, videoUri);
         }
     }
 
@@ -141,7 +174,15 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        FileUtils.handlePermissionsResult(this, requestCode, permissions, grantResults, videoFileName);
+        if (requestCode == REQUEST_CODE_READ_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                videoPlayerManager.initializePlayer(this, videoUri);
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            FileUtils.handlePermissionsResult(this, requestCode, permissions, grantResults, videoFileName);
+        }
     }
 
     @Override
@@ -152,14 +193,17 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         String videoDescription = videoItem.getDescription();
         int videoLikes = videoItem.getLikes();
         int videoViews = videoItem.getViews();
+        int videoId = videoItem.getId();
         String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
+        moveToWatch.putParcelableArrayListExtra("video_items", mergedList);
         moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
         moveToWatch.putExtra("video_likes", videoLikes);
         moveToWatch.putExtra("video_date", videoDate);
         moveToWatch.putExtra("video_views", videoViews);
+        moveToWatch.putExtra("video_id", videoId);
         startActivity(moveToWatch);
     }
 }

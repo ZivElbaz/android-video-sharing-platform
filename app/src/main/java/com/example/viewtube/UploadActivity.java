@@ -48,7 +48,7 @@ public class UploadActivity extends AppCompatActivity {
                     VideoItem newVideoItem = createNewVideoItem(title, videoUri.toString());
 
                     // Create an Intent to pass back the uploaded video data to HomeActivity
-                    Intent intent = new Intent();
+                    Intent intent = new Intent(UploadActivity.this, HomeActivity.class);
                     intent.putExtra("uploadedVideoItem", newVideoItem);
                     setResult(RESULT_OK, intent);
                     finish(); // Finish the UploadActivity and return to HomeActivity
@@ -81,6 +81,7 @@ public class UploadActivity extends AppCompatActivity {
         int thumbnailResId = R.drawable.ic_home_background;
 
         // Create and return the new VideoItem object
-        return new VideoItem(0, title, "", CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, "", "", videoUrl, thumbnailResId);
+        int id = getIntent().getIntExtra("maxId", 10) + 1;
+        return new VideoItem(id, title, "", CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, "", "", videoUrl, thumbnailResId);
     }
 }
