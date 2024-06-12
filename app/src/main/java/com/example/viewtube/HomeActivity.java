@@ -190,6 +190,20 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             toggleTheme(isChecked);
         });
+
+        MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
+        logOutItem.setOnMenuItemClickListener(item -> {
+            if(CurrentUserManager.getInstance().getCurrentUser()!=null){
+                CurrentUserManager.getInstance().logout();
+                startActivity(getIntent());
+                finish();
+            }
+            else{
+                Toast.makeText(this, "You are not logged in", Toast.LENGTH_SHORT).show();
+            }
+
+            return true;
+        });
     }
 
     private static final int UPLOAD_REQUEST_CODE = 1001;
@@ -245,12 +259,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
-
+/*
         Intent intent = getIntent();
         finish();
         overridePendingTransition(0, 0);
         startActivity(intent);
-        overridePendingTransition(0, 0);
+        overridePendingTransition(0, 0);*/
     }
 
     @Override
