@@ -47,7 +47,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private BottomNavigationView bottomNavBar;
     private List<VideoItem> allVideoItems;
 
-    private List<VideoItem> mergedList;
+    private ArrayList<VideoItem> mergedList;
     private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
     private Uri videoUri;
@@ -158,6 +158,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 startActivity(loginIntent);
             } else if (itemId == R.id.nav_upload) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
+                uploadIntent.putExtra("maxId", getMaxId(mergedList));
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
 
             }
@@ -254,19 +255,23 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
+        // Handle video item click
         String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
         int videoLikes = videoItem.getLikes();
         int videoViews = videoItem.getViews();
+        int videoId = videoItem.getId();
         String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
+        moveToWatch.putParcelableArrayListExtra("video_items", mergedList);
         moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
         moveToWatch.putExtra("video_likes", videoLikes);
         moveToWatch.putExtra("video_date", videoDate);
         moveToWatch.putExtra("video_views", videoViews);
+        moveToWatch.putExtra("video_id", videoId);
         startActivity(moveToWatch);
 
     }
@@ -277,5 +282,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         // Exit the app
         CurrentUserManager.getInstance().logout();
         finishAffinity();
+    }
+
+    private int getMaxId (List<VideoItem> videoItems) {
+        int max = 0;
+        for (VideoItem v:videoItems) {
+            max = Math.max(max, v.getId());
+        }
+        return max;
     }
 }

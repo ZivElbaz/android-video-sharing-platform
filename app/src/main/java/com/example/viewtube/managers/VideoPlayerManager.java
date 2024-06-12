@@ -1,8 +1,11 @@
 package com.example.viewtube.managers;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -11,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.viewtube.R;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -38,10 +42,12 @@ public class VideoPlayerManager {
     public void initializePlayer(Context context, Uri videoUri) {
         simpleExoPlayer = new SimpleExoPlayer.Builder(context).build();
         DataSource.Factory factory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "viewtube"));
-        MediaSource mediaSource = new ProgressiveMediaSource.Factory(factory).createMediaSource(videoUri);
+        MediaItem mediaItem = MediaItem.fromUri(videoUri);
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(factory).createMediaSource(mediaItem);
         playerView.setPlayer(simpleExoPlayer);
         playerView.setKeepScreenOn(true);
-        simpleExoPlayer.prepare(mediaSource);
+        simpleExoPlayer.setMediaSource(mediaSource);
+        simpleExoPlayer.prepare();
         simpleExoPlayer.setPlayWhenReady(true);
 
         setupPlayerControls(context);
@@ -107,5 +113,18 @@ public class VideoPlayerManager {
             simpleExoPlayer.release();
             simpleExoPlayer = null;
         }
+    }
+
+    private String getFilePathFromContentUri(Context context, Uri contentUri) {
+        String[] projection = {MediaStore.Video.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
+        if (cursor != null) {
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            String filePath = cursor.getString(columnIndex);
+            cursor.close();
+            return filePath;
+        }
+        return null;
     }
 }
