@@ -13,6 +13,13 @@
         android:inputType="text" />
 
     <EditText
+        android:id="@+id/author_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Author"
+        android:inputType="text" />
+
+    <EditText
         android:id="@+id/description_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,6 +27,14 @@
         android:inputType="textMultiLine"
         android:minLines="3"
         android:gravity="top" />
+
+    <Button
+        android:id="@+id/select_video_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add video"
+        android:layout_marginTop="16dp" />
+
 
     <Button
         android:id="@+id/upload_button"

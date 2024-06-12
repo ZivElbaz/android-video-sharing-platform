@@ -1,6 +1,8 @@
 package com.example.viewtube;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class VideoItem {
+public class VideoItem implements Parcelable {
     private int id;
     private String title;
     private String description;
@@ -12,6 +14,7 @@ public class VideoItem {
     private String videoURL;
     private int thumbnailResId;
 
+    // Constructor
     public VideoItem(int id, String title, String description, String author, int views, int likes, String date, String duration, String videoURL, int thumbnailResId) {
         this.id = id;
         this.title = title;
@@ -25,8 +28,34 @@ public class VideoItem {
         this.thumbnailResId = thumbnailResId;
     }
 
-    // Getters and Setters
+    // Parcelable constructor
+    protected VideoItem(Parcel in) {
+        id = in.readInt();
+        title = in.readString();
+        description = in.readString();
+        author = in.readString();
+        views = in.readInt();
+        likes = in.readInt();
+        date = in.readString();
+        duration = in.readString();
+        videoURL = in.readString();
+        thumbnailResId = in.readInt();
+    }
 
+    // Parcelable CREATOR
+    public static final Creator<VideoItem> CREATOR = new Creator<VideoItem>() {
+        @Override
+        public VideoItem createFromParcel(Parcel in) {
+            return new VideoItem(in);
+        }
+
+        @Override
+        public VideoItem[] newArray(int size) {
+            return new VideoItem[size];
+        }
+    };
+
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -105,5 +134,25 @@ public class VideoItem {
 
     public void setThumbnailResId(int thumbnailResId) {
         this.thumbnailResId = thumbnailResId;
+    }
+
+    // Parcelable methods
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeString(author);
+        dest.writeInt(views);
+        dest.writeInt(likes);
+        dest.writeString(date);
+        dest.writeString(duration);
+        dest.writeString(videoURL);
+        dest.writeInt(thumbnailResId);
     }
 }
