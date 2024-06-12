@@ -1,24 +1,28 @@
 package com.example.viewtube;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.viewtube.managers.CurrentUserManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -30,8 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.example.viewtube.managers.CurrentUserManager;
 
 public class HomeActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
@@ -50,11 +52,22 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private NavigationView sideBar;
     private Uri videoUri;
     private TextInputEditText titleEditText;
+    private ImageView logoImageView;
 
     private Uri profilePicture;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply saved theme
+        sharedPreferences = getSharedPreferences("theme_preferences", MODE_PRIVATE);
+        boolean isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
@@ -67,6 +80,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         allVideoItems = new ArrayList<>();
         uploadedVideoList = new ArrayList<>();
         mergedList = new ArrayList<>();
+        logoImageView = findViewById(R.id.youtube_logo);
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
@@ -76,7 +90,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             // If no current user, show the login item
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
-            profileImageView.setImageResource(R.drawable.ic_profile);
+            profileImageView.setImageResource(R.drawable.ic_profile_foreground);
             usernameView.setText("Guest");
         } else {
             // If there is a current user, hide the login item
@@ -88,11 +102,10 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 profileImageView.setImageURI(profilePicture); // Set profile image using URI
                 profileImageView.setImageResource(R.drawable.circular_background);
             } else {
-                profileImageView.setImageResource(R.drawable.ic_profile); // Set default profile image
+                profileImageView.setImageResource(R.drawable.ic_profile_foreground); // Set default profile image
             }
             usernameView.setText(CurrentUserManager.getInstance().getCurrentUser().getUsername());
         }
-
 
         videoList = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -116,7 +129,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
         }
 
-
         searchButton.setOnClickListener(view -> {
             // Toggle search bar visibility
             Animation slideDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
@@ -131,6 +143,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             }
         });
 
+        // Move this line inside the onCreate method
         bottomNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
@@ -141,11 +154,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 videoRecyclerView.smoothScrollToPosition(0);
                 return true;
             } else if (itemId == R.id.nav_login) {
-                Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+                Intent loginIntent = new Intent(this, LoginActivity.class);
                 startActivity(loginIntent);
             } else if (itemId == R.id.nav_upload) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
+
             }
             return false;
         });
@@ -167,6 +181,14 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             filter("");
             hideKeyboard();
         });
+
+        // Implement the dark mode toggle logic
+        MenuItem darkModeItem = sideBar.getMenu().findItem(R.id.nav_dark_mode);
+        SwitchCompat darkModeSwitch = (SwitchCompat) darkModeItem.getActionView();
+        darkModeSwitch.setChecked(isDarkMode);
+        darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            toggleTheme(isChecked);
+        });
     }
 
     private static final int UPLOAD_REQUEST_CODE = 1001;
@@ -175,13 +197,20 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            // Retrieve the uploaded video item from the UploadActivity result
-            VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
-            if (uploadedVideoItem != null) {
+            // Retrieve the uploaded video URI and title from the UploadActivity result
+            String uploadedVideoUriString = data.getStringExtra("video_uri");
+            String uploadedVideoTitle = data.getStringExtra("video_title");
+
+            if (uploadedVideoUriString != null && uploadedVideoTitle != null) {
+                // Create a new VideoItem with the uploaded video URI and title
+                Uri uploadedVideoUri = Uri.parse(uploadedVideoUriString);
+                VideoItem uploadedVideoItem = new VideoItem(0, uploadedVideoTitle, "", "", 0, 0, "", "", uploadedVideoUriString, 0);
+
                 // Add the uploaded video item to the list and refresh the RecyclerView
                 uploadedVideoList.add(uploadedVideoItem);
                 mergedList.addAll(uploadedVideoList);
                 videoList.setVideoItems(mergedList);
+
                 // Show a success message
                 Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
             }
@@ -192,18 +221,35 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
-            searchBar.clearFocus();
         }
     }
 
-    private void filter(String text) {
+    private void filter(String query) {
         List<VideoItem> filteredList = new ArrayList<>();
-        for (VideoItem item : mergedList) {
-            if (item.getTitle().toLowerCase().contains(text.toLowerCase())) {
-                filteredList.add(item);
+        for (VideoItem videoItem : mergedList) {
+            if (videoItem.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(videoItem);
             }
         }
         videoList.setVideoItems(filteredList);
+    }
+
+    private void toggleTheme(boolean isDarkMode) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("dark_mode", isDarkMode);
+        editor.apply();
+
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
+        Intent intent = getIntent();
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 
     @Override
@@ -222,6 +268,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         moveToWatch.putExtra("video_date", videoDate);
         moveToWatch.putExtra("video_views", videoViews);
         startActivity(moveToWatch);
+
     }
 
     @Override
