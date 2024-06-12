@@ -17,7 +17,7 @@ public class UsersManager {
 
     private UsersManager() {
         users = new ArrayList<>();
-       profilePictureHard = Uri.parse("android.resource://com.example.viewtube/" + R.drawable.ic_profile);
+       profilePictureHard = Uri.parse("android.resource://com.example.viewtube/" + R.drawable.ic_profile_foreground);
         users.add(new User("admin", "admin", "admin", "admin", profilePictureHard.toString() ));
     }
 
