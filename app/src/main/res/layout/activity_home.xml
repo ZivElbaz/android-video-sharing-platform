@@ -14,8 +14,8 @@
         <!-- YouTube Logo -->
         <ImageView
             android:id="@+id/youtube_logo"
-            android:layout_width="130dp"
-            android:layout_height="67dp"
+            android:layout_width="156dp"
+            android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:contentDescription="YouTube Logo"
@@ -23,37 +23,33 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Register Button -->
-        <Button
-            android:id="@+id/upload_button_home"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:id="@+id/search_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginTop="16dp"
-            android:contentDescription="Upload Page"
-            android:text="Upload"
+            android:background="@null"
+            android:contentDescription="Search button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_search_foreground"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.906"
             app:layout_constraintStart_toStartOf="@+id/youtube_logo"
             app:layout_constraintTop_toTopOf="parent" />
-
         <!-- Search Bar -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/search_input_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
             android:layout_marginTop="8dp"
-            app:boxBackgroundMode="outline"
-            app:boxCornerRadiusBottomEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxStrokeColor="@color/light_border_color"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"
             app:endIconMode="clear_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/youtube_logo">
+            app:layout_constraintTop_toBottomOf="@id/youtube_logo"
+            >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/search_bar"
@@ -63,8 +59,15 @@
                 android:hint="Search"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
+                android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:paddingStart="8dp" />
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxStrokeColor="@color/light_border_color"
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -82,8 +85,8 @@
             android:id="@+id/bottomNavigationView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            app:itemIconSize="30dp"
+            android:background="@color/light_border_color"
+            app:itemIconSize="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"

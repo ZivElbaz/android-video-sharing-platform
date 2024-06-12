@@ -1,19 +1,20 @@
 package com.example.viewtube;
-
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.viewtube.managers.CurrentUserManager;
-import com.example.viewtube.models.User;
 
 public class HomeActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
@@ -39,31 +39,39 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
-    private Button uploadButton;
+    private List<VideoItem> uploadedVideoList;
+    private ImageView searchButton;
     private TextInputEditText searchBar;
     private BottomNavigationView bottomNavBar;
     private List<VideoItem> allVideoItems;
 
+    private List<VideoItem> mergedList;
+    private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
+    private Uri videoUri;
+    private TextInputEditText titleEditText;
+
+    private Uri profilePicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        Log.d(TAG, "onCreate: Initializing components");
-
         sideBar = findViewById(R.id.navigation_view);
-        uploadButton = findViewById(R.id.upload_button_home);
+        searchButton = findViewById(R.id.search_button);
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
         searchBar = findViewById(R.id.search_bar);
         bottomNavBar = findViewById(R.id.bottomNavigationView);
+        searchInputLayout = findViewById(R.id.search_input_layout);
+        allVideoItems = new ArrayList<>();
+        uploadedVideoList = new ArrayList<>();
+        mergedList = new ArrayList<>();
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
         ImageView profileImageView = headerView.findViewById(R.id.current_profile);
         TextView usernameView = headerView.findViewById(R.id.current_user);
-
         if (CurrentUserManager.getInstance().getCurrentUser() == null) {
             // If no current user, show the login item
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
@@ -76,13 +84,15 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
             String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
             if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
-                Uri profilePictureUri = Uri.parse(profilePictureUriString);
-                profileImageView.setImageURI(profilePictureUri); // Set profile image using URI
+                profilePicture = Uri.parse(profilePictureUriString);
+                profileImageView.setImageURI(profilePicture); // Set profile image using URI
+                profileImageView.setImageResource(R.drawable.circular_background);
             } else {
                 profileImageView.setImageResource(R.drawable.ic_profile); // Set default profile image
             }
             usernameView.setText(CurrentUserManager.getInstance().getCurrentUser().getUsername());
         }
+
 
         videoList = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -94,6 +104,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             allVideoItems = VideoItemParser.parseVideoItems(inputStream, this); // Pass the context
             if (allVideoItems != null) {
                 videoList.setVideoItems(allVideoItems);
+                mergedList.addAll(allVideoItems);
             } else {
                 // Handle case where videoItems is null
                 Toast.makeText(this, "Failed to load video items", Toast.LENGTH_SHORT).show();
@@ -105,16 +116,26 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
         }
 
-        uploadButton.setOnClickListener(view -> {
-            Intent intent = new Intent(HomeActivity.this, UploadActivity.class);
-            startActivity(intent);
+
+        searchButton.setOnClickListener(view -> {
+            // Toggle search bar visibility
+            Animation slideDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
+            if (searchInputLayout.getVisibility() == View.GONE) {
+                searchInputLayout.setVisibility(View.VISIBLE);
+                searchInputLayout.startAnimation(slideDown);
+            } else {
+                searchInputLayout.setVisibility(View.GONE);
+                hideKeyboard();
+                searchBar.setText("");
+                filter("");
+            }
         });
 
         bottomNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
                 // Render all videos when the home button is clicked
-                videoList.setVideoItems(allVideoItems);
+                videoList.setVideoItems(mergedList);
                 searchBar.setText("");
                 searchBar.clearFocus();
                 videoRecyclerView.smoothScrollToPosition(0);
@@ -124,7 +145,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 startActivity(loginIntent);
             } else if (itemId == R.id.nav_upload) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
-                startActivity(uploadIntent);
+                startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
             }
             return false;
         });
@@ -139,13 +160,32 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         });
 
         // Handle text changes and clear button click
-        TextInputLayout searchInputLayout = findViewById(R.id.search_input_layout);
+        searchInputLayout = findViewById(R.id.search_input_layout);
         searchInputLayout.setEndIconOnClickListener(view -> {
             searchBar.setText("");
             searchBar.clearFocus();
             filter("");
             hideKeyboard();
         });
+    }
+
+    private static final int UPLOAD_REQUEST_CODE = 1001;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            // Retrieve the uploaded video item from the UploadActivity result
+            VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
+            if (uploadedVideoItem != null) {
+                // Add the uploaded video item to the list and refresh the RecyclerView
+                uploadedVideoList.add(uploadedVideoItem);
+                mergedList.addAll(uploadedVideoList);
+                videoList.setVideoItems(mergedList);
+                // Show a success message
+                Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void hideKeyboard() {
@@ -158,7 +198,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private void filter(String text) {
         List<VideoItem> filteredList = new ArrayList<>();
-        for (VideoItem item : allVideoItems) {
+        for (VideoItem item : mergedList) {
             if (item.getTitle().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }
