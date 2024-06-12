@@ -1,6 +1,7 @@
 package com.example.viewtube;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,12 +9,14 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.VideoView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -163,35 +166,31 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     }
 
     private void enterFullscreen() {
-        isFullscreen = true;
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-        // Hide other UI elements (e.g., ActionBar)
-        getSupportActionBar().hide();
-
-        // Adjust the player view layout
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) playerView.getLayoutParams();
-        params.width = FrameLayout.LayoutParams.MATCH_PARENT;
-        params.height = FrameLayout.LayoutParams.MATCH_PARENT;
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+                |View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                |View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().hide();
+        }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) playerView.getLayoutParams();
+        params.width = params.MATCH_PARENT;
+        params.height = params.MATCH_PARENT;
         playerView.setLayoutParams(params);
+        isFullscreen = true;
     }
 
     private void exitFullscreen() {
-        isFullscreen = false;
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-
-        // Show other UI elements (e.g., ActionBar)
-        getSupportActionBar().show();
-
-        // Adjust the player view layout
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) playerView.getLayoutParams();
-        params.width = FrameLayout.LayoutParams.MATCH_PARENT;
-        params.height = FrameLayout.LayoutParams.WRAP_CONTENT;
+        if(getSupportActionBar() != null){
+            getSupportActionBar().show();
+        }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) playerView.getLayoutParams();
+        params.width = params.MATCH_PARENT;
+        params.height = (int) ( 200 * getApplicationContext().getResources().getDisplayMetrics().density);
         playerView.setLayoutParams(params);
+        isFullscreen = false;
     }
 
     private void togglePlayPause() {

@@ -17,7 +17,8 @@
             android:exported="false" />
         <activity
             android:name=".VideoWatchActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity
             android:name=".UploadActivity"
             android:exported="false" />
