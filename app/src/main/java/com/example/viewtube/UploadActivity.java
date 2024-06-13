@@ -67,8 +67,6 @@ public class UploadActivity extends AppCompatActivity {
                     // Show a toast if the title or video is not selected
                     Toast.makeText(UploadActivity.this, "Please fill in all fields and select a video", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Get the file path from the URI
-                    String uri = getPathFromUri(videoUri);
 
                     // Create a new VideoItem object with the provided information
                     VideoItem newVideoItem = createfromFile(UploadActivity.this, title, fileDescriptor);
@@ -104,32 +102,7 @@ public class UploadActivity extends AppCompatActivity {
     }
 
 
-    // Method to create a new VideoItem from a file descriptor
-    private VideoItem createVideoItem(Context context, String title, FileDescriptor fd) {
-        String videoPath = generateUniqueVideoPath(fd);
-        int thumbnailResId = R.drawable.ic_home_background;
-        int id = getIntent().getIntExtra("maxId", 10) + 1;
-        return new VideoItem(id, title, "", CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, "", "", videoPath, thumbnailResId);
-    }
 
-    // Generate a unique file path based on the file descriptor
-    private String generateUniqueVideoPath(FileDescriptor fd) {
-        return "unique_video_path_based_on_fd_" + fd.hashCode();
-    }
-
-    // Method to get the file path from a URI
-    private String getPathFromUri(Uri uri) {
-        String[] projection = {MediaStore.Video.Media.DATA};
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-            cursor.moveToFirst();
-            String filePath = cursor.getString(columnIndex);
-            cursor.close();
-            return filePath;
-        }
-        return uri.toString();
-    }
 
     // Convert URI to FileDescriptor
     public static FileDescriptor uriToFileDescriptor(Context context, Uri uri) {
@@ -147,7 +120,8 @@ public class UploadActivity extends AppCompatActivity {
 
     // Create a file from a FileDescriptor
     private String createFileFromDescriptor(FileDescriptor fd, Context context) {
-        File outputFile = new File(context.getCacheDir(), "video_output.mp4");
+        int id = getIntent().getIntExtra("maxId", 10) + 1;
+        File outputFile = new File(context.getCacheDir(), "video_" + id + ".mp4");
         try (FileInputStream fis = new FileInputStream(fd);
              FileOutputStream fos = new FileOutputStream(outputFile)) {
             byte[] buf = new byte[8192];

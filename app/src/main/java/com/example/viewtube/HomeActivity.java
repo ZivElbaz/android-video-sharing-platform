@@ -49,7 +49,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
-    private List<VideoItem> uploadedVideoList;
+
     private ImageView searchButton;
     private TextInputEditText searchBar;
     private BottomNavigationView bottomNavBar;
@@ -86,7 +86,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         bottomNavBar = findViewById(R.id.bottomNavigationView);
         searchInputLayout = findViewById(R.id.search_input_layout);
         allVideoItems = new ArrayList<>();
-        uploadedVideoList = new ArrayList<>();
         mergedList = new ArrayList<>();
         logoImageView = findViewById(R.id.youtube_logo);
 
@@ -146,8 +145,9 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         try (InputStream inputStream = getResources().openRawResource(R.raw.db)) {
             allVideoItems = VideoItemParser.parseVideoItems(inputStream, this); // Pass the context
             if (allVideoItems != null) {
-                videoList.setVideoItems(allVideoItems);
                 mergedList.addAll(allVideoItems);
+                videoList.setVideoItems(mergedList);
+
             } else {
                 // Handle case where videoItems is null
                 Toast.makeText(this, "Failed to load video items", Toast.LENGTH_SHORT).show();
@@ -247,8 +247,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
             if (uploadedVideoItem != null) {
                 // Add the uploaded video item to the list and refresh the RecyclerView
-                uploadedVideoList.add(uploadedVideoItem);
-                mergedList.addAll(uploadedVideoList);
+                mergedList.add(uploadedVideoItem);
                 videoList.setVideoItems(mergedList);
                 // Show a success message
                 Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
