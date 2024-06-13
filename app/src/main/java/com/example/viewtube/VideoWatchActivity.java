@@ -99,21 +99,17 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             // Local resource video
             int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
             videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
-            videoPlayerManager.initializePlayer(this, videoUri);
         } else {
             // Newly added video
-            videoUri = Uri.parse(videoResourceName);
-            checkAndRequestPermission(videoUri);
+            File videoFile = new File(videoResourceName);
+            videoUri = Uri.fromFile(videoFile);
         }
 
-        Log.d("VideoWatchActivity", "Video URI: " + videoUri.toString());
-
+        Log.d("VideoWatchActivity", "Video URI: " + videoUri.toString() + " and video id: " + id);
         videoFileName = videoResourceName + ".mp4";
+        videoPlayerManager.initializePlayer(this, videoUri);
 
-//        int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
-//        videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
-//        videoFileName = videoResourceName + ".mp4";
-//        videoPlayerManager.initializePlayer(this, videoUri);
+//
 
         // Set button listeners
         btnLike.setOnClickListener(view -> {
@@ -137,7 +133,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             FileUtils.checkAndRequestPermission(this);
         });
 
-        //btnShare.setOnClickListener(view -> FileUtils.shareVideo(this, videoResourceId, videoFileName, title));
+      //  btnShare.setOnClickListener(view -> FileUtils.shareVideo(this, videoResourceId, videoFileName, title));
 
         // Initialize the RecyclerView with related videos
         relatedVideos = new VideoList(this, this);
@@ -151,13 +147,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
     }
 
-    private void checkAndRequestPermission(Uri videoUri) {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_READ_EXTERNAL_STORAGE);
-        } else {
-            videoPlayerManager.initializePlayer(this, videoUri);
-        }
-    }
 
     @Override
     protected void onPause() {
@@ -171,19 +160,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         videoPlayerManager.releasePlayer();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE_READ_EXTERNAL_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                videoPlayerManager.initializePlayer(this, videoUri);
-            } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            FileUtils.handlePermissionsResult(this, requestCode, permissions, grantResults, videoFileName);
-        }
-    }
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {

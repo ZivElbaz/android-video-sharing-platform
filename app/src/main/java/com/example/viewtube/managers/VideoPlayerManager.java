@@ -41,13 +41,11 @@ public class VideoPlayerManager {
 
     public void initializePlayer(Context context, Uri videoUri) {
         simpleExoPlayer = new SimpleExoPlayer.Builder(context).build();
-        DataSource.Factory factory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "viewtube"));
-        MediaItem mediaItem = MediaItem.fromUri(videoUri);
-        MediaSource mediaSource = new ProgressiveMediaSource.Factory(factory).createMediaSource(mediaItem);
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "viewtube"));
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(videoUri));
         playerView.setPlayer(simpleExoPlayer);
         playerView.setKeepScreenOn(true);
-        simpleExoPlayer.setMediaSource(mediaSource);
-        simpleExoPlayer.prepare();
+        simpleExoPlayer.prepare(mediaSource);
         simpleExoPlayer.setPlayWhenReady(true);
 
         setupPlayerControls(context);
