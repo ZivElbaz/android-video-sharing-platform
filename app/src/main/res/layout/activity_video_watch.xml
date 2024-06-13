@@ -18,7 +18,7 @@
         app:controller_layout_id="@layout/exo_player_custom_controller" />
 
     <!-- ScrollView to make the content scrollable -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/videoPlayer">
@@ -38,6 +38,43 @@
                 android:textSize="18sp"
                 android:textStyle="bold|italic"
                 android:textColor="#000" />
+
+            <EditText
+                android:id="@+id/editTitleEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
+                android:textColor="#000"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/editTitleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_light"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/saveTitleButton"
+                android:layout_width="100dp"
+                android:layout_height="38dp"
+                android:text="@string/save"
+                android:textSize="12sp"
+                android:visibility="gone"
+                android:layout_below="@id/videoTitle"/>
+
+            <Button
+                android:id="@+id/cancelTitleButton"
+                android:layout_width="100dp"
+                android:layout_height="38dp"
+                android:text="@string/cancel"
+                android:textSize="12sp"
+                android:visibility="gone"
+                android:layout_below="@id/videoTitle"
+                android:layout_toEndOf="@id/saveTitleButton"/>
 
             <!-- views, date and description of the video -->
         <LinearLayout
@@ -71,8 +108,69 @@
                 android:textSize="12sp"
                 android:textColor="#666" />
 
+            <EditText
+                android:id="@+id/editDescriptionEditText"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/editDescriptionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_light"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="gone"/>
+
 
         </LinearLayout>
+
+            <Button
+                android:id="@+id/saveDescriptionButton"
+                android:layout_width="100dp"
+                android:layout_height="38dp"
+                android:text="@string/save"
+                android:textSize="12sp"
+                android:visibility="gone"
+                android:layout_below="@id/editDescriptionEditText"/>
+
+            <Button
+                android:id="@+id/cancelDescriptionButton"
+                android:layout_width="100dp"
+                android:layout_height="38dp"
+                android:text="@string/cancel"
+                android:textSize="12sp"
+                android:visibility="gone"
+                android:layout_below="@id/editDescriptionEditText"
+                android:layout_toEndOf="@id/saveDescriptionButton"/>
+
+            <!-- Uploader's profile -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/uploaderProfilePic"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circular_background"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/uploaderName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/uploader_name"
+                    android:textSize="16sp"
+                    android:textColor="#000" />
+            </LinearLayout>
 
             <!-- Action buttons: Like, Share, Download -->
             <LinearLayout
@@ -96,7 +194,7 @@
                     android:layout_marginStart="16dp"
                     android:drawableLeft="@drawable/share"
                     android:drawablePadding="8dp"
-                    android:text="Share"
+                    android:text="@string/share"
                     android:textColor="#000"
                     app:backgroundTint="#ECECEC"
                     android:textSize="12sp"
@@ -111,7 +209,7 @@
                     android:layout_marginStart="16dp"
                     android:drawableLeft="@drawable/download"
                     android:drawablePadding="8dp"
-                    android:text="Download"
+                    android:text="@string/download"
                     android:textColor="#000"
                     app:backgroundTint="#ECECEC"
                     android:textSize="12sp"
@@ -125,7 +223,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Comments"
+                android:text="@string/comments"
                 android:textSize="18sp"
                 android:textColor="#000" />
 
@@ -135,7 +233,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Add a comment" />
+                android:hint="@string/add_a_comment" />
 
             <!-- Button to post a comment -->
             <Button
@@ -144,7 +242,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Post" />
+                android:text="@string/post" />
 
             <!-- RecyclerView for displaying comments -->
             <androidx.recyclerview.widget.RecyclerView
@@ -163,5 +261,5 @@
                 android:padding="8dp" />
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </RelativeLayout>

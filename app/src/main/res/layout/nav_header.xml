@@ -12,7 +12,7 @@
         android:layout_height="100dp"
         android:contentDescription="Profile Picture"
         android:scaleType="centerCrop"
-        android:background="@drawable/circular_background" /> <!-- Apply circular background -->
+        android:background="@drawable/circular_background" />
 
 
 
@@ -21,7 +21,7 @@
         android:id="@+id/current_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Guest"
+        android:text="@string/guest"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:layout_marginTop="8dp" />

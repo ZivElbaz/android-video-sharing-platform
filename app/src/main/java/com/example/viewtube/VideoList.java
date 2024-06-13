@@ -1,6 +1,9 @@
 package com.example.viewtube;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,11 +59,22 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
 
 
 
+
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
         VideoItem videoItem = videoItems.get(position);
+        int videoId = videoItem.getId();
         holder.titleTextView.setText(videoItem.getTitle());
-        holder.thumbnailImageView.setImageResource(videoItem.getThumbnailResId());
+
+        if (videoId >= 1 && videoId <= 10) {
+            holder.thumbnailImageView.setImageResource(videoItem.getThumbnailResId());
+        } else {
+            String thumbnailPath = videoItem.getThumbnailPath();
+            Bitmap thumbnailBitmap = BitmapFactory.decodeFile(thumbnailPath);
+            holder.thumbnailImageView.setImageBitmap(thumbnailBitmap);
+        }
+
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

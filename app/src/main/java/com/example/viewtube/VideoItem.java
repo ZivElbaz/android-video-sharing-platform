@@ -13,6 +13,7 @@ public class VideoItem implements Parcelable {
     private String duration;
     private String videoURL;
     private int thumbnailResId;
+    private String thumbnailPath;
 
     // Constructor
     public VideoItem(int id, String title, String description, String author, int views, int likes, String date, String duration, String videoURL, int thumbnailResId) {
@@ -28,6 +29,20 @@ public class VideoItem implements Parcelable {
         this.thumbnailResId = thumbnailResId;
     }
 
+    // Constructor for uploaded videos with thumbnail path
+    public VideoItem(int id, String title, String description, String author, int views, int likes, String date, String duration, String videoURL, String thumbnailPath) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.author = author;
+        this.views = views;
+        this.likes = likes;
+        this.date = date;
+        this.duration = duration;
+        this.videoURL = videoURL;
+        this.thumbnailPath = thumbnailPath;
+    }
+
     // Parcelable constructor
     protected VideoItem(Parcel in) {
         id = in.readInt();
@@ -40,6 +55,7 @@ public class VideoItem implements Parcelable {
         duration = in.readString();
         videoURL = in.readString();
         thumbnailResId = in.readInt();
+        thumbnailPath = in.readString();
     }
 
     // Parcelable CREATOR
@@ -136,6 +152,14 @@ public class VideoItem implements Parcelable {
         this.thumbnailResId = thumbnailResId;
     }
 
+    public String getThumbnailPath() {
+        return thumbnailPath;
+    }
+
+    public void setThumbnailPath(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
+    }
+
     // Parcelable methods
     @Override
     public int describeContents() {
@@ -154,5 +178,6 @@ public class VideoItem implements Parcelable {
         dest.writeString(duration);
         dest.writeString(videoURL);
         dest.writeInt(thumbnailResId);
+        dest.writeString(thumbnailPath);
     }
 }
