@@ -1,39 +1,39 @@
 [
   {
     "id": 1,
-    "title": "mallorca sunrise summer vibes - kygo, chainsmokers, bhaskar robin schulz, gryffin, lost frequencies",
-    "description": "Dancing cats",
+    "title": "Feel So Close x Roses x Summer x I Love It MASHUP",
+    "description": "Summer Mashup Vol.1 (Feel so Close Hudszn Remix)",
     "author": "Ofek Baribi",
     "views": 460,
     "likes": 6,
     "date": "26/05/2021",
     "duration": "01:24:43",
     "videoURL": "feel",
-    "thumbnail": "bibi"
+    "thumbnail": "feel_thumb"
   },
   {
     "id": 2,
-    "title": "Feel So Close x Roses x Summer x I Love It MASHUP",
-    "description": "Summer Mashup Vol.1 (Feel so Close Hudszn Remix)",
+    "title": "mallorca sunrise summer vibes - kygo, chainsmokers, bhaskar robin schulz, gryffin, lost frequencies",
+    "description": "Dancing cats",
     "author": "Ziv Elbaz",
     "views": 100,
     "likes": 354,
     "date": "26/05/2021",
     "duration": "01:10:23",
     "videoURL": "deep",
-    "thumbnail": "lahav"
+    "thumbnail": "deep_thumb"
   },
   {
     "id": 3,
-    "title": "נס X סטילה - חרבו דרבו (Prod. By Stilla)",
-    "description": "מילים ולחן: דור סורוקר, נסיה לוי, אנדרדוג (אוראל שמאילוב) ורוישה (רוי שני כרמל)",
+    "title": "Ness X Stille - Harbo Darbo (Prod. By Stilla)",
+    "description": "HARBO DARBO",
     "author": "Ness Ve Stilla",
     "views": 40,
     "likes": 200,
     "date": "26/05/2021",
     "duration": "52:39",
     "videoURL": "video2",
-    "thumbnail": "mecg"
+    "thumbnail": "harbo_thumb"
   },
   {
     "id": 4,
@@ -45,7 +45,7 @@
     "date": "26/05/2021",
     "duration": "01:10:23",
     "videoURL": "wrong",
-    "thumbnail": "bibi"
+    "thumbnail": "wrong_thumb"
   },
   {
     "id": 5,
@@ -57,7 +57,7 @@
     "date": "11/11/2021",
     "duration": "01:11:11",
     "videoURL": "mountains",
-    "thumbnail": "bibi"
+    "thumbnail": "jonas_thumb"
   },
   {
     "id": 6,
@@ -69,7 +69,7 @@
     "date": "19/01/2024",
     "duration": "03:11",
     "videoURL": "payphone",
-    "thumbnail": "lahav"
+    "thumbnail": "payphone_thumb"
   },
   {
     "id": 7,
@@ -81,7 +81,7 @@
     "date": "19/01/2024",
     "duration": "03:11",
     "videoURL": "summer",
-    "thumbnail": "mecg"
+    "thumbnail": "summer_thumb"
   },
   {
     "id": 8,
@@ -93,7 +93,7 @@
     "date": "19/01/2024",
     "duration": "03:11",
     "videoURL": "wake",
-    "thumbnail": "lahav"
+    "thumbnail": "wake_thumb"
   },
   {
     "id": 9,
@@ -105,7 +105,7 @@
     "date": "19/01/2024",
     "duration": "03:11",
     "videoURL": "whistle",
-    "thumbnail": "mecg"
+    "thumbnail": "whistle_thumb"
   },
   {
     "id": 10,
@@ -117,6 +117,6 @@
     "date": "19/01/2024",
     "duration": "03:11",
     "videoURL": "shape",
-    "thumbnail": "bibi"
+    "thumbnail": "shape_thumb"
   }
 ]
