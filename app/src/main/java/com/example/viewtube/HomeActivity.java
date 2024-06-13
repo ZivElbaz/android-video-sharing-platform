@@ -2,6 +2,13 @@ package com.example.viewtube;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -30,6 +37,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -100,7 +108,29 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
                 profilePicture = Uri.parse(profilePictureUriString);
                 profileImageView.setImageURI(profilePicture); // Set profile image using URI
-                profileImageView.setImageResource(R.drawable.circular_background);
+                // Load the bitmap from Uri
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(profilePicture);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    // Crop the bitmap into a circle
+                    Bitmap circularBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(circularBitmap);
+                    Paint paint = new Paint();
+                    paint.setAntiAlias(true);
+                    Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                    canvas.drawARGB(0, 0, 0, 0);
+                    canvas.drawCircle(bitmap.getWidth() / 2f, bitmap.getHeight() / 2f, bitmap.getWidth() / 2f, paint);
+                    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+                    canvas.drawBitmap(bitmap, rect, rect, paint);
+
+                    // Set the circular bitmap into the ImageView
+                    profileImageView.setImageBitmap(circularBitmap);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
             } else {
                 profileImageView.setImageResource(R.drawable.ic_profile_foreground); // Set default profile image
             }
@@ -156,6 +186,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             } else if (itemId == R.id.nav_login) {
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 startActivity(loginIntent);
+                finish();
             } else if (itemId == R.id.nav_upload) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
                 uploadIntent.putExtra("maxId", getMaxId(mergedList));
@@ -212,20 +243,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            // Retrieve the uploaded video URI and title from the UploadActivity result
-            String uploadedVideoUriString = data.getStringExtra("video_uri");
-            String uploadedVideoTitle = data.getStringExtra("video_title");
-
-            if (uploadedVideoUriString != null && uploadedVideoTitle != null) {
-                // Create a new VideoItem with the uploaded video URI and title
-                Uri uploadedVideoUri = Uri.parse(uploadedVideoUriString);
-                VideoItem uploadedVideoItem = new VideoItem(0, uploadedVideoTitle, "", "", 0, 0, "", "", uploadedVideoUriString, 0);
-
+            // Retrieve the uploaded video item from the UploadActivity result
+            VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
+            if (uploadedVideoItem != null) {
                 // Add the uploaded video item to the list and refresh the RecyclerView
                 uploadedVideoList.add(uploadedVideoItem);
                 mergedList.addAll(uploadedVideoList);
                 videoList.setVideoItems(mergedList);
-
                 // Show a success message
                 Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
             }
@@ -255,16 +279,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         editor.apply();
 
         if (isDarkMode) {
+            getWindow().setWindowAnimations(R.style.WindowAnimationFadeInOutDark);
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         } else {
+            getWindow().setWindowAnimations(R.style.WindowAnimationFadeInOutLight);
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
-/*
-        Intent intent = getIntent();
-        finish();
-        overridePendingTransition(0, 0);
-        startActivity(intent);
-        overridePendingTransition(0, 0);*/
+
     }
 
     @Override
@@ -290,13 +311,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        // Exit the app
-        CurrentUserManager.getInstance().logout();
-        finishAffinity();
-    }
 
     private int getMaxId (List<VideoItem> videoItems) {
         int max = 0;

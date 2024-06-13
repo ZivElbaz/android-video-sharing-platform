@@ -121,6 +121,11 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        if (UsersManager.getInstance().getUser(username.getText().toString()) != null) {
+            username.setError("Username is already taken!");
+            return;
+        }
+
         if (profilePictureUri == null) {
             Toast.makeText(this, "Profile picture is required!", Toast.LENGTH_SHORT).show();
             return;

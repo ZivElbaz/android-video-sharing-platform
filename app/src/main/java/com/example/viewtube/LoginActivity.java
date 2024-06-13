@@ -66,10 +66,21 @@ public class LoginActivity extends AppCompatActivity {
         String pass = password.getText().toString();
         if (UsersManager.getInstance().authenticate(user, pass)) {
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
             finish();
         } else {
             Toast.makeText(this, "Invalid username or password!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
+        overridePendingTransition(0, 0);
     }
 }

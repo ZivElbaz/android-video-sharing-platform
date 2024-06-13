@@ -2,6 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.ViewTube" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/sidemenu_dark</item>
+
     </style>
 
     <style name="Theme.ViewTube" parent="Base.Theme.ViewTube" />
