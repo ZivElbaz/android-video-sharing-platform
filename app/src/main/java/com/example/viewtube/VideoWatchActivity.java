@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -109,7 +110,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         videoFileName = videoResourceName + ".mp4";
         videoPlayerManager.initializePlayer(this, videoUri);
 
-//
+
 
         // Set button listeners
         btnLike.setOnClickListener(view -> {
@@ -133,7 +134,18 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             FileUtils.checkAndRequestPermission(this);
         });
 
-      //  btnShare.setOnClickListener(view -> FileUtils.shareVideo(this, videoResourceId, videoFileName, title));
+        btnShare.setOnClickListener(view -> {
+            Uri contentUri;
+            if (id >= 1 && id <= 10) {
+                // Local resource video
+                int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
+                contentUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
+            } else {
+                // Newly added video
+                contentUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", new File(videoUri.getPath()));
+            }
+            FileUtils.shareVideo(this, contentUri, title);
+        });
 
         // Initialize the RecyclerView with related videos
         relatedVideos = new VideoList(this, this);
