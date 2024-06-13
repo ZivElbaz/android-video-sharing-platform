@@ -11,7 +11,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -244,18 +243,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            // Retrieve the uploaded video URI and title from the UploadActivity result
-            String uploadedVideoUriString = data.getStringExtra("video_uri");
-            String uploadedVideoTitle = data.getStringExtra("video_title");
-
-            if (uploadedVideoUriString != null && uploadedVideoTitle != null) {
-                // Create a new VideoItem with the uploaded video URI and title
-                VideoItem uploadedVideoItem = new VideoItem(0, uploadedVideoTitle, "", "", 0, 0, "", "", uploadedVideoUriString, 0);
-
+            // Retrieve the uploaded video item from the UploadActivity result
+            VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
+            if (uploadedVideoItem != null) {
                 // Add the uploaded video item to the list and refresh the RecyclerView
                 uploadedVideoList.add(uploadedVideoItem);
                 mergedList.addAll(uploadedVideoList);
-                Log.i("VideoCreation", "video upload ID is " + uploadedVideoList.get(0).getId());
                 videoList.setVideoItems(mergedList);
                 // Show a success message
                 Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
