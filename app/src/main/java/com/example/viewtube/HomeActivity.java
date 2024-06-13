@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,10 +36,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONException;
-
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,21 +47,16 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
-
     private ImageView searchButton;
     private TextInputEditText searchBar;
     private BottomNavigationView bottomNavBar;
-    private List<VideoItem> allVideoItems;
-
     private ArrayList<VideoItem> mergedList;
     private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
-    private Uri videoUri;
-    private TextInputEditText titleEditText;
     private ImageView logoImageView;
-
     private Uri profilePicture;
     private SharedPreferences sharedPreferences;
+    private VideoViewModel videoViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,9 +78,18 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         searchBar = findViewById(R.id.search_bar);
         bottomNavBar = findViewById(R.id.bottomNavigationView);
         searchInputLayout = findViewById(R.id.search_input_layout);
-        allVideoItems = new ArrayList<>();
         mergedList = new ArrayList<>();
         logoImageView = findViewById(R.id.youtube_logo);
+
+        // Initialize ViewModel
+        videoViewModel = new ViewModelProvider(this).get(VideoViewModel.class);
+        videoViewModel.getVideoItems().observe(this, videoItems -> {
+            mergedList.clear();
+            if (videoItems != null) {
+                mergedList.addAll(videoItems);
+            }
+            videoList.setVideoItems(mergedList);
+        });
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
@@ -141,24 +143,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         videoRecyclerView.setLayoutManager(layoutManager);
         videoRecyclerView.setAdapter(videoList);
 
-        // Load video items from JSON file
-        try (InputStream inputStream = getResources().openRawResource(R.raw.db)) {
-            allVideoItems = VideoItemParser.parseVideoItems(inputStream, this); // Pass the context
-            if (allVideoItems != null) {
-                mergedList.addAll(allVideoItems);
-                videoList.setVideoItems(mergedList);
-
-            } else {
-                // Handle case where videoItems is null
-                Toast.makeText(this, "Failed to load video items", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-            // Handle IO or JSON exception
-            // Show an error message or take appropriate action
-            Toast.makeText(this, "Error loading video items", Toast.LENGTH_SHORT).show();
-        }
-
         searchButton.setOnClickListener(view -> {
             // Toggle search bar visibility
             Animation slideDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
@@ -191,7 +175,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
                 uploadIntent.putExtra("maxId", getMaxId(mergedList));
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
-
             }
             return false;
         });
@@ -224,15 +207,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
-            if(CurrentUserManager.getInstance().getCurrentUser()!=null){
+            if (CurrentUserManager.getInstance().getCurrentUser() != null) {
                 CurrentUserManager.getInstance().logout();
                 startActivity(getIntent());
                 finish();
-            }
-            else{
+            } else {
                 Toast.makeText(this, "You are not logged in", Toast.LENGTH_SHORT).show();
             }
-
             return true;
         });
     }
@@ -247,8 +228,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
             if (uploadedVideoItem != null) {
                 // Add the uploaded video item to the list and refresh the RecyclerView
-                mergedList.add(uploadedVideoItem);
-                videoList.setVideoItems(mergedList);
+                videoViewModel.addVideoItem(uploadedVideoItem);
                 // Show a success message
                 Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
             }
@@ -284,7 +264,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             getWindow().setWindowAnimations(R.style.WindowAnimationFadeInOutLight);
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
-
     }
 
     @Override
@@ -307,13 +286,11 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         moveToWatch.putExtra("video_views", videoViews);
         moveToWatch.putExtra("video_id", videoId);
         startActivity(moveToWatch);
-
     }
 
-
-    private int getMaxId (List<VideoItem> videoItems) {
+    private int getMaxId(List<VideoItem> videoItems) {
         int max = 0;
-        for (VideoItem v:videoItems) {
+        for (VideoItem v : videoItems) {
             max = Math.max(max, v.getId());
         }
         return max;
