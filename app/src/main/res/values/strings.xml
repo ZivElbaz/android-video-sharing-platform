@@ -9,4 +9,13 @@
     <string name="exo_controls_play_description">Play</string>
     <string name="exo_controls_fastforward_description">Fast forward 10 seconds</string>
     <string name="exo_controls_fullscreen_description">Fullscreen</string>
+    <string name="uploader_name">Uploader Name</string>
+    <string name="share">Share</string>
+    <string name="download">Download</string>
+    <string name="add_a_comment">Add a comment</string>
+    <string name="post">Post</string>
+    <string name="comments">Comments</string>
+    <string name="guest">Guest</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
 </resources>

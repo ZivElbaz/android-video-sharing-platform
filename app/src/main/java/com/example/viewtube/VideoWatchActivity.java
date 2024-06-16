@@ -5,9 +5,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.viewtube.managers.CommentsManager;
+import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.managers.FileUtils;
 import com.example.viewtube.managers.SessionManager;
 import com.example.viewtube.managers.VideoDetailsManager;
@@ -40,11 +45,22 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private CommentsManager commentsManager;
 
     private Uri videoUri;
-    private String videoFileName;
+
+    private int videoIdentifier;
     private boolean liked = false;
     private RecyclerView recyclerView;
     private VideoList relatedVideos;
     private ArrayList<VideoItem> mergedList;
+
+    private String user;
+
+    private EditText editTitleEditText;
+    private EditText editDescriptionEditText;
+    private Button saveTitleButton;
+    private Button saveDescriptionButton;
+    private Button cancelTitleButton;
+    private Button cancelDescriptionButton;
+
 
     private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 100;
 
@@ -59,6 +75,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         TextView videoDescription = findViewById(R.id.videoDescription);
         TextView videoViews = findViewById(R.id.videoViews);
         TextView videoDate = findViewById(R.id.videoDate);
+        ImageView uploaderProfilePic = findViewById(R.id.uploaderProfilePic);
+        TextView uploaderName = findViewById(R.id.uploaderName);
         RecyclerView commentsRecyclerView = findViewById(R.id.commentsRecyclerView);
         EditText commentInput = findViewById(R.id.commentInput);
         Button btnLike = findViewById(R.id.btnLike);
@@ -71,30 +89,126 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         Button btnDownload = findViewById(R.id.btnDownload);
         recyclerView = findViewById(R.id.recyclerView);
 
+        ImageButton editTitleButton = findViewById(R.id.editTitleButton);
+        ImageButton editDescriptionButton = findViewById(R.id.editDescriptionButton);
+        EditText editTitleEditText = findViewById(R.id.editTitleEditText);
+        EditText editDescriptionEditText = findViewById(R.id.editDescriptionEditText);
+        Button saveTitleButton = findViewById(R.id.saveTitleButton);
+        Button saveDescriptionButton = findViewById(R.id.saveDescriptionButton);
+        Button cancelTitleButton = findViewById(R.id.cancelTitleButton);
+        Button cancelDescriptionButton = findViewById(R.id.cancelDescriptionButton);
+
+
+        if (CurrentUserManager.getInstance().getCurrentUser() == null) {
+            this.user = "Guest";
+        } else {
+            this.user = CurrentUserManager.getInstance().getCurrentUser().getUsername();
+        }
+
         // Initialize managers
         videoPlayerManager = new VideoPlayerManager(playerView, playPauseButton, rewindButton, forwardButton, fullscreenButton);
-        videoDetailsManager = new VideoDetailsManager(videoTitle, videoDescription, videoDate, videoViews, btnLike);
-        commentsManager = new CommentsManager(SessionManager.getInstance().getComments(videoFileName), commentInput, commentsRecyclerView);
+        videoDetailsManager = new VideoDetailsManager(this, videoTitle, videoDescription, videoDate, videoViews, btnLike, uploaderName, uploaderProfilePic);
+
+
 
         // Get video details from intent
         String videoResourceName = getIntent().getStringExtra("video_resource_name");
         String title = getIntent().getStringExtra("video_title");
         String description = getIntent().getStringExtra("video_description");
         String date = getIntent().getStringExtra("video_date");
+        String author = getIntent().getStringExtra("video_author");
         int initialLikes = getIntent().getIntExtra("video_likes", 1);
         int views = getIntent().getIntExtra("video_views", 1);
         int id = getIntent().getIntExtra("video_id", 1);
+        this.videoIdentifier = id;
+        ArrayList<VideoItem> videoItems = getIntent().getParcelableArrayListExtra("video_items");
+        mergedList = videoItems;
 
+
+        commentsRecyclerView.setAdapter(null);
+        commentsManager = new CommentsManager(videoIdentifier, SessionManager.getInstance().getVideoCommentsMap(), commentInput, commentsRecyclerView);
         // Check if session has likes and liked status
         int likes = SessionManager.getInstance().getLikes(videoResourceName) == 0 ? initialLikes : SessionManager.getInstance().getLikes(videoResourceName);
         liked = SessionManager.getInstance().isLiked(videoResourceName);
 
+
         // Set video details
-        videoDetailsManager.setVideoDetails(title, description, date, views, likes);
+        videoDetailsManager.setVideoDetails(title, description, date, views, likes, author);
+        videoDetailsManager.setUploaderImage(id);
         btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
         btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
 
-        Log.d("VideoWatchActivity", "Video re name: " + videoResourceName + " and video id: " + id);
+        // Show edit buttons if the current user is the author
+        if (this.user.equals(author)) {
+            editTitleButton.setVisibility(View.VISIBLE);
+            editDescriptionButton.setVisibility(View.VISIBLE);
+        }
+
+        // Set up click listeners for the edit buttons
+        editTitleButton.setOnClickListener(v -> {
+            // Replace TextView with EditText for title
+            videoTitle.setVisibility(View.GONE);
+            editTitleEditText.setText(videoTitle.getText());
+            editTitleEditText.setVisibility(View.VISIBLE);
+            saveTitleButton.setVisibility(View.VISIBLE);
+            cancelTitleButton.setVisibility(View.VISIBLE);
+            editTitleButton.setVisibility(View.GONE);
+
+            // Save button click listener
+            saveTitleButton.setOnClickListener(saveView -> {
+                videoTitle.setText(editTitleEditText.getText());
+                videoTitle.setVisibility(View.VISIBLE);
+                editTitleEditText.setVisibility(View.GONE);
+                saveTitleButton.setVisibility(View.GONE);
+                cancelTitleButton.setVisibility(View.GONE);
+                editTitleButton.setVisibility(View.VISIBLE);
+
+                mergedList.get(videoIdentifier - 1).setTitle(editTitleEditText.getText().toString());
+                // Here you would also update the title in your data source
+                Toast.makeText(this, "Title updated", Toast.LENGTH_SHORT).show();
+            });
+
+            // Cancel button click listener
+            cancelTitleButton.setOnClickListener(cancelView -> {
+                videoTitle.setVisibility(View.VISIBLE);
+                editTitleEditText.setVisibility(View.GONE);
+                saveTitleButton.setVisibility(View.GONE);
+                cancelTitleButton.setVisibility(View.GONE);
+                editTitleButton.setVisibility(View.VISIBLE);
+            });
+        });
+
+        editDescriptionButton.setOnClickListener(v -> {
+            // Replace TextView with EditText for description
+            videoDescription.setVisibility(View.GONE);
+            editDescriptionEditText.setText(videoDescription.getText());
+            editDescriptionEditText.setVisibility(View.VISIBLE);
+            saveDescriptionButton.setVisibility(View.VISIBLE);
+            cancelDescriptionButton.setVisibility(View.VISIBLE);
+            editDescriptionButton.setVisibility(View.GONE);
+
+            // Save button click listener
+            saveDescriptionButton.setOnClickListener(saveView -> {
+                videoDescription.setText(editDescriptionEditText.getText());
+                videoDescription.setVisibility(View.VISIBLE);
+                editDescriptionEditText.setVisibility(View.GONE);
+                saveDescriptionButton.setVisibility(View.GONE);
+                cancelDescriptionButton.setVisibility(View.GONE);
+                editDescriptionButton.setVisibility(View.VISIBLE);
+
+                // Here you would also update the description in your data source
+                Toast.makeText(this, "Description updated", Toast.LENGTH_SHORT).show();
+            });
+
+            // Cancel button click listener
+            cancelDescriptionButton.setOnClickListener(cancelView -> {
+                videoDescription.setVisibility(View.VISIBLE);
+                editDescriptionEditText.setVisibility(View.GONE);
+                saveDescriptionButton.setVisibility(View.GONE);
+                cancelDescriptionButton.setVisibility(View.GONE);
+                editDescriptionButton.setVisibility(View.VISIBLE);
+            });
+        });
 
         if (id >= 1 && id <= 10) {
             // Local resource video
@@ -107,7 +221,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         }
 
         Log.d("VideoWatchActivity", "Video URI: " + videoUri.toString() + " and video id: " + id);
-        videoFileName = videoResourceName + ".mp4";
         videoPlayerManager.initializePlayer(this, videoUri);
 
 
@@ -120,14 +233,13 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
             SessionManager.getInstance().setLikes(videoResourceName, newLikes);
             SessionManager.getInstance().setLiked(videoResourceName, liked);
-            videoDetailsManager.setVideoDetails(title, description, date, views, newLikes);
+            videoDetailsManager.setVideoDetails(title, description, date, views, newLikes, author);
         });
 
 
         btnPostComment.setOnClickListener(view -> {
-            String commentText = commentInput.getText().toString().trim();
+            String commentText = user + ": " + commentInput.getText().toString().trim();
             commentsManager.addComment(commentText);
-            SessionManager.getInstance().addComment(videoResourceName, commentText);
         });
 
         btnDownload.setOnClickListener(view -> {
@@ -152,10 +264,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(relatedVideos);
 
+        relatedVideos.setVideoItems(mergedList);
 
-        ArrayList<VideoItem> videoItems = getIntent().getParcelableArrayListExtra("video_items");
-        relatedVideos.setVideoItems(videoItems);
-        mergedList = videoItems;
 
     }
 
@@ -179,6 +289,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
+        String author = videoItem.getAuthor();
         int videoLikes = videoItem.getLikes();
         int videoViews = videoItem.getViews();
         int videoId = videoItem.getId();
@@ -192,6 +303,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         moveToWatch.putExtra("video_date", videoDate);
         moveToWatch.putExtra("video_views", videoViews);
         moveToWatch.putExtra("video_id", videoId);
+        moveToWatch.putExtra("video_author", author);
         startActivity(moveToWatch);
     }
 }

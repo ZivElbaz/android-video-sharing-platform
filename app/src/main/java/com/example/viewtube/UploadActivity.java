@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -22,11 +24,12 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class UploadActivity extends AppCompatActivity {
 
     // UI components
-    private EditText titleEditText;
+    private EditText titleEditText , descriptionEditText;
     private Button selectVideoButton;
     private Button uploadButton;
 
@@ -46,6 +49,7 @@ public class UploadActivity extends AppCompatActivity {
 
         // Initialize UI components
         titleEditText = findViewById(R.id.title_edit_text);
+        descriptionEditText = findViewById(R.id.description_edit_text);
         selectVideoButton = findViewById(R.id.select_video_button);
         uploadButton = findViewById(R.id.upload_button);
 
@@ -62,6 +66,7 @@ public class UploadActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String title = titleEditText.getText().toString().trim();
+                String description = descriptionEditText.getText().toString().trim();
 
                 if (title.isEmpty() || videoUri == null) {
                     // Show a toast if the title or video is not selected
@@ -69,7 +74,7 @@ public class UploadActivity extends AppCompatActivity {
                 } else {
 
                     // Create a new VideoItem object with the provided information
-                    VideoItem newVideoItem = createfromFile(UploadActivity.this, title, fileDescriptor);
+                    VideoItem newVideoItem = createfromFile(UploadActivity.this, title, description, fileDescriptor);
 
                     // Create an Intent to pass back the uploaded video data to HomeActivity
                     Intent intent = new Intent(UploadActivity.this, HomeActivity.class);
@@ -138,14 +143,49 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     // Create a VideoItem from a FileDescriptor
-    private VideoItem createfromFile(Context context, String title, FileDescriptor fd) {
+    private VideoItem createfromFile(Context context, String title, String description, FileDescriptor fd) {
         String videoPath = createFileFromDescriptor(fd, context);
         if (videoPath == null) {
             Log.e("VideoCreation", "Failed to create video from file descriptor");
             return null;
         }
-        int thumbnailResid = R.drawable.ic_home_background;
         int id = getIntent().getIntExtra("maxId", 10) + 1;
-        return new VideoItem(id, title, "", CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, "", "", videoPath, thumbnailResid);
+        Bitmap thumbnailBitmap = createVideoThumbnail(videoPath);
+        String thumbnailPath = null;
+        if (thumbnailBitmap != null) {
+            // Save the thumbnail bitmap and get its path
+            thumbnailPath = saveThumbnail(context, thumbnailBitmap, id);
+        }
+        return new VideoItem(id, title, description, CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, "13/06/24", "", videoPath, thumbnailPath);
+    }
+
+    // Create a thumbnail from a video file
+    private Bitmap createVideoThumbnail(String videoPath) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(videoPath);
+            return retriever.getFrameAtTime(1000000); // Get frame at 1 second
+        } catch (IllegalArgumentException e) {
+            Log.e("ThumbnailCreation", "Failed to create thumbnail", e);
+            return null;
+        } finally {
+            try {
+                retriever.release();
+            } catch (IOException e) {
+                Log.e("ThumbnailCreation", "Error releasing MediaMetadataRetriever", e);
+            }
+        }
+    }
+
+    // Save the thumbnail to internal storage and return the file path
+    private String saveThumbnail(Context context, Bitmap bitmap, int id) {
+        File thumbnailFile = new File(context.getFilesDir(), "thumbnail_" + id + ".png");
+        try (FileOutputStream fos = new FileOutputStream(thumbnailFile)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            Log.e("ThumbnailSave", "Error saving thumbnail", e);
+            return null;
+        }
+        return thumbnailFile.getAbsolutePath();
     }
 }
