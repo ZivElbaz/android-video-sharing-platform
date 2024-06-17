@@ -60,21 +60,47 @@
 
     </LinearLayout>
 
-    <!-- Seek Bar -->
-    <com.google.android.exoplayer2.ui.DefaultTimeBar
-        android:id="@+id/exo_progress"
+    <!-- Time Display -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
         android:layout_gravity="bottom"
-        app:played_color="@color/exo_played_color"
-        app:scrubber_color="@color/exo_played_color"
-        app:buffered_color="@color/exo_unplayed_color"
-        app:unplayed_color="@android:color/transparent"
-        app:ad_marker_color="@color/exo_ad_marker_color"
-        app:played_ad_marker_color="@color/exo_played_ad_marker_color" />
+        android:padding="16dp">
 
-    <!-- Fullscreen Button at Bottom Left -->
+        <TextView
+            android:id="@+id/exo_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_00_00"
+            android:textColor="@android:color/white"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Seek Bar -->
+        <com.google.android.exoplayer2.ui.DefaultTimeBar
+            android:id="@+id/exo_progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="bottom"
+            app:played_color="@color/exo_played_color"
+            app:scrubber_color="@color/exo_played_color"
+            app:buffered_color="@color/exo_unplayed_color"
+            app:unplayed_color="@android:color/transparent"
+            app:ad_marker_color="@color/exo_ad_marker_color"
+            app:played_ad_marker_color="@color/exo_played_ad_marker_color" />
+
+        <TextView
+            android:id="@+id/exo_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_00_00"
+            android:textColor="@android:color/white"
+            android:layout_marginStart="16dp" />
+    </LinearLayout>
+
+    <!-- Fullscreen Button -->
     <ImageButton
         android:id="@+id/exo_fullscreen"
         android:layout_width="30dp"

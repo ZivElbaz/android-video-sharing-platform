@@ -48,36 +48,36 @@ public class VideoDetailsManager {
         uploaderName.setText(author);
     }
 
-    public void setUploaderImage(int id) {
+    public void setUploaderImage(int id, ImageView imageView) {
         if (id >= 1 && id <= 10) {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.lahav);
             Bitmap circularBitmap = getCircularBitmap(bitmap);
-            uploaderProfilePic.setImageBitmap(circularBitmap);
+            imageView.setImageBitmap(circularBitmap);
         } else {
             // Set the current user's profile image for video IDs 11 and above
             if (CurrentUserManager.getInstance().getCurrentUser() != null) {
                 String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
                 if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
                     Uri profilePicture = Uri.parse(profilePictureUriString);
-                    uploaderProfilePic.setImageURI(profilePicture); // Set profile image using URI
+                    imageView.setImageURI(profilePicture); // Set profile image using URI
 
                     // Load the bitmap from Uri and crop into a circle
                     try {
                         InputStream inputStream = context.getContentResolver().openInputStream(profilePicture);
                         Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                         Bitmap circularBitmap = getCircularBitmap(bitmap);
-                        uploaderProfilePic.setImageBitmap(circularBitmap);
+                        imageView.setImageBitmap(circularBitmap);
 
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
-                        uploaderProfilePic.setImageResource(R.drawable.ic_profile_foreground); // Fallback image
+                        imageView.setImageResource(R.drawable.ic_profile_foreground); // Fallback image
                     }
 
                 } else {
-                    uploaderProfilePic.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
+                    imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
                 }
             } else {
-                uploaderProfilePic.setImageResource(R.drawable.ic_profile_foreground); // Default profile image for guest
+                imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image for guest
             }
         }
     }
