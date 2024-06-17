@@ -16,10 +16,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -52,6 +54,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private VideoList relatedVideos;
     private ArrayList<VideoItem> mergedList;
 
+    private VideoViewModel videoViewModel;
+
     private String user;
 
     private EditText editTitleEditText;
@@ -68,6 +72,11 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_watch);
+
+        // Initialize ViewModel
+        videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
+        mergedList = new ArrayList<>(videoViewModel.getVideoItems().getValue());
+
 
         // Initialize views
         PlayerView playerView = findViewById(R.id.videoPlayer);
@@ -89,6 +98,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         Button btnDownload = findViewById(R.id.btnDownload);
         recyclerView = findViewById(R.id.recyclerView);
 
+        // Initialize uploader edit section views
         ImageButton editTitleButton = findViewById(R.id.editTitleButton);
         ImageButton editDescriptionButton = findViewById(R.id.editDescriptionButton);
         EditText editTitleEditText = findViewById(R.id.editTitleEditText);
@@ -97,6 +107,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         Button saveDescriptionButton = findViewById(R.id.saveDescriptionButton);
         Button cancelTitleButton = findViewById(R.id.cancelTitleButton);
         Button cancelDescriptionButton = findViewById(R.id.cancelDescriptionButton);
+        Button btnDelete = findViewById(R.id.btnDelete);
 
 
         if (CurrentUserManager.getInstance().getCurrentUser() == null) {
@@ -121,8 +132,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         int views = getIntent().getIntExtra("video_views", 1);
         int id = getIntent().getIntExtra("video_id", 1);
         this.videoIdentifier = id;
-        ArrayList<VideoItem> videoItems = getIntent().getParcelableArrayListExtra("video_items");
-        mergedList = videoItems;
+
 
 
         commentsRecyclerView.setAdapter(null);
@@ -142,7 +152,21 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         if (this.user.equals(author)) {
             editTitleButton.setVisibility(View.VISIBLE);
             editDescriptionButton.setVisibility(View.VISIBLE);
+            btnDelete.setVisibility(View.VISIBLE);
         }
+
+        btnDelete.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete Video")
+                    .setMessage("Are you sure you want to delete this video?")
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                        videoViewModel.removeVideoItem(videoIdentifier);
+                        Toast.makeText(this, "Video deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
+        });
 
         // Set up click listeners for the edit buttons
         editTitleButton.setOnClickListener(v -> {
@@ -163,8 +187,9 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 cancelTitleButton.setVisibility(View.GONE);
                 editTitleButton.setVisibility(View.VISIBLE);
 
-                mergedList.get(videoIdentifier - 1).setTitle(editTitleEditText.getText().toString());
-                // Here you would also update the title in your data source
+                //update the viewmodel list
+                videoViewModel.updateVideoItemTitle(videoIdentifier, editTitleEditText.getText().toString());
+
                 Toast.makeText(this, "Title updated", Toast.LENGTH_SHORT).show();
             });
 
@@ -196,8 +221,11 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 cancelDescriptionButton.setVisibility(View.GONE);
                 editDescriptionButton.setVisibility(View.VISIBLE);
 
-                // Here you would also update the description in your data source
+                //update the viewmodel list
+                videoViewModel.updateVideoItemDescription(videoIdentifier, editDescriptionEditText.getText().toString());
+
                 Toast.makeText(this, "Description updated", Toast.LENGTH_SHORT).show();
+
             });
 
             // Cancel button click listener
@@ -295,7 +323,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         int videoId = videoItem.getId();
         String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
-        moveToWatch.putParcelableArrayListExtra("video_items", mergedList);
         moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);

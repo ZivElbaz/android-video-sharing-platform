@@ -38,17 +38,7 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
         notifyDataSetChanged();
     }
 
-    public void addVideoItem(VideoItem videoItem) {
-        Toast.makeText(context, "New video added to the list", Toast.LENGTH_SHORT).show();
-        videoItems.add(videoItem);
-        notifyItemInserted(videoItems.size() - 1);
-    }
 
-    public void logVideoList() {
-        for (VideoItem item : videoItems) {
-            Log.d("VideoList", "Title: " + item.getTitle() + ", Author: " + item.getAuthor() + ", VideoURL: " + item.getVideoURL());
-        }
-    }
 
     @NonNull
     @Override

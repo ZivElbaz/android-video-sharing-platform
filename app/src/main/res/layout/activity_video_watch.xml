@@ -170,6 +170,17 @@
                     android:text="@string/uploader_name"
                     android:textSize="16sp"
                     android:textColor="#000" />
+
+                <Button
+                    android:id="@+id/btnDelete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/delete"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/red"
+                    android:layout_marginStart="40dp"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <!-- Action buttons: Like, Share, Download -->

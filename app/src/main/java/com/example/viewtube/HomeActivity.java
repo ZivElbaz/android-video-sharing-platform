@@ -50,7 +50,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private ImageView searchButton;
     private TextInputEditText searchBar;
     private BottomNavigationView bottomNavBar;
-    private ArrayList<VideoItem> mergedList;
     private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
     private ImageView logoImageView;
@@ -78,17 +77,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         searchBar = findViewById(R.id.search_bar);
         bottomNavBar = findViewById(R.id.bottomNavigationView);
         searchInputLayout = findViewById(R.id.search_input_layout);
-        mergedList = new ArrayList<>();
         logoImageView = findViewById(R.id.youtube_logo);
 
         // Initialize ViewModel
-        videoViewModel = new ViewModelProvider(this).get(VideoViewModel.class);
+        videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
         videoViewModel.getVideoItems().observe(this, videoItems -> {
-            mergedList.clear();
-            if (videoItems != null) {
-                mergedList.addAll(videoItems);
-            }
-            videoList.setVideoItems(mergedList);
+            videoList.setVideoItems(videoItems);
         });
 
         // Initialize side bar header views
@@ -157,12 +151,11 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             }
         });
 
-        // Move this line inside the onCreate method
         bottomNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
                 // Render all videos when the home button is clicked
-                videoList.setVideoItems(mergedList);
+                videoList.setVideoItems(videoViewModel.getVideoItems().getValue());
                 searchBar.setText("");
                 searchBar.clearFocus();
                 videoRecyclerView.smoothScrollToPosition(0);
@@ -173,7 +166,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 finish();
             } else if (itemId == R.id.nav_upload) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
-                uploadIntent.putExtra("maxId", getMaxId(mergedList));
+                uploadIntent.putExtra("maxId", getMaxId(videoViewModel.getVideoItems().getValue()));
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
             }
             return false;
@@ -244,7 +237,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private void filter(String query) {
         List<VideoItem> filteredList = new ArrayList<>();
-        for (VideoItem videoItem : mergedList) {
+        for (VideoItem videoItem : videoViewModel.getVideoItems().getValue()) {
             if (videoItem.getTitle().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(videoItem);
             }
@@ -278,7 +271,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         int videoId = videoItem.getId();
         String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
-        moveToWatch.putParcelableArrayListExtra("video_items", mergedList);
         moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
