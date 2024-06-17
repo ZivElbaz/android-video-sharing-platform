@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,6 +17,7 @@ import com.example.viewtube.R;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.ui.PlayerView;
@@ -28,15 +30,18 @@ public class VideoPlayerManager {
     private SimpleExoPlayer simpleExoPlayer;
     private PlayerView playerView;
     private ImageButton playPauseButton, rewindButton, forwardButton, fullscreenButton;
+    private TextView exoPosition, exoDuration;
     private boolean isFullscreen = false;
 
     public VideoPlayerManager(PlayerView playerView, ImageButton playPauseButton, ImageButton rewindButton,
-                              ImageButton forwardButton, ImageButton fullscreenButton) {
+                              ImageButton forwardButton, ImageButton fullscreenButton, TextView exoPosition, TextView exoDuration) {
         this.playerView = playerView;
         this.playPauseButton = playPauseButton;
         this.rewindButton = rewindButton;
         this.forwardButton = forwardButton;
         this.fullscreenButton = fullscreenButton;
+        this.exoPosition = exoPosition;
+        this.exoDuration = exoDuration;
     }
 
     public void initializePlayer(Context context, Uri videoUri) {
@@ -49,6 +54,7 @@ public class VideoPlayerManager {
         simpleExoPlayer.setPlayWhenReady(true);
 
         setupPlayerControls(context);
+        setupProgressListener();
     }
 
     private void setupPlayerControls(Context context) {
@@ -113,16 +119,49 @@ public class VideoPlayerManager {
         }
     }
 
-    private String getFilePathFromContentUri(Context context, Uri contentUri) {
-        String[] projection = {MediaStore.Video.Media.DATA};
-        Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
-        if (cursor != null) {
-            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-            cursor.moveToFirst();
-            String filePath = cursor.getString(columnIndex);
-            cursor.close();
-            return filePath;
+    private void setupProgressListener() {
+        simpleExoPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                if (isPlaying) {
+                    updateProgress();
+                }
+            }
+
+            @Override
+            public void onPositionDiscontinuity(int reason) {
+                updateProgress();
+            }
+
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                updateProgress();
+            }
+
+            @Override
+            public void onTimelineChanged(Timeline timeline, int reason) {
+                updateProgress();
+            }
+        });
+    }
+
+    private void updateProgress() {
+        long position = simpleExoPlayer.getCurrentPosition();
+        long duration = simpleExoPlayer.getDuration();
+        exoPosition.setText(formatTime(position));
+        exoDuration.setText(formatTime(duration));
+    }
+
+    // Utility method to format time
+    private String formatTime(long timeMs) {
+        long totalSeconds = timeMs / 1000;
+        long seconds = totalSeconds % 60;
+        long minutes = (totalSeconds / 60) % 60;
+        long hours = totalSeconds / 3600;
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format("%02d:%02d", minutes, seconds);
         }
-        return null;
     }
 }

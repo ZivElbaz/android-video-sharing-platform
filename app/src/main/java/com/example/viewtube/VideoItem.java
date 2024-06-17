@@ -1,6 +1,12 @@
 package com.example.viewtube;
+import android.media.MediaMetadataRetriever;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Locale;
 
 public class VideoItem implements Parcelable {
     private int id;
@@ -38,7 +44,7 @@ public class VideoItem implements Parcelable {
         this.views = views;
         this.likes = likes;
         this.date = date;
-        this.duration = duration;
+        this.duration = calculateVideoDuration(videoURL);
         this.videoURL = videoURL;
         this.thumbnailPath = thumbnailPath;
     }
@@ -179,5 +185,39 @@ public class VideoItem implements Parcelable {
         dest.writeString(videoURL);
         dest.writeInt(thumbnailResId);
         dest.writeString(thumbnailPath);
+    }
+
+    // Method to calculate video duration
+    private String calculateVideoDuration(String videoPath) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            File videoFile = new File(videoPath);
+            retriever.setDataSource(videoFile.getAbsolutePath());
+
+            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            if (time == null) {
+                return "00:00";
+            }
+
+            long timeInMillisec = Long.parseLong(time);
+            long duration = timeInMillisec / 1000;
+            long hours = duration / 3600;
+            long minutes = (duration % 3600) / 60;
+            long seconds = duration % 60;
+
+            if (hours > 0) {
+                return String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds);
+            } else {
+                return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+            }
+        } catch (Exception e) {
+            return "00:00";
+        } finally {
+            try {
+                retriever.release();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

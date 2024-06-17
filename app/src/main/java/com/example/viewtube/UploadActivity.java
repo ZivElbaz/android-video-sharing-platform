@@ -25,6 +25,9 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class UploadActivity extends AppCompatActivity {
 
@@ -156,7 +159,8 @@ public class UploadActivity extends AppCompatActivity {
             // Save the thumbnail bitmap and get its path
             thumbnailPath = saveThumbnail(context, thumbnailBitmap, id);
         }
-        return new VideoItem(id, title, description, CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, "13/06/24", "", videoPath, thumbnailPath);
+        String currentDate = new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(new Date());
+        return new VideoItem(id, title, description, CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, currentDate, "", videoPath, thumbnailPath);
     }
 
     // Create a thumbnail from a video file

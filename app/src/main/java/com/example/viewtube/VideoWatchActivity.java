@@ -79,7 +79,17 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
 
         // Initialize views
+
+        //Video Display Views
         PlayerView playerView = findViewById(R.id.videoPlayer);
+        ImageButton playPauseButton = findViewById(R.id.exo_play_pause);
+        ImageButton rewindButton = findViewById(R.id.exo_rew);
+        ImageButton forwardButton = findViewById(R.id.exo_ffwd);
+        ImageButton fullscreenButton = findViewById(R.id.exo_fullscreen);
+        TextView exoPosition = findViewById(R.id.exo_position);
+        TextView exoDuration = findViewById(R.id.exo_duration);
+
+        //Video Options and Details Views
         TextView videoTitle = findViewById(R.id.videoTitle);
         TextView videoDescription = findViewById(R.id.videoDescription);
         TextView videoViews = findViewById(R.id.videoViews);
@@ -90,15 +100,11 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         EditText commentInput = findViewById(R.id.commentInput);
         Button btnLike = findViewById(R.id.btnLike);
         Button btnPostComment = findViewById(R.id.btnPostComment);
-        ImageButton playPauseButton = findViewById(R.id.exo_play_pause);
-        ImageButton rewindButton = findViewById(R.id.exo_rew);
-        ImageButton forwardButton = findViewById(R.id.exo_ffwd);
-        ImageButton fullscreenButton = findViewById(R.id.exo_fullscreen);
         Button btnShare = findViewById(R.id.btnShare);
         Button btnDownload = findViewById(R.id.btnDownload);
         recyclerView = findViewById(R.id.recyclerView);
 
-        // Initialize uploader edit section views
+        //Uploader edit section views
         ImageButton editTitleButton = findViewById(R.id.editTitleButton);
         ImageButton editDescriptionButton = findViewById(R.id.editDescriptionButton);
         EditText editTitleEditText = findViewById(R.id.editTitleEditText);
@@ -117,7 +123,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         }
 
         // Initialize managers
-        videoPlayerManager = new VideoPlayerManager(playerView, playPauseButton, rewindButton, forwardButton, fullscreenButton);
+        videoPlayerManager = new VideoPlayerManager(playerView, playPauseButton, rewindButton, forwardButton, fullscreenButton, exoPosition, exoDuration);
         videoDetailsManager = new VideoDetailsManager(this, videoTitle, videoDescription, videoDate, videoViews, btnLike, uploaderName, uploaderProfilePic);
 
 
@@ -144,7 +150,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
         // Set video details
         videoDetailsManager.setVideoDetails(title, description, date, views, likes, author);
-        videoDetailsManager.setUploaderImage(id);
+        videoDetailsManager.setUploaderImage(id, uploaderProfilePic);
         btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
         btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
 
@@ -189,6 +195,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
                 //update the viewmodel list
                 videoViewModel.updateVideoItemTitle(videoIdentifier, editTitleEditText.getText().toString());
+                videoViewModel.updateVideoList();
 
                 Toast.makeText(this, "Title updated", Toast.LENGTH_SHORT).show();
             });
@@ -223,6 +230,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
                 //update the viewmodel list
                 videoViewModel.updateVideoItemDescription(videoIdentifier, editDescriptionEditText.getText().toString());
+                videoViewModel.updateVideoList();
 
                 Toast.makeText(this, "Description updated", Toast.LENGTH_SHORT).show();
 
@@ -239,17 +247,15 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         if (id >= 1 && id <= 10) {
-            // Local resource video
             int videoResourceId = getResources().getIdentifier(videoResourceName, "raw", getPackageName());
             videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + videoResourceId);
         } else {
-            // Newly added video
             File videoFile = new File(videoResourceName);
             videoUri = Uri.fromFile(videoFile);
         }
 
         Log.d("VideoWatchActivity", "Video URI: " + videoUri.toString() + " and video id: " + id);
-        videoPlayerManager.initializePlayer(this, videoUri);
+        initializePlayer();
 
 
 
@@ -297,6 +303,12 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
     }
 
+    private void initializePlayer() {
+        if (videoPlayerManager != null) {
+            videoPlayerManager.releasePlayer();
+        }
+        videoPlayerManager.initializePlayer(this, videoUri);
+    }
 
     @Override
     protected void onPause() {
@@ -310,11 +322,17 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         videoPlayerManager.releasePlayer();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initializePlayer();
+    }
+
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
         // Handle video item click
-        String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
+        String videoResourceName = videoItem.getVideoURL();
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
         String author = videoItem.getAuthor();
@@ -323,7 +341,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         int videoId = videoItem.getId();
         String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
-        moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
+        moveToWatch.putExtra("video_resource_name", videoResourceName);
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
         moveToWatch.putExtra("video_likes", videoLikes);
@@ -333,4 +351,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         moveToWatch.putExtra("video_author", author);
         startActivity(moveToWatch);
     }
+
+
 }
