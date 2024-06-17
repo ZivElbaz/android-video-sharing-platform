@@ -2,13 +2,6 @@ package com.example.viewtube;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -36,8 +29,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,28 +94,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
                 profilePicture = Uri.parse(profilePictureUriString);
                 profileImageView.setImageURI(profilePicture); // Set profile image using URI
-                // Load the bitmap from Uri
-                try {
-                    InputStream inputStream = getContentResolver().openInputStream(profilePicture);
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                    // Crop the bitmap into a circle
-                    Bitmap circularBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(circularBitmap);
-                    Paint paint = new Paint();
-                    paint.setAntiAlias(true);
-                    Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                    canvas.drawARGB(0, 0, 0, 0);
-                    canvas.drawCircle(bitmap.getWidth() / 2f, bitmap.getHeight() / 2f, bitmap.getWidth() / 2f, paint);
-                    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-                    canvas.drawBitmap(bitmap, rect, rect, paint);
-
-                    // Set the circular bitmap into the ImageView
-                    profileImageView.setImageBitmap(circularBitmap);
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
 
             } else {
                 profileImageView.setImageResource(R.drawable.ic_profile_foreground); // Set default profile image

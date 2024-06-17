@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,45 +17,45 @@
         <!-- Control Buttons -->
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_height="174dp"
+            android:layout_gravity="center"
             android:gravity="center"
-            android:layout_gravity="center">
+            android:orientation="horizontal">
 
             <!-- Rewind 10 seconds -->
             <ImageButton
                 android:id="@+id/exo_rew"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/rewind"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
                 android:background="@null"
                 android:contentDescription="@string/exo_controls_rewind_description"
-                android:padding="8dp"
-                android:scaleType="centerInside" />
+                android:padding="20dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/rewind" />
 
             <!-- Play/Pause Button -->
             <ImageButton
                 android:id="@+id/exo_play_pause"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/pause"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="40dp"
                 android:background="@null"
-                android:layout_marginStart="25dp"
                 android:contentDescription="@string/exo_controls_play_description"
-                android:padding="8dp"
-                android:scaleType="centerInside" />
+                android:padding="25dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/pause" />
 
             <!-- Forward 10 seconds -->
             <ImageButton
                 android:id="@+id/exo_ffwd"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="25dp"
-                android:src="@drawable/forward"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="40dp"
                 android:background="@null"
                 android:contentDescription="@string/exo_controls_fastforward_description"
-                android:padding="8dp"
-                android:scaleType="centerInside" />
+                android:padding="20dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/forward" />
         </LinearLayout>
 
 
@@ -74,22 +75,15 @@
             android:layout_height="wrap_content"
             android:text="@string/_00_00"
             android:textColor="@android:color/white"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="3dp"
+            android:layout_marginStart="3dp"/>
 
-        <!-- Seek Bar -->
-        <com.google.android.exoplayer2.ui.DefaultTimeBar
-            android:id="@+id/exo_progress"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginTop="16dp"
-            android:layout_gravity="bottom"
-            app:played_color="@color/exo_played_color"
-            app:scrubber_color="@color/exo_played_color"
-            app:buffered_color="@color/exo_unplayed_color"
-            app:unplayed_color="@android:color/transparent"
-            app:ad_marker_color="@color/exo_ad_marker_color"
-            app:played_ad_marker_color="@color/exo_played_ad_marker_color" />
+            android:text="/"
+            android:textColor="@android:color/white"
+            android:layout_marginEnd="3dp" />
 
         <TextView
             android:id="@+id/exo_duration"
@@ -97,21 +91,45 @@
             android:layout_height="wrap_content"
             android:text="@string/_00_00"
             android:textColor="@android:color/white"
-            android:layout_marginStart="16dp" />
+            android:layout_marginStart="3dp" />
+
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Seek Bar -->
+        <com.google.android.exoplayer2.ui.DefaultTimeBar
+            android:id="@+id/exo_progress"
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            app:ad_marker_color="@color/exo_ad_marker_color"
+            app:buffered_color="@color/exo_unplayed_color"
+            app:played_ad_marker_color="@color/exo_played_ad_marker_color"
+            app:played_color="@color/exo_played_color"
+            app:scrubber_color="@color/exo_played_color"
+            app:unplayed_color="@color/dark_buffer" />
+
+    </LinearLayout>
+
 
     <!-- Fullscreen Button -->
     <ImageButton
         android:id="@+id/exo_fullscreen"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:src="@drawable/fullscreen"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
         android:background="@null"
         android:contentDescription="@string/exo_controls_fullscreen_description"
         android:padding="8dp"
         android:scaleType="centerInside"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp" />
+        android:src="@drawable/fullscreen"
+        tools:ignore="TouchTargetSizeCheck" />
 
     <!-- Player Control View -->
     <com.google.android.exoplayer2.ui.PlayerControlView
