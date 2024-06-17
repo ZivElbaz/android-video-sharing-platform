@@ -24,7 +24,7 @@ Before running the application, make sure you have the following:
 
 ## Installation
 ### Clone the Repository:
-git clone https://github.com/ofekbaribi/android-video-sharing-platform.git
+git clone https://github.com/ZivElbaz/android-video-sharing-platform
 ### Open and Run the Project:
 - Open Android Studio.
 - Import the project you just cloned.
