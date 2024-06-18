@@ -1,8 +1,5 @@
 package com.example.viewtube.managers;
 
-import android.net.Uri;
-
-import com.example.viewtube.R;
 import com.example.viewtube.models.User;
 
 import java.util.ArrayList;
@@ -13,12 +10,9 @@ public class UsersManager {
     private static UsersManager instance;
     private List<User> users;
     private User currentUser;
-    private Uri profilePictureHard;
 
     private UsersManager() {
         users = new ArrayList<>();
-       profilePictureHard = Uri.parse("android.resource://com.example.viewtube/" + R.drawable.ic_home_background);
-        users.add(new User("admin", "admin", "admin", "admin", profilePictureHard.toString()));
     }
 
     public static synchronized UsersManager getInstance() {
