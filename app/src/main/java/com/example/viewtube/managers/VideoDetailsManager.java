@@ -27,6 +27,7 @@ public class VideoDetailsManager {
     private Context context;
     private String author;
 
+    // Constructor to initialize the VideoDetailsManager with UI components and context
     public VideoDetailsManager(Context context, TextView videoTitle, TextView videoDescription, TextView videoDate,
                                TextView videoViews, Button btnLike, TextView uploaderName, ImageView uploaderProfilePic) {
         this.context = context;
@@ -39,6 +40,7 @@ public class VideoDetailsManager {
         this.uploaderProfilePic = uploaderProfilePic;
     }
 
+    // Method to set video details on the UI components
     public void setVideoDetails(String title, String description, String date, int views, int likes, String author) {
         videoTitle.setText(title);
         videoDescription.setText(description);
@@ -48,8 +50,10 @@ public class VideoDetailsManager {
         uploaderName.setText(author);
     }
 
+    // Method to set the uploader's profile image
     public void setUploaderImage(int id, ImageView imageView) {
         if (id >= 1 && id <= 10) {
+            // Set a default image for predefined video IDs
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.lahav);
             Bitmap circularBitmap = getCircularBitmap(bitmap);
             imageView.setImageBitmap(circularBitmap);
@@ -82,6 +86,7 @@ public class VideoDetailsManager {
         }
     }
 
+    // Method to create a circular bitmap from a given bitmap
     private Bitmap getCircularBitmap(Bitmap bitmap) {
         int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
 

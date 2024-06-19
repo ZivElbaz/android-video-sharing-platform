@@ -20,6 +20,7 @@ public class CommentsManager {
     private RecyclerView commentsRecyclerView;
     private CommentsAdapter commentsAdapter;
 
+    // Constructor to initialize the CommentsManager with video ID, comments map, comment input field, and comments RecyclerView
     public CommentsManager(int videoId, Map<Integer, List<String>> videoCommentsMap, EditText commentInput, RecyclerView commentsRecyclerView) {
         this.videoId = videoId;
         this.videoCommentsMap = videoCommentsMap;
@@ -28,6 +29,7 @@ public class CommentsManager {
         initializeComments();
     }
 
+    // Method to initialize comments for the current video
     private void initializeComments() {
         List<String> comments = videoCommentsMap.get(videoId);
         if (comments == null) {
@@ -39,6 +41,7 @@ public class CommentsManager {
         commentsRecyclerView.setAdapter(commentsAdapter);
     }
 
+    // Method to add a comment to the current video's comments list
     public void addComment(String commentText) {
         if (!commentText.isEmpty()) {
             List<String> comments = videoCommentsMap.get(videoId);
