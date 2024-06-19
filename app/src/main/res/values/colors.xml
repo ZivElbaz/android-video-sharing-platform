@@ -15,5 +15,7 @@
     <color name="sidemenu_header">#F1EAEA</color>
     <color name="sidemenu_dark">#0D0D10</color>
     <color name="dark_buffer">#BE000000</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="search_dark">#272727</color>
 
 </resources>

@@ -5,25 +5,37 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeActivity"
-    android:theme="@style/AppTheme.Light">
+    android:theme="@style/AppTheme.Light"
+    app:hintEnabled="false"
+    tools:context=".HomeActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- YouTube Logo -->
+
+        <ImageView
+            android:id="@+id/menu_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="25dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/baseline_menu_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ImageView
             android:id="@+id/youtube_logo"
             android:layout_width="156dp"
             android:layout_height="40dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="20dp"
             android:contentDescription="YouTube Logo"
             android:src="@drawable/logo"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
         <ImageView
             android:id="@+id/search_button"
@@ -46,33 +58,51 @@
             android:layout_marginLeft="10dp"
             android:layout_marginTop="8dp"
             android:layout_marginRight="10dp"
+            android:hint="Search"
             android:visibility="gone"
             app:endIconMode="clear_text"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusTopStart="8dp"
+            app:hintEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/youtube_logo"
-            >
+            app:layout_constraintTop_toBottomOf="@id/youtube_logo">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/search_bar"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
-                android:background="@color/light_border_color"
+                android:background="@drawable/search_edit_text_background"
                 android:hint="Search"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/darker_gray"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="8dp"
                 app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxStrokeColor="@color/light_border_color"
-                />
+                app:boxCornerRadiusTopStart="8dp" />
+
+            <ImageView
+                android:id="@+id/clear_search_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:onClick="onClearSearchClick"
+                android:src="@drawable/ic_clear"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Bottom Navigation Bar -->
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/video_feed_recycler_view"
             android:layout_width="match_parent"
