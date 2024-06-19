@@ -33,6 +33,7 @@ public class VideoPlayerManager {
     private TextView exoPosition, exoDuration;
     private boolean isFullscreen = false;
 
+    // Constructor to initialize the VideoPlayerManager with UI components
     public VideoPlayerManager(PlayerView playerView, ImageButton playPauseButton, ImageButton rewindButton,
                               ImageButton forwardButton, ImageButton fullscreenButton, TextView exoPosition, TextView exoDuration) {
         this.playerView = playerView;
@@ -44,19 +45,29 @@ public class VideoPlayerManager {
         this.exoDuration = exoDuration;
     }
 
+    // Method to initialize the player with a given video URI
     public void initializePlayer(Context context, Uri videoUri) {
+        // Build the SimpleExoPlayer instance
         simpleExoPlayer = new SimpleExoPlayer.Builder(context).build();
+        // Create a data source factory
         DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context, Util.getUserAgent(context, "viewtube"));
+        // Create a media source from the video URI
         MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(videoUri));
+        // Set the player to the player view
         playerView.setPlayer(simpleExoPlayer);
+        // Keep the screen on while playing
         playerView.setKeepScreenOn(true);
+        // Prepare the player with the media source
         simpleExoPlayer.prepare(mediaSource);
+        // Start playback
         simpleExoPlayer.setPlayWhenReady(true);
 
+        // Setup player controls and progress listener
         setupPlayerControls(context);
         setupProgressListener();
     }
 
+    // Method to setup player control buttons
     private void setupPlayerControls(Context context) {
         playPauseButton.setOnClickListener(view -> togglePlayPause());
         rewindButton.setOnClickListener(view -> simpleExoPlayer.seekBack());
@@ -64,6 +75,7 @@ public class VideoPlayerManager {
         fullscreenButton.setOnClickListener(view -> toggleFullscreen(context));
     }
 
+    // Method to toggle play/pause state
     private void togglePlayPause() {
         if (simpleExoPlayer != null) {
             if (simpleExoPlayer.getPlayWhenReady()) {
@@ -76,6 +88,7 @@ public class VideoPlayerManager {
         }
     }
 
+    // Method to toggle fullscreen mode
     private void toggleFullscreen(Context context) {
         if (isFullscreen) {
             exitFullscreen(context);
@@ -84,6 +97,7 @@ public class VideoPlayerManager {
         }
     }
 
+    // Method to enter fullscreen mode
     private void enterFullscreen(Context context) {
         ((AppCompatActivity) context).getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -99,6 +113,7 @@ public class VideoPlayerManager {
         isFullscreen = true;
     }
 
+    // Method to exit fullscreen mode
     private void exitFullscreen(Context context) {
         ((AppCompatActivity) context).getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         if (((AppCompatActivity) context).getSupportActionBar() != null) {
@@ -112,6 +127,7 @@ public class VideoPlayerManager {
         isFullscreen = false;
     }
 
+    // Method to release the player and free resources
     public void releasePlayer() {
         if (simpleExoPlayer != null) {
             simpleExoPlayer.release();
@@ -119,6 +135,7 @@ public class VideoPlayerManager {
         }
     }
 
+    // Method to setup progress listener for the player
     private void setupProgressListener() {
         simpleExoPlayer.addListener(new Player.Listener() {
             @Override
@@ -145,6 +162,7 @@ public class VideoPlayerManager {
         });
     }
 
+    // Method to update the progress of the player
     private void updateProgress() {
         long position = simpleExoPlayer.getCurrentPosition();
         long duration = simpleExoPlayer.getDuration();
@@ -152,7 +170,7 @@ public class VideoPlayerManager {
         exoDuration.setText(formatTime(duration));
     }
 
-    // Utility method to format time
+    // Utility method to format time from milliseconds to a string
     private String formatTime(long timeMs) {
         long totalSeconds = timeMs / 1000;
         long seconds = totalSeconds % 60;
