@@ -19,15 +19,18 @@ public class FileUtils {
 
     private static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1;
 
+    // Method to check and request write external storage permission
     public static void checkAndRequestPermission(Activity activity) {
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
+            // Request permission if not granted
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
         }
     }
 
+    // Method to share a video via an intent
     public static void shareVideo(Activity activity, Uri videoUri, String title) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("video/*");

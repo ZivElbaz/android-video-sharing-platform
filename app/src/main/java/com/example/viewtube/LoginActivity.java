@@ -14,10 +14,10 @@ import com.example.viewtube.managers.UsersManager;
 
 public class LoginActivity extends AppCompatActivity {
 
+    // UI components
     private EditText username;
     private EditText password;
     private Button login;
-
     private Button register;
 
     @Override
@@ -25,11 +25,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Initialize UI components
         username = findViewById(R.id.username);
         password = findViewById(R.id.password);
         login = findViewById(R.id.login);
         register = findViewById(R.id.register);
 
+        // Set click listener for login button
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -37,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Set click listener for register button
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -46,24 +49,31 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    // Check if an EditText is empty
     boolean isEmpty(EditText text) {
         CharSequence str = text.getText().toString();
         return TextUtils.isEmpty(str);
     }
 
+    // Authenticate user based on username and password
     void authenticateUser() {
+        // Check if username is empty
         if (isEmpty(username)) {
             username.setError("Username is required!");
             return;
         }
 
+        // Check if password is empty
         if (isEmpty(password)) {
             password.setError("Password is required!");
             return;
         }
 
+        // Retrieve username and password from EditText fields
         String user = username.getText().toString();
         String pass = password.getText().toString();
+
+        // Authenticate the user using UsersManager
         if (UsersManager.getInstance().authenticate(user, pass)) {
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(LoginActivity.this, HomeActivity.class);

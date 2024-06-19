@@ -36,6 +36,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private static final String TAG = "HomeActivity";
 
+    // UI components
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
     private ImageView searchButton;
@@ -50,7 +51,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply saved theme
+        // Apply saved theme preferences
         sharedPreferences = getSharedPreferences("theme_preferences", MODE_PRIVATE);
         boolean isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
         if (isDarkMode) {
@@ -62,6 +63,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // Initialize UI components
         sideBar = findViewById(R.id.navigation_view);
         searchButton = findViewById(R.id.search_button);
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
@@ -80,35 +82,34 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         View headerView = sideBar.getHeaderView(0);
         ImageView profileImageView = headerView.findViewById(R.id.current_profile);
         TextView usernameView = headerView.findViewById(R.id.current_user);
+
+        // Check if there is a current user and update the UI accordingly
         if (CurrentUserManager.getInstance().getCurrentUser() == null) {
-            // If no current user, show the login item
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
             profileImageView.setImageResource(R.drawable.ic_profile_foreground);
             usernameView.setText("Guest");
         } else {
-            // If there is a current user, hide the login item
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
             String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
             if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
                 profilePicture = Uri.parse(profilePictureUriString);
                 profileImageView.setImageURI(profilePicture); // Set profile image using URI
-
-
             } else {
                 profileImageView.setImageResource(R.drawable.ic_profile_foreground); // Set default profile image
             }
             usernameView.setText(CurrentUserManager.getInstance().getCurrentUser().getUsername());
         }
 
+        // Setup RecyclerView
         videoList = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         videoRecyclerView.setLayoutManager(layoutManager);
         videoRecyclerView.setAdapter(videoList);
 
+        // Handle search button click to toggle search bar visibility
         searchButton.setOnClickListener(view -> {
-            // Toggle search bar visibility
             Animation slideDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
             if (searchInputLayout.getVisibility() == View.GONE) {
                 searchInputLayout.setVisibility(View.VISIBLE);
@@ -121,6 +122,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             }
         });
 
+        // Handle bottom navigation bar item selection
         bottomNavBar.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
@@ -142,6 +144,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             return false;
         });
 
+        // Handle search bar actions
         searchBar.setOnEditorActionListener((TextView v, int actionId, KeyEvent event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 filter(v.getText().toString());
@@ -152,7 +155,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         });
 
         // Handle text changes and clear button click
-        searchInputLayout = findViewById(R.id.search_input_layout);
         searchInputLayout.setEndIconOnClickListener(view -> {
             searchBar.setText("");
             searchBar.clearFocus();
@@ -168,6 +170,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             toggleTheme(isChecked);
         });
 
+        // Handle log out menu item click
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
             if (CurrentUserManager.getInstance().getCurrentUser() != null) {
@@ -198,6 +201,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         }
     }
 
+    // Hide the keyboard
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null) {
@@ -205,6 +209,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         }
     }
 
+    // Filter video items based on the query
     private void filter(String query) {
         List<VideoItem> filteredList = new ArrayList<>();
         for (VideoItem videoItem : videoViewModel.getVideoItems().getValue()) {
@@ -215,6 +220,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         videoList.setVideoItems(filteredList);
     }
 
+    // Toggle theme and save preference
     private void toggleTheme(boolean isDarkMode) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("dark_mode", isDarkMode);
@@ -232,7 +238,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
         // Handle video item click
-        String videoResourceName = videoItem.getVideoURL(); // Ensure this is the correct resource name
+        String videoResourceName = videoItem.getVideoURL();
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
         String author = videoItem.getAuthor();
@@ -241,7 +247,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         int videoId = videoItem.getId();
         String videoDate = videoItem.getDate();
         Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
-        moveToWatch.putExtra("video_resource_name", videoResourceName); // Change to video_resource_name
+        moveToWatch.putExtra("video_resource_name", videoResourceName);
         moveToWatch.putExtra("video_title", videoTitle);
         moveToWatch.putExtra("video_description", videoDescription);
         moveToWatch.putExtra("video_likes", videoLikes);
@@ -252,6 +258,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         startActivity(moveToWatch);
     }
 
+    // Get the maximum ID from the list of video items
     private int getMaxId(List<VideoItem> videoItems) {
         int max = 0;
         for (VideoItem v : videoItems) {

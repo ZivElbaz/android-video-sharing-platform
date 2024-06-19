@@ -26,6 +26,7 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
     private VideoItemClickListener videoItemClickListener;
     private VideoDetailsManager videoDetailsManager;
 
+    // Constructor
     public VideoList(Context context, VideoItemClickListener listener) {
         this.context = context;
         this.videoItemClickListener = listener;
@@ -33,26 +34,34 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
         this.videoDetailsManager = new VideoDetailsManager(context, null, null, null, null, null, null, null);
     }
 
+    // Method to set the list of video items and notify the adapter of data changes
     public void setVideoItems(List<VideoItem> videoItems) {
         this.videoItems = videoItems;
         notifyDataSetChanged();
     }
 
+    // Method to create a new ViewHolder
     @NonNull
     @Override
     public VideoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the item_video layout
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_video, parent, false);
         return new VideoViewHolder(view);
     }
 
+    // Method to bind data to the ViewHolder
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
+        // Get the current video item
         VideoItem videoItem = videoItems.get(position);
         int videoId = videoItem.getId();
+
+        // Set the title, details, and duration text views
         holder.titleTextView.setText(videoItem.getTitle());
         holder.detailsTextView.setText(videoItem.getAuthor() + " - " + videoItem.getViews() + " views - " + videoItem.getDate());
         holder.durationTextView.setText(videoItem.getDuration());
 
+        // Set the thumbnail image view based on the video ID
         if (videoId >= 1 && videoId <= 10) {
             holder.thumbnailImageView.setImageResource(videoItem.getThumbnailResId());
         } else {
@@ -61,25 +70,30 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
             holder.thumbnailImageView.setImageBitmap(thumbnailBitmap);
         }
 
-        // Use the refactored setUploaderImage method
+        // Use the refactored setUploaderImage method to set the channel icon image view
         videoDetailsManager.setUploaderImage(videoId, holder.channelIconImageView);
 
+        // Set the click listener for the item view
         holder.itemView.setOnClickListener(v -> videoItemClickListener.onVideoItemClick(videoItem));
     }
 
+    // Method to get the total number of items in the data set
     @Override
     public int getItemCount() {
         return videoItems.size();
     }
 
+    // Interface for handling video item clicks
     public interface VideoItemClickListener {
         void onVideoItemClick(VideoItem videoItem);
     }
 
+    // ViewHolder class to hold references to each item's views
     static class VideoViewHolder extends RecyclerView.ViewHolder {
         TextView titleTextView, detailsTextView, durationTextView;
         ImageView thumbnailImageView, channelIconImageView;
 
+        // Constructor to initialize the item views
         public VideoViewHolder(@NonNull View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.video_title_text_view);
