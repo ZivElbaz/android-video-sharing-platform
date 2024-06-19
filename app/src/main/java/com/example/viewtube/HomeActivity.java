@@ -8,10 +8,11 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.Transformation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,10 +45,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private BottomNavigationView bottomNavBar;
     private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
-    private ImageView logoImageView;
+
+    private ImageView menuButton;
     private Uri profilePicture;
     private SharedPreferences sharedPreferences;
     private VideoViewModel videoViewModel;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,14 +66,15 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         sideBar = findViewById(R.id.navigation_view);
         searchButton = findViewById(R.id.search_button);
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
         searchBar = findViewById(R.id.search_bar);
         bottomNavBar = findViewById(R.id.bottomNavigationView);
         searchInputLayout = findViewById(R.id.search_input_layout);
-        logoImageView = findViewById(R.id.youtube_logo);
+        menuButton = findViewById(R.id.menu_btn);
+
 
         // Initialize ViewModel
         videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
@@ -105,20 +111,23 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         videoList = new VideoList(this, this); // Pass the context and the listener
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         videoRecyclerView.setLayoutManager(layoutManager);
+        videoRecyclerView.setHasFixedSize(true);
         videoRecyclerView.setAdapter(videoList);
+
+
 
         searchButton.setOnClickListener(view -> {
             // Toggle search bar visibility
-            Animation slideDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
+
             if (searchInputLayout.getVisibility() == View.GONE) {
                 searchInputLayout.setVisibility(View.VISIBLE);
-                searchInputLayout.startAnimation(slideDown);
+                expandView(searchInputLayout);
             } else {
-                searchInputLayout.setVisibility(View.GONE);
+                collapseView(searchInputLayout);
                 hideKeyboard();
-                searchBar.setText("");
-                filter("");
             }
+
+
         });
 
         bottomNavBar.setOnItemSelectedListener(item -> {
@@ -166,6 +175,14 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         darkModeSwitch.setChecked(isDarkMode);
         darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             toggleTheme(isChecked);
+        });
+
+        menuButton.setOnClickListener(view -> {
+            if (drawerLayout.isDrawerOpen(sideBar)) {
+                drawerLayout.closeDrawer(sideBar);
+            } else {
+                drawerLayout.openDrawer(sideBar);
+            }
         });
 
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
@@ -258,5 +275,57 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             max = Math.max(max, v.getId());
         }
         return max;
+    }
+
+    private void expandView(final View view) {
+        view.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = view.getMeasuredHeight();
+
+        view.getLayoutParams().height = 1;
+        view.setVisibility(View.VISIBLE);
+        Animation animation = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                view.getLayoutParams().height = interpolatedTime == 1
+                        ? LinearLayout.LayoutParams.WRAP_CONTENT
+                        : (int) (targetHeight * interpolatedTime);
+                view.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        animation.setDuration(200);
+        view.startAnimation(animation);
+    }
+
+    // Method to animate the collapse of a view
+    private void collapseView(final View view) {
+        final int initialHeight = view.getMeasuredHeight();
+
+        Animation animation = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if (interpolatedTime == 1) {
+                    view.setVisibility(View.GONE);
+                } else {
+                    view.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
+                    view.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        animation.setDuration(200);
+        view.startAnimation(animation);
     }
 }
