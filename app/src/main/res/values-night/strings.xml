@@ -6,4 +6,7 @@
     <string name="add_a_comment">Add a comment</string>
     <string name="post">Post</string>
     <string name="comments">Comments</string>
+    <string name="comment">Comment</string>
+    <string name="v">V</string>
+    <string name="x">X</string>
 </resources>

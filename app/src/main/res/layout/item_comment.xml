@@ -2,13 +2,51 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp">
 
     <TextView
         android:id="@+id/commentTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/editCommentTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/editCommentButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Comment"
-        android:textSize="16sp" />
+        android:src="@drawable/ic_edit_light"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/deleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/delete"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/v"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/x"
+        android:visibility="gone" />
+
 </LinearLayout>
