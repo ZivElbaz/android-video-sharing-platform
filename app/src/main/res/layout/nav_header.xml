@@ -10,7 +10,7 @@
         android:id="@+id/current_profile"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:contentDescription="Profile Picture"
+        android:contentDescription="@string/profile_picture"
         android:scaleType="centerCrop"
         android:background="@drawable/circular_background" />
 

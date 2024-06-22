@@ -4,19 +4,13 @@
 
     <item
         android:id="@+id/nav_logout"
-        android:title="Logout"
+        android:title="@string/logout"
         android:icon="@drawable/ic_login_foreground" />
 
 
     <item
-        android:id="@+id/nav_upload"
-        android:title="Upload"
-        android:icon="@drawable/ic_upload_foreground"
-        android:visible="false" />
-
-    <item
         android:id="@+id/nav_dark_mode"
-        android:title="Dark Mode"
+        android:title="@string/dark_mode"
         android:icon="@drawable/ic_dark_mode_foreground"
         app:actionViewClass="androidx.appcompat.widget.SwitchCompat" />
 </menu>

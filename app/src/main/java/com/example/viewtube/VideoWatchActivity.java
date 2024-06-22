@@ -1,7 +1,6 @@
 package com.example.viewtube;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,17 +11,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.viewtube.managers.CommentsManager;
 import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.managers.FileUtils;
@@ -30,7 +25,6 @@ import com.example.viewtube.managers.SessionManager;
 import com.example.viewtube.managers.VideoDetailsManager;
 import com.example.viewtube.managers.VideoPlayerManager;
 import com.google.android.exoplayer2.ui.PlayerView;
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -44,9 +38,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
     private int videoIdentifier;
     private boolean liked = false;
-    private RecyclerView recyclerView;
-    private VideoList relatedVideos;
-    private ArrayList<VideoItem> mergedList;
 
     private VideoViewModel videoViewModel;
 
@@ -68,7 +59,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
         // Initialize ViewModel
         videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
-        mergedList = new ArrayList<>(videoViewModel.getVideoItems().getValue());
+        ArrayList<VideoItem> mergedList = new ArrayList<>(videoViewModel.getVideoItems().getValue());
 
         // Initialize views
         PlayerView playerView = findViewById(R.id.videoPlayer);
@@ -91,7 +82,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         Button btnPostComment = findViewById(R.id.btnPostComment);
         Button btnShare = findViewById(R.id.btnShare);
         Button btnDownload = findViewById(R.id.btnDownload);
-        recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
 
         ImageButton editTitleButton = findViewById(R.id.editTitleButton);
         ImageButton editDescriptionButton = findViewById(R.id.editDescriptionButton);
@@ -275,7 +266,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         // Initialize the RecyclerView with related videos
-        relatedVideos = new VideoList(this, this);
+        VideoList relatedVideos = new VideoList(this, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(relatedVideos);
 

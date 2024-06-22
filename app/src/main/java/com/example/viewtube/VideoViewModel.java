@@ -18,7 +18,7 @@ public class VideoViewModel extends AndroidViewModel {
     // List to hold all video items
     private static List<VideoItem> allVideoItems = new ArrayList<>();
     // LiveData to hold the video items list for observation
-    private static MutableLiveData<List<VideoItem>> videoItemsLiveData = new MutableLiveData<>();
+    private static final MutableLiveData<List<VideoItem>> videoItemsLiveData = new MutableLiveData<>();
 
     // Constructor to initialize the ViewModel
     public VideoViewModel(@NonNull Application application) {

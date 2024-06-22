@@ -17,8 +17,6 @@ public class LoginActivity extends AppCompatActivity {
     // UI components
     private EditText username;
     private EditText password;
-    private Button login;
-    private Button register;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +26,8 @@ public class LoginActivity extends AppCompatActivity {
         // Initialize UI components
         username = findViewById(R.id.username);
         password = findViewById(R.id.password);
-        login = findViewById(R.id.login);
-        register = findViewById(R.id.register);
+        Button login = findViewById(R.id.login);
+        Button register = findViewById(R.id.register);
 
         // Set click listener for login button
         login.setOnClickListener(new View.OnClickListener() {

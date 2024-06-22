@@ -1,10 +1,7 @@
 package com.example.viewtube;
-
 import android.media.MediaMetadataRetriever;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
