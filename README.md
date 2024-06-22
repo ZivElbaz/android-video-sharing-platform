@@ -8,7 +8,7 @@ ViewTube is a video-sharing platform that allows users to upload, watch, and int
 - **Video Sharing:** Share videos effortlessly with your friends.
 - **Comments Section:** Interact with the community through comments.
 - **Related Videos:** Explore related videos based on your viewing.
-- **User Management:** Handle your profile, track your likes, and manage your uploads conveniently.
+- **User Management:** Create and sign into your created user, upload videos and manage your likes/dislikes, videos uploaded and your comments.
 - **Dark Mode:** Customize your viewing preference with Dark Mode.
 
 ## Technologies Used
