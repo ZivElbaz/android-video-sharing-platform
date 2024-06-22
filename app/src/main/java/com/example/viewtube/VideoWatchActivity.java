@@ -127,7 +127,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
         // Initialize comments manager
         commentsRecyclerView.setAdapter(null);
-        commentsManager = new CommentsManager(videoIdentifier, SessionManager.getInstance().getVideoCommentsMap(), commentInput, commentsRecyclerView);
+        commentsManager = new CommentsManager(videoIdentifier, SessionManager.getInstance().getVideoCommentsMap(), commentInput, commentsRecyclerView, user);
 
         // Check if session has likes and liked status
         int likes = SessionManager.getInstance().getLikes(videoResourceName) == 0 ? initialLikes : SessionManager.getInstance().getLikes(videoResourceName);
@@ -255,8 +255,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         btnPostComment.setOnClickListener(view -> {
-            String commentText = user + ": " + commentInput.getText().toString().trim();
-            commentsManager.addComment(commentText);
+            String commentText =commentInput.getText().toString().trim();
+            commentsManager.addComment(commentText, user);
         });
 
         btnDownload.setOnClickListener(view -> {
