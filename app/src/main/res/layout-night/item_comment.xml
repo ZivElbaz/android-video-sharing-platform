@@ -24,7 +24,7 @@
         android:id="@+id/editCommentButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_edit_light"
+        android:src="@drawable/ic_edit_dark"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="gone" />
 
@@ -42,6 +42,7 @@
         android:layout_height="wrap_content"
         android:text="@string/v"
         android:textColor="@color/exo_scrubber_color"
+        android:backgroundTint="@color/white"
         android:visibility="gone" />
 
     <Button
@@ -50,6 +51,7 @@
         android:layout_height="wrap_content"
         android:text="@string/x"
         android:textColor="@color/red"
+        android:backgroundTint="@color/white"
         android:visibility="gone" />
 
 </LinearLayout>
