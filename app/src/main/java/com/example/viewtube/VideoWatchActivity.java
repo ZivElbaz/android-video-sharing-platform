@@ -50,7 +50,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private Button cancelTitleButton;
     private Button cancelDescriptionButton;
 
-    private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

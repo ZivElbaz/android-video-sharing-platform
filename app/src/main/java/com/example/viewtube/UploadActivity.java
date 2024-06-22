@@ -102,8 +102,6 @@ public class UploadActivity extends AppCompatActivity {
     }
 
 
-
-
     // Convert URI to FileDescriptor
     public static FileDescriptor uriToFileDescriptor(Context context, Uri uri) {
         ContentResolver resolver = context.getContentResolver();
