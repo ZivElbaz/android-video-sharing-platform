@@ -9,4 +9,12 @@
     <string name="comment">Comment</string>
     <string name="v">V</string>
     <string name="x">X</string>
+    <string name="login_to">"Login to "</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="register_to">Register to</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="add_video">Add video</string>
+    <string name="upload">Upload</string>
 </resources>

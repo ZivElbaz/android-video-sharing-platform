@@ -1,15 +1,12 @@
 package com.example.viewtube;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,9 +14,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.viewtube.managers.CurrentUserManager;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -33,8 +28,6 @@ public class UploadActivity extends AppCompatActivity {
 
     // UI components
     private EditText titleEditText , descriptionEditText;
-    private Button selectVideoButton;
-    private Button uploadButton;
 
     // File descriptor for the selected video
     private FileDescriptor fileDescriptor;
@@ -53,8 +46,8 @@ public class UploadActivity extends AppCompatActivity {
         // Initialize UI components
         titleEditText = findViewById(R.id.title_edit_text);
         descriptionEditText = findViewById(R.id.description_edit_text);
-        selectVideoButton = findViewById(R.id.select_video_button);
-        uploadButton = findViewById(R.id.upload_button);
+        Button selectVideoButton = findViewById(R.id.select_video_button);
+        Button uploadButton = findViewById(R.id.upload_button);
 
         // Set click listener for the select video button
         selectVideoButton.setOnClickListener(new View.OnClickListener() {
@@ -103,8 +96,7 @@ public class UploadActivity extends AppCompatActivity {
         if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null) {
             // Video selected, get its URI
             videoUri = data.getData();
-            FileDescriptor ff = uriToFileDescriptor(this, videoUri);
-            fileDescriptor = ff;
+            fileDescriptor = uriToFileDescriptor(this, videoUri);
             Toast.makeText(this, "Video selected: " + videoUri.getPath(), Toast.LENGTH_SHORT).show();
         }
     }

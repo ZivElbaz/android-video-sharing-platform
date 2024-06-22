@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.viewtube.managers.SessionManager;
@@ -15,11 +16,11 @@ import com.example.viewtube.managers.SessionManager;
 import java.util.List;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentViewHolder> {
-    private List<SessionManager.Comment> comments;
+    private final List<SessionManager.Comment> comments;
 
-    private String currentUsername;
+    private final String currentUsername;
 
-    private OnCommentActionListener commentActionListener;
+    private final OnCommentActionListener commentActionListener;
 
     // Constructor to initialize the comments list
     public CommentsAdapter(List<SessionManager.Comment> comments, String currentUsername, OnCommentActionListener commentActionListener) {
@@ -35,6 +36,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     // Called when RecyclerView needs a new ViewHolder of the given type to represent an item
+    @NonNull
     @Override
     public CommentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Inflate the item layout for comments

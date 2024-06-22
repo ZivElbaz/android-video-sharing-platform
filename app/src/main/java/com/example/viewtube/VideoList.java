@@ -12,8 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.viewtube.R;
-import com.example.viewtube.VideoItem;
+
 import com.example.viewtube.managers.VideoDetailsManager;
 
 import java.util.ArrayList;
@@ -22,13 +21,11 @@ import java.util.List;
 public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
 
     private List<VideoItem> videoItems;
-    private Context context;
-    private VideoItemClickListener videoItemClickListener;
-    private VideoDetailsManager videoDetailsManager;
+    private final VideoItemClickListener videoItemClickListener;
+    private final VideoDetailsManager videoDetailsManager;
 
     // Constructor
     public VideoList(Context context, VideoItemClickListener listener) {
-        this.context = context;
         this.videoItemClickListener = listener;
         this.videoItems = new ArrayList<>();
         this.videoDetailsManager = new VideoDetailsManager(context, null, null, null, null, null, null, null);

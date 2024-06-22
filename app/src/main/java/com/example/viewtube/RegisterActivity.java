@@ -26,9 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText password;
     private EditText confirmPassword;
     private EditText username;
-    private Button register;
     private ImageView profilePicture;
-    private Button selectPictureButton;
     private Uri profilePictureUri;
 
     @Override
@@ -42,9 +40,9 @@ public class RegisterActivity extends AppCompatActivity {
         password = findViewById(R.id.password);
         confirmPassword = findViewById(R.id.confirm_password);
         username = findViewById(R.id.username);
-        register = findViewById(R.id.register);
+        Button register = findViewById(R.id.register);
         profilePicture = findViewById(R.id.profile_picture);
-        selectPictureButton = findViewById(R.id.select_picture_button);
+        Button selectPictureButton = findViewById(R.id.select_picture_button);
 
         // Set click listener for selecting a profile picture
         selectPictureButton.setOnClickListener(new View.OnClickListener() {

@@ -9,14 +9,14 @@
         android:id="@+id/title_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Title"
+        android:hint="@string/title"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/description_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Description"
+        android:hint="@string/description"
         android:inputType="textMultiLine"
         android:minLines="3"
         android:gravity="top" />
@@ -25,7 +25,8 @@
         android:id="@+id/select_video_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add video"
+        android:backgroundTint="@color/red"
+        android:text="@string/add_video"
         android:layout_marginTop="16dp" />
 
 
@@ -33,7 +34,8 @@
         android:id="@+id/upload_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Upload"
+        android:backgroundTint="@color/red"
+        android:text="@string/upload"
         android:layout_marginTop="16dp" />
 
 </LinearLayout>

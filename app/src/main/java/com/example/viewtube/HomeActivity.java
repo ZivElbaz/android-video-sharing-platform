@@ -36,19 +36,13 @@ import java.util.List;
 
 public class HomeActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
-    private static final String TAG = "HomeActivity";
-
     // UI components
     private RecyclerView videoRecyclerView;
     private VideoList videoList;
-    private ImageView searchButton;
     private TextInputEditText searchBar;
-    private BottomNavigationView bottomNavBar;
     private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
 
-    private ImageView menuButton;
-    private Uri profilePicture;
     private SharedPreferences sharedPreferences;
     private VideoViewModel videoViewModel;
 
@@ -71,12 +65,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         // Initialize UI components
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         sideBar = findViewById(R.id.navigation_view);
-        searchButton = findViewById(R.id.search_button);
+        ImageView searchButton = findViewById(R.id.search_button);
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
         searchBar = findViewById(R.id.search_bar);
-        bottomNavBar = findViewById(R.id.bottomNavigationView);
+        BottomNavigationView bottomNavBar = findViewById(R.id.bottomNavigationView);
         searchInputLayout = findViewById(R.id.search_input_layout);
-        menuButton = findViewById(R.id.menu_btn);
+        ImageView menuButton = findViewById(R.id.menu_btn);
 
 
         // Initialize ViewModel
@@ -95,13 +89,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
             profileImageView.setImageResource(R.drawable.ic_profile_foreground);
-            usernameView.setText("Guest");
+            usernameView.setText(R.string.guest);
         } else {
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
             String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
             if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
-                profilePicture = Uri.parse(profilePictureUriString);
+                Uri profilePicture = Uri.parse(profilePictureUriString);
                 profileImageView.setImageURI(profilePicture); // Set profile image using URI
             } else {
                 profileImageView.setImageResource(R.drawable.ic_profile_foreground); // Set default profile image
@@ -143,7 +137,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 startActivity(loginIntent);
                 finish();
-            } else if (itemId == R.id.nav_upload) {
+            } else if (itemId == R.id.nav_upload && videoViewModel.getVideoItems().getValue() != null) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
                 uploadIntent.putExtra("maxId", getMaxId(videoViewModel.getVideoItems().getValue()));
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
@@ -326,14 +320,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 }
             }
 
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
         };
 
         // 1dp/ms
         animation.setDuration(200);
         view.startAnimation(animation);
+    }
+
+    public void onClearSearchClick(View view) {
     }
 }
