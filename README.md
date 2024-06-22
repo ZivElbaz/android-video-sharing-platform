@@ -13,9 +13,7 @@ ViewTube is a video-sharing platform that allows users to upload, watch, and int
 
 ## Technologies Used
 - **Frontend:** Android SDK
-- **State Management:** LiveData & ViewModel
 - **Styling:** XML with Material Components
-- **Navigation:** Jetpack Navigation Component
 
 ## Prerequisites
 Before running the application, make sure you have the following:
