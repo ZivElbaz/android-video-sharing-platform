@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.VideoDetailsManager;
 
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
 
         // Set the title, details, and duration text views
         holder.titleTextView.setText(videoItem.getTitle());
-        holder.detailsTextView.setText(videoItem.getAuthor() + " - " + videoItem.getViews() + " views - " + videoItem.getDate());
+        holder.detailsTextView.setText(videoItem.getUploader() + " - " + videoItem.getViews() + " views - " + videoItem.getDate());
         holder.durationTextView.setText(videoItem.getDuration());
 
         // Set the thumbnail image view based on the video ID

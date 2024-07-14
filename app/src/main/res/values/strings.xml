@@ -47,4 +47,5 @@
     <string name="home">Home</string>
     <string name="logout">Logout</string>
     <string name="dark_mode">Dark Mode</string>
+    <string name="BaseUrl">http://10.0.2.2:12345/api/</string>
 </resources>

@@ -25,7 +25,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CurrentUserManager;
+import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -44,12 +46,14 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private NavigationView sideBar;
 
     private SharedPreferences sharedPreferences;
-    private VideoViewModel videoViewModel;
+    private VideosViewModel videosViewModel;
+
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         // Apply saved theme preferences
         sharedPreferences = getSharedPreferences("theme_preferences", MODE_PRIVATE);
         boolean isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
@@ -62,6 +66,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+
         // Initialize UI components
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         sideBar = findViewById(R.id.navigation_view);
@@ -72,12 +77,25 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         searchInputLayout = findViewById(R.id.search_input_layout);
         ImageView menuButton = findViewById(R.id.menu_btn);
 
+        // Setup RecyclerView
+        videoList = new VideoList(this, this); // Pass the context and the listener
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        videoRecyclerView.setLayoutManager(layoutManager);
+        videoRecyclerView.setHasFixedSize(true);
+        videoRecyclerView.setAdapter(videoList);
 
-        // Initialize ViewModel
-        videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
-        videoViewModel.getVideoItems().observe(this, videoItems -> {
-            videoList.setVideoItems(videoItems);
-        });
+
+//        // Initialize ViewModel
+//        videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
+//        videoViewModel.getVideoItems().observe(this, videoItems -> {
+//            videoList.setVideoItems(videoItems);
+//        });
+
+
+        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
+        videosViewModel.getVideoItemsLiveData().observe(this, videoItems -> videoList.setVideoItems(videoItems));
+
+
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
@@ -103,12 +121,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             usernameView.setText(CurrentUserManager.getInstance().getCurrentUser().getUsername());
         }
 
-        // Setup RecyclerView
-        videoList = new VideoList(this, this); // Pass the context and the listener
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        videoRecyclerView.setLayoutManager(layoutManager);
-        videoRecyclerView.setHasFixedSize(true);
-        videoRecyclerView.setAdapter(videoList);
 
         // Handle search button click to toggle search bar visibility
           searchButton.setOnClickListener(view -> {
@@ -128,7 +140,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
                 // Render all videos when the home button is clicked
-                videoList.setVideoItems(videoViewModel.getVideoItems().getValue());
+                videoList.setVideoItems(videosViewModel.getVideoItemsLiveData().getValue());
                 searchBar.setText("");
                 searchBar.clearFocus();
                 videoRecyclerView.smoothScrollToPosition(0);
@@ -137,9 +149,9 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 startActivity(loginIntent);
                 finish();
-            } else if (itemId == R.id.nav_upload && videoViewModel.getVideoItems().getValue() != null) {
+            } else if (itemId == R.id.nav_upload && videosViewModel.getVideoItemsLiveData().getValue() != null) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
-                uploadIntent.putExtra("maxId", getMaxId(videoViewModel.getVideoItems().getValue()));
+                uploadIntent.putExtra("maxId", getMaxId(videosViewModel.getVideoItemsLiveData().getValue()));
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
             }
             return false;
@@ -201,15 +213,9 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            // Retrieve the uploaded video item from the UploadActivity result
-            VideoItem uploadedVideoItem = data.getParcelableExtra("uploadedVideoItem");
-            if (uploadedVideoItem != null) {
-                // Add the uploaded video item to the list and refresh the RecyclerView
-                videoViewModel.addVideoItem(uploadedVideoItem);
-                // Show a success message
-                Toast.makeText(this, "Video uploaded successfully", Toast.LENGTH_SHORT).show();
-            }
+        if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK) {
+            // Refresh the list of videos from the server
+            videosViewModel.updateVideoList();
         }
     }
 
@@ -224,7 +230,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     // Filter video items based on the query
     private void filter(String query) {
         List<VideoItem> filteredList = new ArrayList<>();
-        for (VideoItem videoItem : videoViewModel.getVideoItems().getValue()) {
+        for (VideoItem videoItem : videosViewModel.getVideoItemsLiveData().getValue()) {
             if (videoItem.getTitle().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(videoItem);
             }
@@ -253,7 +259,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         String videoResourceName = videoItem.getVideoURL();
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
-        String author = videoItem.getAuthor();
+        String author = videoItem.getUploader();
         int videoLikes = videoItem.getLikes();
         int videoViews = videoItem.getViews();
         int videoId = videoItem.getId();

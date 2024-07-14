@@ -1,20 +1,27 @@
 package com.example.viewtube;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
+
+import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CurrentUserManager;
+import com.example.viewtube.viewmodels.VideosViewModel;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -24,65 +31,39 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+
+
 public class UploadActivity extends AppCompatActivity {
-
-    // UI components
-    private EditText titleEditText , descriptionEditText;
-
-    // File descriptor for the selected video
+    private EditText titleEditText, descriptionEditText;
     private FileDescriptor fileDescriptor;
-
-    // Request code for picking a video
     private static final int PICK_VIDEO_REQUEST = 1;
-
-    // URI of the selected video
     private Uri videoUri;
+    private VideosViewModel videosViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
 
-        // Initialize UI components
         titleEditText = findViewById(R.id.title_edit_text);
         descriptionEditText = findViewById(R.id.description_edit_text);
         Button selectVideoButton = findViewById(R.id.select_video_button);
         Button uploadButton = findViewById(R.id.upload_button);
 
-        // Set click listener for the select video button
-        selectVideoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFilePicker(); // Open the file picker to select a video
-            }
-        });
+        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
 
-        // Set click listener for the upload button
-        uploadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String title = titleEditText.getText().toString().trim();
-                String description = descriptionEditText.getText().toString().trim();
-
-                if (title.isEmpty() || videoUri == null) {
-                    // Show a toast if the title or video is not selected
-                    Toast.makeText(UploadActivity.this, "Please fill in all fields and select a video", Toast.LENGTH_SHORT).show();
-                } else {
-
-                    // Create a new VideoItem object with the provided information
-                    VideoItem newVideoItem = createfromFile(UploadActivity.this, title, description, fileDescriptor);
-
-                    // Create an Intent to pass back the uploaded video data to HomeActivity
-                    Intent intent = new Intent(UploadActivity.this, HomeActivity.class);
-                    intent.putExtra("uploadedVideoItem", newVideoItem);
-                    setResult(RESULT_OK, intent);
-                    finish(); // Finish the UploadActivity and return to HomeActivity
-                }
+        selectVideoButton.setOnClickListener(v -> openFilePicker());
+        uploadButton.setOnClickListener(v -> {
+            String title = titleEditText.getText().toString().trim();
+            String description = descriptionEditText.getText().toString().trim();
+            if (title.isEmpty() || videoUri == null) {
+                Toast.makeText(UploadActivity.this, "Please fill in all fields and select a video", Toast.LENGTH_SHORT).show();
+            } else {
+                uploadVideo(title, description);
             }
         });
     }
 
-    // Method to open the file picker for selecting a video
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("video/*");
@@ -92,17 +73,13 @@ public class UploadActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null) {
-            // Video selected, get its URI
             videoUri = data.getData();
             fileDescriptor = uriToFileDescriptor(this, videoUri);
             Toast.makeText(this, "Video selected: " + videoUri.getPath(), Toast.LENGTH_SHORT).show();
         }
     }
 
-
-    // Convert URI to FileDescriptor
     public static FileDescriptor uriToFileDescriptor(Context context, Uri uri) {
         ContentResolver resolver = context.getContentResolver();
         try {
@@ -116,7 +93,6 @@ public class UploadActivity extends AppCompatActivity {
         return null;
     }
 
-    // Create a file from a FileDescriptor
     private String createFileFromDescriptor(FileDescriptor fd, Context context) {
         int id = getIntent().getIntExtra("maxId", 10) + 1;
         File outputFile = new File(context.getCacheDir(), "video_" + id + ".mp4");
@@ -135,51 +111,53 @@ public class UploadActivity extends AppCompatActivity {
         return outputFile.getAbsolutePath();
     }
 
-    // Create a VideoItem from a FileDescriptor
-    private VideoItem createfromFile(Context context, String title, String description, FileDescriptor fd) {
-        String videoPath = createFileFromDescriptor(fd, context);
+    private void uploadVideo(String title, String description) {
+        String videoPath = createFileFromDescriptor(fileDescriptor, this);
         if (videoPath == null) {
-            Log.e("VideoCreation", "Failed to create video from file descriptor");
-            return null;
+            Log.e("VideoUpload", "Failed to create video from file descriptor");
+            return;
         }
+
+        File videoFile = new File(videoPath);
         int id = getIntent().getIntExtra("maxId", 10) + 1;
-        Bitmap thumbnailBitmap = createVideoThumbnail(videoPath);
-        String thumbnailPath = null;
-        if (thumbnailBitmap != null) {
-            // Save the thumbnail bitmap and get its path
-            thumbnailPath = saveThumbnail(context, thumbnailBitmap, id);
-        }
-        String currentDate = new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(new Date());
-        return new VideoItem(id, title, description, CurrentUserManager.getInstance().getCurrentUser().getUsername(), 0, 0, currentDate, "", videoPath, thumbnailPath);
+        String uploader = CurrentUserManager.getInstance().getCurrentUser().getUsername();
+        String duration = getVideoDuration(videoPath);
+        String date = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
+
+        VideoItem videoItem = new VideoItem(id, title, description, uploader, 0, 0, date, duration, videoPath,  null);
+        videosViewModel.addVideoItem(videoItem, videoFile);
     }
 
-    // Create a thumbnail from a video file
-    private Bitmap createVideoThumbnail(String videoPath) {
+    // Method to calculate video duration
+    private String getVideoDuration(String videoPath) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(videoPath);
-            return retriever.getFrameAtTime(1000000); // Get frame at 1 second
-        } catch (IllegalArgumentException e) {
-            Log.e("ThumbnailCreation", "Failed to create thumbnail", e);
-            return null;
+
+            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            if (time == null) {
+                return "00:00";
+            }
+
+            long timeInMillisec = Long.parseLong(time);
+            long duration = timeInMillisec / 1000;
+            long hours = duration / 3600;
+            long minutes = (duration % 3600) / 60;
+            long seconds = duration % 60;
+
+            if (hours > 0) {
+                return String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds);
+            } else {
+                return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+            }
+        } catch (Exception e) {
+            return "00:00";
         } finally {
             try {
                 retriever.release();
             } catch (IOException e) {
-                Log.e("ThumbnailCreation", "Error releasing MediaMetadataRetriever", e);
+                throw new RuntimeException(e);
             }
         }
-    }
-
-    // Save the thumbnail to internal storage and return the file path
-    private String saveThumbnail(Context context, Bitmap bitmap, int id) {
-        File thumbnailFile = new File(context.getFilesDir(), "thumbnail_" + id + ".png");
-        try (FileOutputStream fos = new FileOutputStream(thumbnailFile)) {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            Log.e("ThumbnailSave", "Error saving thumbnail", e);
-            return null;
-        }
-        return thumbnailFile.getAbsolutePath();
     }
 }

@@ -18,12 +18,15 @@ import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CommentsManager;
 import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.managers.FileUtils;
 import com.example.viewtube.managers.SessionManager;
 import com.example.viewtube.managers.VideoDetailsManager;
 import com.example.viewtube.managers.VideoPlayerManager;
+import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.exoplayer2.ui.PlayerView;
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +42,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private int videoIdentifier;
     private boolean liked = false;
 
-    private VideoViewModel videoViewModel;
+    private VideosViewModel videosViewModel;
 
     private String user;
 
@@ -57,8 +60,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         setContentView(R.layout.activity_video_watch);
 
         // Initialize ViewModel
-        videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
-        ArrayList<VideoItem> mergedList = new ArrayList<>(videoViewModel.getVideoItems().getValue());
+        videosViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideosViewModel.class);
+        ArrayList<VideoItem> mergedList = new ArrayList<>(videosViewModel.getVideoItemsLiveData().getValue());
 
         // Initialize views
         PlayerView playerView = findViewById(R.id.videoPlayer);
@@ -142,7 +145,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                     .setTitle("Delete Video")
                     .setMessage("Are you sure you want to delete this video?")
                     .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                        videoViewModel.removeVideoItem(videoIdentifier);
+                        videosViewModel.removeVideoItem(videoIdentifier);
                         Toast.makeText(this, "Video deleted", Toast.LENGTH_SHORT).show();
                         finish();
                     })
@@ -170,8 +173,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 editTitleButton.setVisibility(View.VISIBLE);
 
                 // Update the ViewModel list
-                videoViewModel.updateVideoItemTitle(videoIdentifier, editTitleEditText.getText().toString());
-                videoViewModel.updateVideoList();
+                videosViewModel.updateVideoItemTitle(videoIdentifier, editTitleEditText.getText().toString());
+                videosViewModel.updateVideoList();
 
                 Toast.makeText(this, "Title updated", Toast.LENGTH_SHORT).show();
             });
@@ -205,8 +208,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 editDescriptionButton.setVisibility(View.VISIBLE);
 
                 // Update the ViewModel list
-                videoViewModel.updateVideoItemDescription(videoIdentifier, editDescriptionEditText.getText().toString());
-                videoViewModel.updateVideoList();
+                videosViewModel.updateVideoItemDescription(videoIdentifier, editDescriptionEditText.getText().toString());
+                videosViewModel.updateVideoList();
 
                 Toast.makeText(this, "Description updated", Toast.LENGTH_SHORT).show();
             });
@@ -304,7 +307,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         String videoResourceName = videoItem.getVideoURL();
         String videoTitle = videoItem.getTitle();
         String videoDescription = videoItem.getDescription();
-        String author = videoItem.getAuthor();
+        String author = videoItem.getUploader();
         int videoLikes = videoItem.getLikes();
         int videoViews = videoItem.getViews();
         int videoId = videoItem.getId();

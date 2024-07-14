@@ -2,6 +2,8 @@ package com.example.viewtube;
 
 import android.content.Context;
 
+import com.example.viewtube.entities.VideoItem;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
