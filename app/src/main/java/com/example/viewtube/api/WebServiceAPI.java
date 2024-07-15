@@ -27,14 +27,14 @@ public interface WebServiceAPI {
     Call<VideoItem> getVideo(@Path("id") int id);
 
     @PATCH("videos/{id}")
-    Call<Void> updateVideo(@Path("id") int id, @Body VideoItem videoItem);
+    Call<VideoItem> updateVideo(@Path("id") int id, @Body VideoAPI.VideoUpdate videoUpdate);
 
     @DELETE("videos/{id}")
     Call<Void> deleteVideo(@Path("id") int id);
 
     @Multipart
     @POST("videos")
-    Call<Void> createVideo(
+    Call<VideoItem> createVideo(
             @Part MultipartBody.Part videoFile,
             @Part("title") RequestBody title,
             @Part("description") RequestBody description,
@@ -43,7 +43,7 @@ public interface WebServiceAPI {
     );
 
     @POST("videos/{id}/like")
-    Call<Void> likeVideo(@Path("id") int id, @Body Map<String, String> body);
+    Call<Void> userLiked(@Path("id") int id, @Body Map<String, String> body);
 
     @PATCH("videos/{id}/view")
     Call<Void> incrementViewCount(@Path("id") int id);

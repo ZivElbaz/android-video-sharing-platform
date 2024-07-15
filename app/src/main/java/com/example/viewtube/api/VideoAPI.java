@@ -1,15 +1,17 @@
 package com.example.viewtube.api;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.viewtube.R;
 import com.example.viewtube.VideoDao;
 import com.example.viewtube.entities.VideoItem;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -22,22 +24,23 @@ import retrofit2.Callback;
 
 public class VideoAPI {
 
-    private MutableLiveData<List<VideoItem>> videosListData;
-    private VideoDao dao;
-    private Retrofit retrofit;
+    private static final String BASE_URL = "http://192.168.1.100:12345/";
+
     private WebServiceAPI webServiceAPI;
+    private VideoDao videoDao;
 
+    public VideoAPI(VideoDao dao, Context context) {
+        this.videoDao = dao;
 
-
-    public VideoAPI(MutableLiveData<List<VideoItem>> videosListData, VideoDao dao, Context context) {
-        this.videosListData = videosListData;
-        this.dao = dao;
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl(context.getString(R.string.BaseUrl))
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL + "api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         webServiceAPI = retrofit.create(WebServiceAPI.class);
+    }
+
+    private String getFullVideoUrl(String relativeUrl) {
+        return BASE_URL + relativeUrl;
     }
 
     public void getAll() {
@@ -45,16 +48,44 @@ public class VideoAPI {
         call.enqueue(new Callback<List<VideoItem>>() {
             @Override
             public void onResponse(Call<List<VideoItem>> call, Response<List<VideoItem>> response) {
-                if (response.body() != null) {
-                    dao.clear();
-                    dao.insertAll(response.body());
-                    videosListData.postValue(dao.getAll());
+                if (response.isSuccessful() && response.body() != null) {
+                    new Thread(() -> {
+                        List<VideoItem> videoItems = response.body();
+                        for (VideoItem videoItem : videoItems) {
+                            videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
+                        }
+                        videoDao.clear();
+                        videoDao.insertAll(videoItems);
+                    }).start();
+                } else {
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
                 }
             }
 
             @Override
             public void onFailure(Call<List<VideoItem>> call, Throwable t) {
-                // Error handling
+                Log.e("VideoAPI", "Request failed", t);
+            }
+        });
+    }
+
+    public void getVideo(int videoId) {
+        Call<VideoItem> call = webServiceAPI.getVideo(videoId);
+        call.enqueue(new Callback<VideoItem>() {
+            @Override
+            public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    VideoItem videoItem = response.body();
+                    videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
+                    new Thread(() -> videoDao.insert(videoItem)).start();
+                } else {
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VideoItem> call, Throwable t) {
+                Log.e("VideoAPI", "Request failed", t);
             }
         });
     }
@@ -68,60 +99,98 @@ public class VideoAPI {
         RequestBody uploaderBody = RequestBody.create(MediaType.parse("text/plain"), videoItem.getUploader());
         RequestBody durationBody = RequestBody.create(MediaType.parse("text/plain"), videoItem.getDuration());
 
-        Call<Void> call = webServiceAPI.createVideo(videoPart, titleBody, descriptionBody, uploaderBody, durationBody);
+        Call<VideoItem> call = webServiceAPI.createVideo(videoPart, titleBody, descriptionBody, uploaderBody, durationBody);
+        call.enqueue(new Callback<VideoItem>() {
+            @Override
+            public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    VideoItem serverVideoItem = response.body();
+                    serverVideoItem.setVideoUrl(getFullVideoUrl(serverVideoItem.getVideoUrl()));
+                    new Thread(() -> videoDao.insert(serverVideoItem)).start();
+                } else {
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VideoItem> call, Throwable t) {
+                Log.e("VideoAPI", "Request failed", t);
+            }
+        });
+    }
+
+    public void update(int videoId, String title, String description) {
+        Call<VideoItem> call = webServiceAPI.updateVideo(videoId, new VideoUpdate(title, description));
+        call.enqueue(new Callback<VideoItem>() {
+            @Override
+            public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    VideoItem updatedVideoItem = response.body();
+                    updatedVideoItem.setVideoUrl(getFullVideoUrl(updatedVideoItem.getVideoUrl()));
+                    new Thread(() -> videoDao.update(updatedVideoItem)).start();
+                } else {
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<VideoItem> call, Throwable t) {
+                Log.e("VideoAPI", "Request failed", t);
+            }
+        });
+    }
+
+    public void delete(int videoId) {
+        Call<Void> call = webServiceAPI.deleteVideo(videoId);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    new Thread(() -> {
-                        dao.insert(videoItem);
-                        videosListData.postValue(dao.getAll());
-                    }).start();
+                    new Thread(() -> videoDao.deleteById(videoId)).start();
                 } else {
-                    // Handle the error
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                // Error handling
+                Log.e("VideoAPI", "Request failed", t);
             }
         });
     }
 
-    public void update(VideoItem videoItem) {
-        Call<Void> call = webServiceAPI.updateVideo(videoItem.getId(), videoItem);
+    public void userLiked(int videoId, String username) {
+        Map<String, String> body = new HashMap<>();
+        body.put("username", username);
+        Call<Void> call = webServiceAPI.userLiked(videoId, body);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                new Thread(() -> {
-                    dao.update(videoItem);
-                    videosListData.postValue(dao.getAll());
-                }).start();
+                // Handle response
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                // Error handling
+                Log.e("VideoAPI", "Request failed", t);
             }
         });
     }
 
-    public void delete(VideoItem videoItem) {
-        Call<Void> call = webServiceAPI.deleteVideo(videoItem.getId());
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                new Thread(() -> {
-                    dao.delete(videoItem);
-                    videosListData.postValue(dao.getAll());
-                }).start();
-            }
+    class VideoUpdate {
+        private String title;
+        private String description;
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                // Error handling
-            }
-        });
+        public VideoUpdate(String title, String description) {
+            this.title = title;
+            this.description = description;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 }

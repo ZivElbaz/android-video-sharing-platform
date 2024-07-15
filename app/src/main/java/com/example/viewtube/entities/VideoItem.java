@@ -15,11 +15,11 @@ public class VideoItem {
     private int likes;
     private String date;
     private String duration;
-    private String videoURL;
+    private String videoUrl;
     private String thumbnailPath;
 
     // Constructor
-    public VideoItem(int id, String title, String description, String uploader, int views, int likes, String date, String duration, String videoURL, String thumbnailPath) {
+    public VideoItem(int id, String title, String description, String uploader, int views, int likes, String date, String duration, String videoUrl, String thumbnailPath) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -28,7 +28,7 @@ public class VideoItem {
         this.likes = likes;
         this.date = date;
         this.duration = duration;
-        this.videoURL = videoURL;
+        this.videoUrl = videoUrl;
         this.thumbnailPath = thumbnailPath;
     }
 
@@ -97,12 +97,12 @@ public class VideoItem {
         this.duration = duration;
     }
 
-    public String getVideoURL() {
-        return videoURL;
+    public String getVideoUrl() {
+        return videoUrl;
     }
 
-    public void setVideoURL(String videoURL) {
-        this.videoURL = videoURL;
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public String getThumbnailPath() {

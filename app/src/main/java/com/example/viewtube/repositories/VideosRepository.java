@@ -1,12 +1,9 @@
 package com.example.viewtube.repositories;
 
-import static com.example.viewtube.MainActivity.context;
-
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.room.Room;
 
 import com.example.viewtube.AppDB;
 import com.example.viewtube.VideoDao;
@@ -14,73 +11,60 @@ import com.example.viewtube.api.VideoAPI;
 import com.example.viewtube.entities.VideoItem;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class VideosRepository {
-    private AppDB db;
+
     private VideoDao dao;
-
     private VideoAPI api;
+    private MutableLiveData<VideoItem> selectedVideoItem = new MutableLiveData<>();
 
-    private VideoListData videoListData;
-
-
-    public VideosRepository() {
-        db = Room.databaseBuilder(context, AppDB.class, "VideosDB")
-                .allowMainThreadQueries()
-                .build();
-
-        dao = db.videoDao();
-
-        videoListData = new VideoListData();
-
-        api = new VideoAPI(videoListData, dao, context);
-
+    public VideosRepository(Context context) {
+        dao = AppDB.getInstance(context).videoDao();
+        api = new VideoAPI(dao, context);
     }
 
-    class VideoListData extends MutableLiveData<List<VideoItem>> {
-
-        public VideoListData() {
-            super();
-            setValue(dao.getAll());
-
-        }
-
-        @Override
-        protected void onActive() {
-            super.onActive();
-
-            new Thread( () -> {
-                api.getAll();
-            }).start();
-
-
-        }
+    public LiveData<List<VideoItem>> getAllVideos() {
+        return dao.getAll();
     }
 
-    public LiveData<List<VideoItem>> getAll() {
-        return videoListData;
+    public LiveData<VideoItem> getVideoItem(int videoId) {
+        return dao.get(videoId);
     }
 
-    public VideoItem getById(int id) {
-        return dao.get(id);
+    public void fetchAllVideos() {
+        api.getAll();
+    }
+
+    public void fetchVideoDetails(int videoId) {
+        api.getVideo(videoId);
+    }
+
+    public void setSelectedVideoItem(VideoItem videoItem) {
+        selectedVideoItem.setValue(videoItem);
+    }
+
+    public LiveData<VideoItem> getSelectedVideoItem() {
+        return selectedVideoItem;
     }
 
     public void add(final VideoItem videoItem, File videoFile) {
         api.add(videoItem, videoFile);
     }
 
-    public void update(final VideoItem videoItem) {
-        api.update(videoItem);
+    public void update(final int videoId, String title, String description) {
+        api.update(videoId, title, description);
     }
 
-    public void delete(final VideoItem videoItem) {
-        api.delete(videoItem);
+    public void delete(final int videoId) {
+        api.delete(videoId);
     }
 
     public void reload() {
         api.getAll();
     }
 
+    public void userLiked(int videoId, String username) {
+        api.userLiked(videoId, username);
+    }
 }

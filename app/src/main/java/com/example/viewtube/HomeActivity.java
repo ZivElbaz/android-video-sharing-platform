@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -78,24 +79,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         ImageView menuButton = findViewById(R.id.menu_btn);
 
         // Setup RecyclerView
-        videoList = new VideoList(this, this); // Pass the context and the listener
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        videoRecyclerView.setLayoutManager(layoutManager);
-        videoRecyclerView.setHasFixedSize(true);
+        videoList = new VideoList(this, this);
+        videoRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         videoRecyclerView.setAdapter(videoList);
-
-
-//        // Initialize ViewModel
-//        videoViewModel = new ViewModelProvider.AndroidViewModelFactory(getApplication()).create(VideoViewModel.class);
-//        videoViewModel.getVideoItems().observe(this, videoItems -> {
-//            videoList.setVideoItems(videoItems);
-//        });
-
 
         videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
         videosViewModel.getVideoItemsLiveData().observe(this, videoItems -> videoList.setVideoItems(videoItems));
-
-
+        videosViewModel.fetchAllVideos();
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
@@ -151,7 +141,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 finish();
             } else if (itemId == R.id.nav_upload && videosViewModel.getVideoItemsLiveData().getValue() != null) {
                 Intent uploadIntent = new Intent(HomeActivity.this, UploadActivity.class);
-                uploadIntent.putExtra("maxId", getMaxId(videosViewModel.getVideoItemsLiveData().getValue()));
                 startActivityForResult(uploadIntent, UPLOAD_REQUEST_CODE); // Start UploadActivity for result
             }
             return false;
@@ -215,7 +204,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK) {
             // Refresh the list of videos from the server
-            videosViewModel.updateVideoList();
+            videosViewModel.reload();
         }
     }
 
@@ -255,35 +244,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
-        // Handle video item click
-        String videoResourceName = videoItem.getVideoURL();
-        String videoTitle = videoItem.getTitle();
-        String videoDescription = videoItem.getDescription();
-        String author = videoItem.getUploader();
-        int videoLikes = videoItem.getLikes();
-        int videoViews = videoItem.getViews();
-        int videoId = videoItem.getId();
-        String videoDate = videoItem.getDate();
-        Intent moveToWatch = new Intent(this, VideoWatchActivity.class);
-        moveToWatch.putExtra("video_resource_name", videoResourceName);
-        moveToWatch.putExtra("video_title", videoTitle);
-        moveToWatch.putExtra("video_description", videoDescription);
-        moveToWatch.putExtra("video_likes", videoLikes);
-        moveToWatch.putExtra("video_date", videoDate);
-        moveToWatch.putExtra("video_views", videoViews);
-        moveToWatch.putExtra("video_id", videoId);
-        moveToWatch.putExtra("video_author", author);
-        startActivity(moveToWatch);
+        videosViewModel.setSelectedVideoItem(videoItem);
+        Intent intent = new Intent(this, VideoWatchActivity.class);
+        startActivity(intent);
     }
 
-    // Get the maximum ID from the list of video items
-    private int getMaxId(List<VideoItem> videoItems) {
-        int max = 0;
-        for (VideoItem v : videoItems) {
-            max = Math.max(max, v.getId());
-        }
-        return max;
-    }
+
 
     private void expandView(final View view) {
         view.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);

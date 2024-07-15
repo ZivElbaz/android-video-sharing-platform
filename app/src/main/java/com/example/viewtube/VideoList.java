@@ -27,13 +27,13 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
     // Constructor
     public VideoList(Context context, VideoItemClickListener listener) {
         this.videoItemClickListener = listener;
-        this.videoItems = new ArrayList<>();
+        this.videoItems = new ArrayList<>(); // Initialize videoItems to an empty list
         this.videoDetailsManager = new VideoDetailsManager(context, null, null, null, null, null, null, null);
     }
 
     // Method to set the list of video items and notify the adapter of data changes
     public void setVideoItems(List<VideoItem> videoItems) {
-        this.videoItems = videoItems;
+        this.videoItems = videoItems != null ? videoItems : new ArrayList<>(); // Ensure videoItems is not null
         notifyDataSetChanged();
     }
 
@@ -51,24 +51,19 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
         // Get the current video item
         VideoItem videoItem = videoItems.get(position);
-        int videoId = videoItem.getId();
 
         // Set the title, details, and duration text views
         holder.titleTextView.setText(videoItem.getTitle());
         holder.detailsTextView.setText(videoItem.getUploader() + " - " + videoItem.getViews() + " views - " + videoItem.getDate());
         holder.durationTextView.setText(videoItem.getDuration());
 
-        // Set the thumbnail image view based on the video ID
-        if (videoId >= 1 && videoId <= 10) {
-            holder.thumbnailImageView.setImageResource(videoItem.getThumbnailResId());
-        } else {
-            String thumbnailPath = videoItem.getThumbnailPath();
-            Bitmap thumbnailBitmap = BitmapFactory.decodeFile(thumbnailPath);
-            holder.thumbnailImageView.setImageBitmap(thumbnailBitmap);
-        }
+        // Set the thumbnail image view
+//        String thumbnailPath = videoItem.getThumbnailPath();
+//        Bitmap thumbnailBitmap = BitmapFactory.decodeFile(thumbnailPath);
+//        holder.thumbnailImageView.setImageBitmap(thumbnailBitmap);
 
-        // Use the refactored setUploaderImage method to set the channel icon image view
-        videoDetailsManager.setUploaderImage(videoId, holder.channelIconImageView);
+        // Set the channel icon image view
+        videoDetailsManager.setUploaderImage(videoItem.getId(), holder.channelIconImageView);
 
         // Set the click listener for the item view
         holder.itemView.setOnClickListener(v -> videoItemClickListener.onVideoItemClick(videoItem));
@@ -77,7 +72,7 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
     // Method to get the total number of items in the data set
     @Override
     public int getItemCount() {
-        return videoItems.size();
+        return videoItems != null ? videoItems.size() : 0; // Null check for videoItems
     }
 
     // Interface for handling video item clicks

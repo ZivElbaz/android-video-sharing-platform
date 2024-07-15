@@ -93,9 +93,8 @@ public class UploadActivity extends AppCompatActivity {
         return null;
     }
 
-    private String createFileFromDescriptor(FileDescriptor fd, Context context) {
-        int id = getIntent().getIntExtra("maxId", 10) + 1;
-        File outputFile = new File(context.getCacheDir(), "video_" + id + ".mp4");
+    private String createFileFromDescriptor(FileDescriptor fd, String title, Context context) {
+        File outputFile = new File(context.getCacheDir(), "video_" + title + ".mp4");
         try (FileInputStream fis = new FileInputStream(fd);
              FileOutputStream fos = new FileOutputStream(outputFile)) {
             byte[] buf = new byte[8192];
@@ -112,19 +111,18 @@ public class UploadActivity extends AppCompatActivity {
     }
 
     private void uploadVideo(String title, String description) {
-        String videoPath = createFileFromDescriptor(fileDescriptor, this);
+        String videoPath = createFileFromDescriptor(fileDescriptor, title, this);
         if (videoPath == null) {
             Log.e("VideoUpload", "Failed to create video from file descriptor");
             return;
         }
 
         File videoFile = new File(videoPath);
-        int id = getIntent().getIntExtra("maxId", 10) + 1;
         String uploader = CurrentUserManager.getInstance().getCurrentUser().getUsername();
         String duration = getVideoDuration(videoPath);
-        String date = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
 
-        VideoItem videoItem = new VideoItem(id, title, description, uploader, 0, 0, date, duration, videoPath,  null);
+        // Create a temporary VideoItem without id, date, videoUrl, and thumbnail
+        VideoItem videoItem = new VideoItem(0, title, description, uploader, 0, 0, null, duration, null, null);
         videosViewModel.addVideoItem(videoItem, videoFile);
     }
 
