@@ -8,16 +8,23 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.net.Uri;
+import android.util.Base64;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Button;
 
-import com.example.viewtube.managers.CurrentUserManager;
-import com.example.viewtube.R;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import com.example.viewtube.R;
+import com.example.viewtube.entities.ProfilePictureResponse;
+import com.example.viewtube.entities.VideoItem;
+import com.example.viewtube.viewmodels.UserViewModel;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class VideoDetailsManager {
 
@@ -25,9 +32,9 @@ public class VideoDetailsManager {
     private Button btnLike;
     private ImageView uploaderProfilePic;
     private Context context;
-    private String author;
+    private UserViewModel userViewModel;
+    private LifecycleOwner lifecycleOwner;
 
-    // Constructor to initialize the VideoDetailsManager with UI components and context
     public VideoDetailsManager(Context context, TextView videoTitle, TextView videoDescription, TextView videoDate,
                                TextView videoViews, Button btnLike, TextView uploaderName, ImageView uploaderProfilePic) {
         this.context = context;
@@ -38,55 +45,39 @@ public class VideoDetailsManager {
         this.btnLike = btnLike;
         this.uploaderName = uploaderName;
         this.uploaderProfilePic = uploaderProfilePic;
+        this.userViewModel = userViewModel;
+        this.lifecycleOwner = lifecycleOwner;
     }
 
-    // Method to set video details on the UI components
-    public void setVideoDetails(String title, String description, String date, int views, int likes, String author) {
-        videoTitle.setText(title);
-        videoDescription.setText(description);
-        videoViews.setText(String.valueOf(views) + " Views");
-        videoDate.setText(date);
-        btnLike.setText(String.valueOf(likes));
-        uploaderName.setText(author);
+    public void setVideoDetails(VideoItem videoItem) {
+        videoTitle.setText(videoItem.getTitle());
+        videoDescription.setText(videoItem.getDescription());
+        videoViews.setText(String.valueOf(videoItem.getViews()) + " Views");
+        videoDate.setText(videoItem.getDate());
+        btnLike.setText(String.valueOf(videoItem.getLikes()));
+        uploaderName.setText(videoItem.getUploader());
+        setUploaderImage(videoItem, uploaderProfilePic);
     }
 
-    // Method to set the uploader's profile image
-    public void setUploaderImage(int id, ImageView imageView) {
-        if (id >= 1 && id <= 10) {
-            // Set a default image for predefined video IDs
-            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.lahav);
-            Bitmap circularBitmap = getCircularBitmap(bitmap);
+    public void setUploaderImage(VideoItem videoItem, ImageView imageView) {
+        String base64Image = videoItem.getProfilePicture();
+        if (base64Image != null) {
+            if (base64Image.startsWith("data:image/jpeg;base64,")) {
+                base64Image = base64Image.substring(23);  // Remove the prefix
+            }
+            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            Bitmap circularBitmap = getCircularBitmap(decodedByte);
             imageView.setImageBitmap(circularBitmap);
         } else {
-            // Set the current user's profile image for video IDs 11 and above
-            if (CurrentUserManager.getInstance().getCurrentUser() != null) {
-                String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
-                if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
-                    Uri profilePicture = Uri.parse(profilePictureUriString);
-                    imageView.setImageURI(profilePicture); // Set profile image using URI
-
-                    // Load the bitmap from Uri and crop into a circle
-                    try {
-                        InputStream inputStream = context.getContentResolver().openInputStream(profilePicture);
-                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                        Bitmap circularBitmap = getCircularBitmap(bitmap);
-                        imageView.setImageBitmap(circularBitmap);
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        imageView.setImageResource(R.drawable.ic_profile_foreground); // Fallback image
-                    }
-
-                } else {
-                    imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
-                }
-            } else {
-                imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image for guest
-            }
+            imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
         }
     }
 
-    // Method to create a circular bitmap from a given bitmap
+
+
+
+
     private Bitmap getCircularBitmap(Bitmap bitmap) {
         int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
 

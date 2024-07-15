@@ -1,4 +1,4 @@
-package com.example.viewtube;
+package com.example.viewtube.activities;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 
+import com.example.viewtube.R;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.viewmodels.VideosViewModel;
@@ -27,8 +28,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 

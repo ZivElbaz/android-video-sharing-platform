@@ -1,12 +1,11 @@
 package com.example.viewtube.managers;
 
-import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.viewtube.CommentsAdapter;
+import com.example.viewtube.adapters.CommentsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

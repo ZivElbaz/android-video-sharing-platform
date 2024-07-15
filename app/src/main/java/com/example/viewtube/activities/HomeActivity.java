@@ -1,10 +1,9 @@
-package com.example.viewtube;
+package com.example.viewtube.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,8 +25,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.viewtube.R;
+import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CurrentUserManager;
+import com.example.viewtube.viewmodels.UserViewModel;
 import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -48,6 +50,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     private SharedPreferences sharedPreferences;
     private VideosViewModel videosViewModel;
+
 
 
 
@@ -78,7 +81,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         searchInputLayout = findViewById(R.id.search_input_layout);
         ImageView menuButton = findViewById(R.id.menu_btn);
 
+//        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+//        userViewModel.getUserLiveData().observe(this, user -> {
+//            // Update UI with user details
+//        });
+
         // Setup RecyclerView
+        UserViewModel userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         videoList = new VideoList(this, this);
         videoRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         videoRecyclerView.setAdapter(videoList);
@@ -86,6 +95,8 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
         videosViewModel.getVideoItemsLiveData().observe(this, videoItems -> videoList.setVideoItems(videoItems));
         videosViewModel.fetchAllVideos();
+
+
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
@@ -101,7 +112,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         } else {
             bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
             bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
-            String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getProfilePictureUri();
+            String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getImage();
             if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
                 Uri profilePicture = Uri.parse(profilePictureUriString);
                 profileImageView.setImageURI(profilePicture); // Set profile image using URI
@@ -244,8 +255,9 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
-        videosViewModel.setSelectedVideoItem(videoItem);
+        videosViewModel.setSelectedVideoItem(videoItem); // Set the selected video in the ViewModel
         Intent intent = new Intent(this, VideoWatchActivity.class);
+        intent.putExtra("video_id", videoItem.getId());
         startActivity(intent);
     }
 

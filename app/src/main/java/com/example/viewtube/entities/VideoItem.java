@@ -1,5 +1,6 @@
 package com.example.viewtube.entities;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -16,10 +17,12 @@ public class VideoItem {
     private String date;
     private String duration;
     private String videoUrl;
-    private String thumbnailPath;
+    private String thumbnail;
+    @ColumnInfo(name = "profilePicture")
+    private String profilePicture;
 
     // Constructor
-    public VideoItem(int id, String title, String description, String uploader, int views, int likes, String date, String duration, String videoUrl, String thumbnailPath) {
+    public VideoItem(int id, String title, String description, String uploader, int views, int likes, String date, String duration, String videoUrl, String thumbnail) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -29,7 +32,7 @@ public class VideoItem {
         this.date = date;
         this.duration = duration;
         this.videoUrl = videoUrl;
-        this.thumbnailPath = thumbnailPath;
+        this.thumbnail = thumbnail;
     }
 
     // Getters and Setters
@@ -105,11 +108,19 @@ public class VideoItem {
         this.videoUrl = videoUrl;
     }
 
-    public String getThumbnailPath() {
-        return thumbnailPath;
+    public String getThumbnail() {
+        return thumbnail;
     }
 
-    public void setThumbnailPath(String thumbnailPath) {
-        this.thumbnailPath = thumbnailPath;
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

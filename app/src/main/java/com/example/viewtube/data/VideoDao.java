@@ -1,4 +1,4 @@
-package com.example.viewtube;
+package com.example.viewtube.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -17,8 +17,8 @@ public interface VideoDao {
     @Query("SELECT * FROM VideoItem")
     LiveData<List<VideoItem>> getAll();
 
-    @Query("SELECT * FROM VideoItem")
-    List<VideoItem> getAllSync();
+    @Query("SELECT * FROM VideoItem WHERE id = :id")
+    VideoItem getVideoItemSync(int id);
 
     @Query("SELECT * FROM VideoItem WHERE id = :id")
     LiveData<VideoItem> get(int id);
@@ -40,5 +40,8 @@ public interface VideoDao {
 
     @Query("DELETE FROM VideoItem")
     void clear();
+
+    @Query("UPDATE VideoItem SET profilePicture = :profilePicture WHERE id = :id")
+    void updateProfilePicture(int id, String profilePicture);
 
 }

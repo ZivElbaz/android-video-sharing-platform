@@ -5,8 +5,8 @@ import android.content.Context;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.viewtube.AppDB;
-import com.example.viewtube.VideoDao;
+import com.example.viewtube.data.AppDB;
+import com.example.viewtube.data.VideoDao;
 import com.example.viewtube.api.VideoAPI;
 import com.example.viewtube.entities.VideoItem;
 
@@ -28,7 +28,11 @@ public class VideosRepository {
         return dao.getAll();
     }
 
-    public LiveData<VideoItem> getVideoItem(int videoId) {
+    public VideoItem getVideoItem(int videoId) {
+        return dao.getVideoItemSync(videoId);
+    }
+
+    public LiveData<VideoItem> getLiveVideoItem(int videoId) {
         return dao.get(videoId);
     }
 
@@ -42,6 +46,10 @@ public class VideosRepository {
 
     public void setSelectedVideoItem(VideoItem videoItem) {
         selectedVideoItem.setValue(videoItem);
+    }
+
+    public void postSelectedVideoItem(VideoItem videoItem) {
+        selectedVideoItem.postValue(videoItem);
     }
 
     public LiveData<VideoItem> getSelectedVideoItem() {

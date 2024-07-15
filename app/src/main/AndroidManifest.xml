@@ -32,26 +32,26 @@
             android:name=".VideoItemParser"
             android:exported="false" />
         <activity
-            android:name=".VideoWatchActivity"
+            android:name=".activities.VideoWatchActivity"
             android:exported="false"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity
-            android:name=".UploadActivity"
+            android:name=".activities.UploadActivity"
             android:exported="false" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:exported="false" />
         <activity
             android:name=".entities.VideoItem"
             android:exported="false" />
         <activity
-            android:name=".HomeActivity"
+            android:name=".activities.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

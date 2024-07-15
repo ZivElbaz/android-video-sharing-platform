@@ -1,4 +1,4 @@
-package com.example.viewtube;
+package com.example.viewtube.data;
 
 import android.content.Context;
 
@@ -6,12 +6,16 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.example.viewtube.entities.Comment;
+import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 
-@Database(entities = {VideoItem.class}, version = 5)
+@Database(entities = {VideoItem.class, Comment.class, User.class}, version = 2)
 public abstract class AppDB extends RoomDatabase {
 
     public abstract VideoDao videoDao();
+    public abstract CommentDao commentDao();
+    public abstract UserDao userDao();
 
     private static volatile AppDB INSTANCE;
 
@@ -20,8 +24,8 @@ public abstract class AppDB extends RoomDatabase {
             synchronized (AppDB.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    AppDB.class, "VideosDB")
-                            .fallbackToDestructiveMigration() // This line enables fallback to destructive migration
+                                    AppDB.class, "ViewTubeDB")
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }

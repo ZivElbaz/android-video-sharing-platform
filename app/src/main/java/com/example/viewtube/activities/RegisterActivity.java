@@ -1,4 +1,4 @@
-package com.example.viewtube;
+package com.example.viewtube.activities;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -13,8 +13,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.viewtube.R;
 import com.example.viewtube.managers.UsersManager;
-import com.example.viewtube.models.User;
+import com.example.viewtube.entities.User;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -153,14 +154,16 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+        User newUser = null;
+
         // Create a new user and add to UserManager
-        User newUser = new User(
-                username.getText().toString(),
-                firstName.getText().toString(),
-                lastName.getText().toString(),
-                password.getText().toString(),
-                profilePictureUri.toString()
-        );
+//        User newUser = new User(
+//                username.getText().toString(),
+//                firstName.getText().toString(),
+//                lastName.getText().toString(),
+//                password.getText().toString(),
+//                profilePictureUri.toString()
+//        );
 
         // Add the new user to UsersManager and set as current user
         UsersManager.getInstance().addUser(newUser);

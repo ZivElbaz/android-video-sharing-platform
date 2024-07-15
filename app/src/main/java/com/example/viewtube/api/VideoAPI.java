@@ -3,12 +3,12 @@ package com.example.viewtube.api;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.lifecycle.MutableLiveData;
-
-import com.example.viewtube.VideoDao;
+import com.example.viewtube.data.VideoDao;
+import com.example.viewtube.entities.ProfilePictureResponse;
 import com.example.viewtube.entities.VideoItem;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +53,34 @@ public class VideoAPI {
                         List<VideoItem> videoItems = response.body();
                         for (VideoItem videoItem : videoItems) {
                             videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
+                            videoItem.setThumbnail(getFullVideoUrl(videoItem.getThumbnail()));
+
+                            // Fetch profile picture for each video item
+                            Call<ProfilePictureResponse> pictureCall = webServiceAPI.getPictureByUsername(videoItem.getUploader());
+                            try {
+                                Response<ProfilePictureResponse> pictureResponse = pictureCall.execute();
+                                if (pictureResponse.isSuccessful() && pictureResponse.body() != null) {
+                                    String base64Image = pictureResponse.body().getProfilePicture();
+                                    if (base64Image != null && base64Image.startsWith("data:image/jpeg;base64,")) {
+                                        base64Image = base64Image.substring(23);  // Remove the prefix
+                                    }
+                                    videoItem.setProfilePicture(base64Image);
+                                } else {
+                                    videoItem.setProfilePicture(null); // or a default value if you prefer
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                videoItem.setProfilePicture(null); // or a default value if you prefer
+                            }
+
+                            // Check if the video item already exists
+                            VideoItem existingVideoItem = videoDao.getVideoItemSync(videoItem.getId());
+                            if (existingVideoItem == null) {
+                                videoDao.insert(videoItem);
+                            } else {
+                                videoDao.update(videoItem);
+                            }
                         }
-                        videoDao.clear();
-                        videoDao.insertAll(videoItems);
                     }).start();
                 } else {
                     Log.e("VideoAPI", "Response error: " + response.errorBody());
@@ -69,6 +94,7 @@ public class VideoAPI {
         });
     }
 
+
     public void getVideo(int videoId) {
         Call<VideoItem> call = webServiceAPI.getVideo(videoId);
         call.enqueue(new Callback<VideoItem>() {
@@ -77,7 +103,49 @@ public class VideoAPI {
                 if (response.isSuccessful() && response.body() != null) {
                     VideoItem videoItem = response.body();
                     videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
-                    new Thread(() -> videoDao.insert(videoItem)).start();
+                    videoItem.setThumbnail(getFullVideoUrl(videoItem.getThumbnail()));
+
+                    // Fetch profile picture for the video item
+                    Call<ProfilePictureResponse> pictureCall = webServiceAPI.getPictureByUsername(videoItem.getUploader());
+                    pictureCall.enqueue(new Callback<ProfilePictureResponse>() {
+                        @Override
+                        public void onResponse(Call<ProfilePictureResponse> call, Response<ProfilePictureResponse> pictureResponse) {
+                            if (pictureResponse.isSuccessful() && pictureResponse.body() != null) {
+                                String base64Image = pictureResponse.body().getProfilePicture();
+                                if (base64Image != null && base64Image.startsWith("data:image/jpeg;base64,")) {
+                                    base64Image = base64Image.substring(23);  // Remove the prefix
+                                }
+                                videoItem.setProfilePicture(base64Image);
+                            } else {
+                                videoItem.setProfilePicture(null); // or a default value if you prefer
+                            }
+
+                            new Thread(() -> {
+                                // Check if the video item already exists
+                                VideoItem existingVideoItem = videoDao.getVideoItemSync(videoItem.getId());
+                                if (existingVideoItem == null) {
+                                    videoDao.insert(videoItem);
+                                } else {
+                                    videoDao.update(videoItem);
+                                }
+                            }).start();
+                        }
+
+                        @Override
+                        public void onFailure(Call<ProfilePictureResponse> call, Throwable t) {
+                            videoItem.setProfilePicture(null); // or a default value if you prefer
+
+                            new Thread(() -> {
+                                // Check if the video item already exists
+                                VideoItem existingVideoItem = videoDao.getVideoItemSync(videoItem.getId());
+                                if (existingVideoItem == null) {
+                                    videoDao.insert(videoItem);
+                                } else {
+                                    videoDao.update(videoItem);
+                                }
+                            }).start();
+                        }
+                    });
                 } else {
                     Log.e("VideoAPI", "Response error: " + response.errorBody());
                 }
@@ -89,6 +157,7 @@ public class VideoAPI {
             }
         });
     }
+
 
     public void add(VideoItem videoItem, File videoFile) {
         RequestBody videoRequestBody = RequestBody.create(MediaType.parse("video/*"), videoFile);

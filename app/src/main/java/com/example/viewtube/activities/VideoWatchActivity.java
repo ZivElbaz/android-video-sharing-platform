@@ -1,6 +1,5 @@
-package com.example.viewtube;
+package com.example.viewtube.activities;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +18,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.viewtube.R;
+import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CommentsManager;
 import com.example.viewtube.managers.CurrentUserManager;
@@ -26,6 +27,8 @@ import com.example.viewtube.managers.FileUtils;
 import com.example.viewtube.managers.SessionManager;
 import com.example.viewtube.managers.VideoDetailsManager;
 import com.example.viewtube.managers.VideoPlayerManager;
+import com.example.viewtube.viewmodels.CommentViewModel;
+import com.example.viewtube.viewmodels.UserViewModel;
 import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.exoplayer2.ui.PlayerView;
 
@@ -43,6 +46,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private boolean liked = false;
 
     private VideosViewModel videosViewModel;
+    private UserViewModel userViewModel;
+    private CommentViewModel commentViewModel;
 
     private String user;
 
@@ -59,6 +64,35 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_watch);
+
+        // Initialize ViewModel
+        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        commentViewModel = new ViewModelProvider(this).get(CommentViewModel.class);
+
+        // Retrieve the video ID from the intent
+        videoIdentifier = getIntent().getIntExtra("video_id", -1);
+
+        // Observe the selected video item
+        videosViewModel.getSelectedVideoItemLiveData().observe(this, videoItem -> {
+            if (videoItem != null) {
+                updateVideoDetails(videoItem);
+            }
+        });
+
+        // Fetch the video details if the videoIdentifier is valid and observe the changes
+        if (videoIdentifier != -1) {
+            videosViewModel.fetchSelectedVideoItem(videoIdentifier);
+        }
+
+        // Example usage of userViewModel and commentViewModel
+//        userViewModel.getUserLiveData().observe(this, user -> {
+//            // Update UI with user details
+//        });
+//
+//        commentViewModel.getCommentsLiveData().observe(this, comments -> {
+//            // Update UI with comments
+//        });
 
 
         // Initialize views
@@ -103,17 +137,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         videoPlayerManager = new VideoPlayerManager(playerView, playPauseButton, rewindButton, forwardButton, fullscreenButton, exoPosition, exoDuration);
         videoDetailsManager = new VideoDetailsManager(this, videoTitle, videoDescription, videoDate, videoViews, btnLike, uploaderName, uploaderProfilePic);
 
-        // Initialize ViewModel
-        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
-
-        // Observe selected video item
-        videosViewModel.getSelectedVideoItemLiveData().observe(this, videoItem -> {
-            if (videoItem != null) {
-                videoDetailsManager.setVideoDetails(videoItem.getTitle(), videoItem.getDescription(), videoItem.getDate(), videoItem.getViews(), videoItem.getLikes(), videoItem.getUploader());
-                videoUri = Uri.parse(videoItem.getVideoUrl());
-                initializePlayer();
-            }
-        });
 
         // Initialize related videos list
         relatedVideosList = new VideoList(this, this);
@@ -217,7 +240,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
                 SessionManager.getInstance().setLikes(videoUri.toString(), newLikes);
                 SessionManager.getInstance().setLiked(videoUri.toString(), liked);
-                videoDetailsManager.setVideoDetails(currentItem.getTitle(), currentItem.getDescription(), currentItem.getDate(), currentItem.getViews(), newLikes, currentItem.getUploader());
+                videoDetailsManager.setVideoDetails(currentItem);
             }
         });
 
@@ -247,6 +270,12 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         }
     }
 
+    private void updateVideoDetails(VideoItem videoItem) {
+        videoDetailsManager.setVideoDetails(videoItem);
+        videoUri = Uri.parse(videoItem.getVideoUrl());
+        initializePlayer();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -269,4 +298,5 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     public void onVideoItemClick(VideoItem videoItem) {
         videosViewModel.setSelectedVideoItem(videoItem);
     }
+
 }

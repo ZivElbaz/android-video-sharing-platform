@@ -40,8 +40,27 @@ public class VideosViewModel extends AndroidViewModel {
         mRepository.fetchVideoDetails(videoId);
     }
 
+    public VideoItem getVideoById(int videoId) {
+        return mRepository.getVideoItem(videoId);
+    }
+
+    public LiveData<VideoItem> getLiveVideoItem(int videoId) {
+        return mRepository.getLiveVideoItem(videoId);
+    }
+
     public void setSelectedVideoItem(VideoItem videoItem) {
         mRepository.setSelectedVideoItem(videoItem);
+    }
+
+    public void postSelectedVideoItem(VideoItem videoItem) {
+        mRepository.postSelectedVideoItem(videoItem);
+    }
+
+    public void fetchSelectedVideoItem(int videoId) {
+        new Thread(() -> {
+            VideoItem videoItem = getVideoById(videoId);
+            postSelectedVideoItem(videoItem);
+        }).start();
     }
 
     public void addVideoItem(final VideoItem videoItem, File videoFile) {

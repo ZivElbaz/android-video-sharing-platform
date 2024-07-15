@@ -1,10 +1,13 @@
-package com.example.viewtube;
+package com.example.viewtube.activities;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.viewtube.R;
+import com.example.viewtube.activities.HomeActivity;
 
 public class MainActivity extends AppCompatActivity {
     public static Context context;

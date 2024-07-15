@@ -1,8 +1,6 @@
-package com.example.viewtube;
+package com.example.viewtube.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +8,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.example.viewtube.R;
+import com.example.viewtube.api.UserAPI;
+import com.example.viewtube.data.AppDB;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.VideoDetailsManager;
+import com.example.viewtube.viewmodels.UserViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +31,7 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
     // Constructor
     public VideoList(Context context, VideoItemClickListener listener) {
         this.videoItemClickListener = listener;
-        this.videoItems = new ArrayList<>(); // Initialize videoItems to an empty list
+        this.videoItems = new ArrayList<>();
         this.videoDetailsManager = new VideoDetailsManager(context, null, null, null, null, null, null, null);
     }
 
@@ -57,13 +61,14 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
         holder.detailsTextView.setText(videoItem.getUploader() + " - " + videoItem.getViews() + " views - " + videoItem.getDate());
         holder.durationTextView.setText(videoItem.getDuration());
 
-        // Set the thumbnail image view
-//        String thumbnailPath = videoItem.getThumbnailPath();
-//        Bitmap thumbnailBitmap = BitmapFactory.decodeFile(thumbnailPath);
-//        holder.thumbnailImageView.setImageBitmap(thumbnailBitmap);
+        // Load thumbnail image using Glide
+        Glide.with(holder.itemView.getContext())
+                .load(videoItem.getThumbnail())
+                .placeholder(android.R.drawable.screen_background_light_transparent)
+                .error(R.drawable.ic_home_background) // Optional: set error drawable if loading fails
+                .into(holder.thumbnailImageView);
 
-        // Set the channel icon image view
-        videoDetailsManager.setUploaderImage(videoItem.getId(), holder.channelIconImageView);
+        videoDetailsManager.setUploaderImage(videoItem, holder.channelIconImageView);
 
         // Set the click listener for the item view
         holder.itemView.setOnClickListener(v -> videoItemClickListener.onVideoItemClick(videoItem));

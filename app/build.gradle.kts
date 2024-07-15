@@ -47,4 +47,7 @@ dependencies {
     // ExoPlayer dependency
     implementation("com.google.android.exoplayer:exoplayer:2.15.1")
     annotationProcessor(libs.room.compiler)
+
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 }
