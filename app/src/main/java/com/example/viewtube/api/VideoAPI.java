@@ -54,6 +54,7 @@ public class VideoAPI {
                         for (VideoItem videoItem : videoItems) {
                             videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
                             videoItem.setThumbnail(getFullVideoUrl(videoItem.getThumbnail()));
+                            videoItem.setTimestamp(System.currentTimeMillis());
 
                             // Fetch profile picture for each video item
                             Call<ProfilePictureResponse> pictureCall = webServiceAPI.getPictureByUsername(videoItem.getUploader());
@@ -66,21 +67,15 @@ public class VideoAPI {
                                     }
                                     videoItem.setProfilePicture(base64Image);
                                 } else {
-                                    videoItem.setProfilePicture(null); // or a default value if you prefer
+                                    videoItem.setProfilePicture(null);
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                videoItem.setProfilePicture(null); // or a default value if you prefer
-                            }
-
-                            // Check if the video item already exists
-                            VideoItem existingVideoItem = videoDao.getVideoItemSync(videoItem.getId());
-                            if (existingVideoItem == null) {
-                                videoDao.insert(videoItem);
-                            } else {
-                                videoDao.update(videoItem);
+                                videoItem.setProfilePicture(null);
                             }
                         }
+                        videoDao.clear();
+                        videoDao.insertAll(videoItems);
                     }).start();
                 } else {
                     Log.e("VideoAPI", "Response error: " + response.errorBody());

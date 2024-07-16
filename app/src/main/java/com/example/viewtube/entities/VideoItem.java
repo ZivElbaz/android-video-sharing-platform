@@ -21,6 +21,10 @@ public class VideoItem {
     @ColumnInfo(name = "profilePicture")
     private String profilePicture;
 
+    //Field to store insertion order
+    @ColumnInfo(name = "timestamp")
+    private long timestamp;
+
     // Constructor
     public VideoItem(int id, String title, String description, String uploader, int views, int likes, String date, String duration, String videoUrl, String thumbnail) {
         this.id = id;
@@ -122,5 +126,13 @@ public class VideoItem {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

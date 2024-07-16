@@ -36,8 +36,11 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
     }
 
     // Method to set the list of video items and notify the adapter of data changes
-    public void setVideoItems(List<VideoItem> videoItems) {
-        this.videoItems = videoItems != null ? videoItems : new ArrayList<>(); // Ensure videoItems is not null
+    public void setVideoItems(List<VideoItem> newVideoItems) {
+        if (newVideoItems != null){
+            videoItems.clear();
+            videoItems.addAll(newVideoItems);
+        }
         notifyDataSetChanged();
     }
 

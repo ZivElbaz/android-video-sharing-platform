@@ -10,7 +10,7 @@ import com.example.viewtube.entities.Comment;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 
-@Database(entities = {VideoItem.class, Comment.class, User.class}, version = 2)
+@Database(entities = {VideoItem.class, Comment.class, User.class}, version = 4)
 public abstract class AppDB extends RoomDatabase {
 
     public abstract VideoDao videoDao();

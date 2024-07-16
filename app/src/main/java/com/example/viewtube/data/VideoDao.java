@@ -14,7 +14,7 @@ import java.util.List;
 @Dao
 public interface VideoDao {
 
-    @Query("SELECT * FROM VideoItem")
+    @Query("SELECT * FROM VideoItem ORDER BY timestamp ASC")
     LiveData<List<VideoItem>> getAll();
 
     @Query("SELECT * FROM VideoItem WHERE id = :id")
@@ -38,7 +38,7 @@ public interface VideoDao {
     @Query("DELETE FROM VideoItem WHERE id = :id")
     void deleteById(int id);
 
-    @Query("DELETE FROM VideoItem")
+    @Query("DELETE FROM  VideoItem")
     void clear();
 
     @Query("UPDATE VideoItem SET profilePicture = :profilePicture WHERE id = :id")
