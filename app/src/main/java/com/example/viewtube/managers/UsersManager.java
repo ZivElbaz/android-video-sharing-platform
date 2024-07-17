@@ -1,6 +1,6 @@
 package com.example.viewtube.managers;
 
-import com.example.viewtube.models.User;
+import com.example.viewtube.entities.User;
 
 import java.util.ArrayList;
 import java.util.List;
