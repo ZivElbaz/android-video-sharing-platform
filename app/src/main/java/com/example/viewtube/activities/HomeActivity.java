@@ -2,8 +2,16 @@ package com.example.viewtube.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,9 +32,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
+import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.viewmodels.UserViewModel;
@@ -47,13 +57,13 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private TextInputEditText searchBar;
     private TextInputLayout searchInputLayout;
     private NavigationView sideBar;
-
+    private SwipeRefreshLayout swipeRefreshLayout;
     private SharedPreferences sharedPreferences;
     private VideosViewModel videosViewModel;
-
-
-
-
+    private UserViewModel userViewModel;
+    private ImageView profileImageView;
+    private TextView usernameView;
+    private BottomNavigationView bottomNavBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,61 +80,52 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-
         // Initialize UI components
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         sideBar = findViewById(R.id.navigation_view);
         ImageView searchButton = findViewById(R.id.search_button);
         videoRecyclerView = findViewById(R.id.video_feed_recycler_view);
         searchBar = findViewById(R.id.search_bar);
-        BottomNavigationView bottomNavBar = findViewById(R.id.bottomNavigationView);
+        bottomNavBar = findViewById(R.id.bottomNavigationView);
         searchInputLayout = findViewById(R.id.search_input_layout);
         ImageView menuButton = findViewById(R.id.menu_btn);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
 
-//        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-//        userViewModel.getUserLiveData().observe(this, user -> {
-//            // Update UI with user details
-//        });
+        // Initialize side bar header views
+        View headerView = sideBar.getHeaderView(0);
+        profileImageView = headerView.findViewById(R.id.current_profile);
+        usernameView = headerView.findViewById(R.id.current_user);
+
+        // Initialize ViewModels
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
 
         // Setup RecyclerView
-        UserViewModel userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         videoList = new VideoList(this, this);
         videoRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         videoRecyclerView.setAdapter(videoList);
 
-        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
-        videosViewModel.getVideoItemsLiveData().observe(this, videoItems -> videoList.setVideoItems(videoItems));
+        // Observe the VideosViewModel to update the video list
+        videosViewModel.getVideoItemsLiveData().observe(this, videoItems -> {
+            videoList.setVideoItems(videoItems);
+            swipeRefreshLayout.setRefreshing(false); // Stop the refreshing animation once the data is fetched
+        });
+
+        // Fetch all videos initially
         videosViewModel.fetchAllVideos();
 
 
+        // Load logged-in user details from SharedPreferences
+        checkLoggedInUser();
 
-        // Initialize side bar header views
-        View headerView = sideBar.getHeaderView(0);
-        ImageView profileImageView = headerView.findViewById(R.id.current_profile);
-        TextView usernameView = headerView.findViewById(R.id.current_user);
-
-        // Check if there is a current user and update the UI accordingly
-        if (CurrentUserManager.getInstance().getCurrentUser() == null) {
-            bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
-            bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
-            profileImageView.setImageResource(R.drawable.ic_profile_foreground);
-            usernameView.setText(R.string.guest);
-        } else {
-            bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
-            bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
-            String profilePictureUriString = CurrentUserManager.getInstance().getCurrentUser().getImage();
-            if (profilePictureUriString != null && !profilePictureUriString.isEmpty()) {
-                Uri profilePicture = Uri.parse(profilePictureUriString);
-                profileImageView.setImageURI(profilePicture); // Set profile image using URI
-            } else {
-                profileImageView.setImageResource(R.drawable.ic_profile_foreground); // Set default profile image
-            }
-            usernameView.setText(CurrentUserManager.getInstance().getCurrentUser().getUsername());
-        }
-
+        // Set up SwipeRefreshLayout to trigger video refresh
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            videosViewModel.fetchAllVideos();
+            swipeRefreshLayout.setRefreshing(true);
+        });
 
         // Handle search button click to toggle search bar visibility
-          searchButton.setOnClickListener(view -> {
+        searchButton.setOnClickListener(view -> {
             if (searchInputLayout.getVisibility() == View.GONE) {
                 searchInputLayout.setVisibility(View.VISIBLE);
                 expandView(searchInputLayout);
@@ -132,8 +133,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 collapseView(searchInputLayout);
                 hideKeyboard();
             }
-
-
         });
 
         // Handle bottom navigation bar item selection
@@ -183,7 +182,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             toggleTheme(isChecked);
         });
 
-
         // Listener for opening or closing the side bar
         menuButton.setOnClickListener(view -> {
             if (drawerLayout.isDrawerOpen(sideBar)) {
@@ -194,18 +192,24 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         });
 
         // Handle log out menu item click
-
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
-            if (CurrentUserManager.getInstance().getCurrentUser() != null) {
-                CurrentUserManager.getInstance().logout();
-                startActivity(getIntent());
-                finish();
-            } else {
-                Toast.makeText(this, "You are not logged in", Toast.LENGTH_SHORT).show();
-            }
+            // Clear user data from SharedPreferences
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+
+
+            // Clear the authenticated user in the ViewModel
+            userViewModel.logoutUser();
+
+            // Update the UI to guest mode
+            showGuestUI();
+
+
             return true;
         });
+
     }
 
     private static final int UPLOAD_REQUEST_CODE = 1001;
@@ -261,8 +265,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         startActivity(intent);
     }
 
-
-
     private void expandView(final View view) {
         view.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         final int targetHeight = view.getMeasuredHeight();
@@ -311,6 +313,77 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         view.startAnimation(animation);
     }
 
-    public void onClearSearchClick(View view) {
+
+    private void updateUIWithUserDetails(User user) {
+        setUserImage(user, profileImageView);
+        usernameView.setText(user.getUsername());
+        bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
+        bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
+    }
+
+    private void showGuestUI() {
+        profileImageView.setImageResource(R.drawable.ic_profile_foreground);
+        usernameView.setText(R.string.guest);
+        bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
+        bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
+    }
+
+    // Method to check if a user is logged in and update the UI accordingly
+    private void checkLoggedInUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", null);
+        if (username != null) {
+            // User is logged in
+            String firstName = sharedPreferences.getString("firstName", "");
+            String lastName = sharedPreferences.getString("lastName", "");
+            String image = sharedPreferences.getString("image", "");
+
+            User user = new User();
+            user.setUsername(username);
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setImage(image);
+
+            updateUIWithUserDetails(user);
+        } else {
+            showGuestUI();
+        }
+    }
+
+    public void setUserImage(User user, ImageView imageView) {
+        String base64Image = user.getImage();
+        if (base64Image != null) {
+            if (base64Image.startsWith("data:image/jpeg;base64,")) {
+                base64Image = base64Image.substring(23);  // Remove the prefix
+            }
+            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            Bitmap circularBitmap = getCircularBitmap(decodedByte);
+            imageView.setImageBitmap(circularBitmap);
+        } else {
+            imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
+        }
+    }
+
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
+
+        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, size, size);
+
+        float r = size / 2f;
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(r, r, r, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
     }
 }

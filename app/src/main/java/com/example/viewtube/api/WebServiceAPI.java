@@ -1,8 +1,11 @@
 package com.example.viewtube.api;
 
+import com.example.viewtube.entities.AuthResponse;
 import com.example.viewtube.entities.Comment;
 import com.example.viewtube.entities.ProfilePictureResponse;
+import com.example.viewtube.entities.TokenRequest;
 import com.example.viewtube.entities.User;
+import com.example.viewtube.entities.UsernameCheckResponse;
 import com.example.viewtube.entities.VideoItem;
 
 import java.util.List;
@@ -57,11 +60,14 @@ public interface WebServiceAPI {
     @GET("users/{username}")
     Call<User> getUser(@Path("username") String username);
 
-    @POST("users/authenticate")
-    Call<User> authenticateUser(@Body User user);
+    @POST("token")
+    Call<AuthResponse> authenticateUser(@Body User user);
+
+    @POST("token/verifyToken")
+    Call<AuthResponse> verifyToken(@Body TokenRequest tokenRequest);
 
     @GET("users/check/{username}")
-    Call<Boolean> checkUsernameExists(@Path("username") String username);
+    Call<UsernameCheckResponse> checkUsernameExists(@Path("username") String username);
 
 
 
