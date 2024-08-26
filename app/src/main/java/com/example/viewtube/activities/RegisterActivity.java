@@ -1,9 +1,13 @@
 package com.example.viewtube.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,8 +18,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.viewtube.R;
-import com.example.viewtube.managers.UsersManager;
+
 import com.example.viewtube.entities.User;
+
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.viewtube.viewmodels.UserViewModel;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -29,6 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText username;
     private ImageView profilePicture;
     private Uri profilePictureUri;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,34 +54,28 @@ public class RegisterActivity extends AppCompatActivity {
         password = findViewById(R.id.password);
         confirmPassword = findViewById(R.id.confirm_password);
         username = findViewById(R.id.username);
-        Button register = findViewById(R.id.register);
         profilePicture = findViewById(R.id.profile_picture);
+        Button register = findViewById(R.id.register);
         Button selectPictureButton = findViewById(R.id.select_picture_button);
 
+        // Initialize ViewModel
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+
         // Set click listener for selecting a profile picture
-        selectPictureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                startActivityForResult(intent, PICK_IMAGE);
-            }
+        selectPictureButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, PICK_IMAGE);
         });
 
         // Set click listener for register button
-        register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkDataEntered();
-            }
-        });
+        register.setOnClickListener(view -> checkDataEntered());
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data != null) {
-            // Get the URI of the selected image and set it to the profile picture ImageView
             profilePictureUri = data.getData();
             profilePicture.setImageURI(profilePictureUri);
         }
@@ -80,7 +87,6 @@ public class RegisterActivity extends AppCompatActivity {
         return TextUtils.isEmpty(str);
     }
 
-    // Validate if the password meets the criteria
     boolean isPasswordValid(EditText text) {
         CharSequence str = text.getText().toString();
         if (str.length() < 8) {
@@ -103,76 +109,85 @@ public class RegisterActivity extends AppCompatActivity {
         return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar;
     }
 
-    // Check if the password and confirm password fields match
     boolean isPasswordsMatch(EditText password, EditText confirmPassword) {
         return password.getText().toString().equals(confirmPassword.getText().toString());
     }
 
-    // Validate user input and register the user
     void checkDataEntered() {
-        // Check if first name is empty
         if (isEmpty(firstName)) {
             firstName.setError("First name is required!");
             return;
         }
 
-        // Check if username is already taken
-        if (UsersManager.getInstance().getUser(username.getText().toString()) != null) {
-            username.setError("Username is already taken!");
-            return;
-        }
-
-        // Check if last name is empty
         if (isEmpty(lastName)) {
             lastName.setError("Last name is required!");
             return;
         }
 
-        // Check if username is empty
         if (isEmpty(username)) {
             username.setError("Username is required!");
             return;
         }
 
-        // Check if profile picture is selected
-        if (profilePictureUri == null) {
-            Toast.makeText(this, "Profile picture is required!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Check if password is valid
         if (!isPasswordValid(password)) {
-            Toast.makeText(this, "Password must be at least 8 characters and contain" +
-                    " at least one uppercase letter, one lowercase letter, one number," +
-                    " and one special character!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Check if password and confirm password fields match
         if (!isPasswordsMatch(password, confirmPassword)) {
             confirmPassword.setError("Passwords do not match!");
             return;
         }
 
-        User newUser = null;
-
-        // Create a new user and add to UserManager
-//        User newUser = new User(
-//                username.getText().toString(),
-//                firstName.getText().toString(),
-//                lastName.getText().toString(),
-//                password.getText().toString(),
-//                profilePictureUri.toString()
-//        );
-
-        // Add the new user to UsersManager and set as current user
-        UsersManager.getInstance().addUser(newUser);
-        UsersManager.getInstance().setCurrentUser(newUser);
-
-        Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
-
-        // Redirect to HomeActivity
-        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
-        startActivity(intent);
+        checkUsernameAndRegister();
     }
+
+    private void checkUsernameAndRegister() {
+        userViewModel.checkUsernameExists(username.getText().toString()).observe(this, exists -> {
+            if (exists != null && exists) {
+                username.setError("Username is already taken!");
+            } else {
+                registerUser();
+            }
+        });
+    }
+
+    private void registerUser() {
+        User newUser = new User();
+        newUser.setUsername(username.getText().toString().trim());
+        newUser.setFirstName(firstName.getText().toString().trim());
+        newUser.setLastName(lastName.getText().toString().trim());
+        newUser.setPassword(password.getText().toString().trim());
+
+        // Use the ViewModel to register the user
+        userViewModel.registerUser(newUser, profilePictureUri, this).observe(this, registeredUser -> {
+            if (registeredUser != null) {
+                // Save user data to SharedPreferences
+                saveUserData(registeredUser);
+
+                Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
+                // Navigate to the next activity or home screen
+                Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Registration failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void saveUserData(User user) {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("username", user.getUsername());
+        editor.putString("firstName", user.getFirstName());
+        editor.putString("lastName", user.getLastName());
+        editor.putString("image", user.getImage());
+        editor.apply();
+    }
+
+
+
+
+
+
 }
+
