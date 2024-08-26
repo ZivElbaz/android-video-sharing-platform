@@ -13,6 +13,7 @@ public class User {
     private String password;
     private String image;
 
+
     // Getter for username
     public String getUsername() {
         return username;
@@ -32,6 +33,7 @@ public class User {
     public String getPassword() {
         return password;
     }
+
 
     // Getter for profile picture URI
     public String getImage() {
