@@ -32,9 +32,9 @@ public class UserViewModel extends AndroidViewModel {
         return liveData;
     }
 
-    public LiveData<User> registerUser(User user, Uri imageUri, Context context) {
+    public LiveData<User> registerUser(User user, Context context) {
         MutableLiveData<User> liveData = new MutableLiveData<>();
-        userRepository.registerUser(user, imageUri, context, liveData);
+        userRepository.registerUser(user, context, liveData);
         return liveData;
     }
 

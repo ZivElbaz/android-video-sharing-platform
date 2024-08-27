@@ -3,6 +3,7 @@ package com.example.viewtube.activities;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -20,7 +21,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.viewtube.R;
 import com.example.viewtube.entities.VideoItem;
-import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.viewmodels.VideosViewModel;
 
 import java.io.File;
@@ -117,7 +117,8 @@ public class UploadActivity extends AppCompatActivity {
         }
 
         File videoFile = new File(videoPath);
-        String uploader = CurrentUserManager.getInstance().getCurrentUser().getUsername();
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String uploader = sharedPreferences.getString("username", null);
         String duration = getVideoDuration(videoPath);
 
         // Create a temporary VideoItem without id, date, videoUrl, and thumbnail
