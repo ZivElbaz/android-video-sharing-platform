@@ -39,7 +39,6 @@ import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
-import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.viewmodels.UserViewModel;
 import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;

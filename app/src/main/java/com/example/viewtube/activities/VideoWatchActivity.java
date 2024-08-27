@@ -1,5 +1,6 @@
 package com.example.viewtube.activities;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +23,6 @@ import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CommentsManager;
-import com.example.viewtube.managers.CurrentUserManager;
 import com.example.viewtube.managers.FileUtils;
 import com.example.viewtube.managers.SessionManager;
 import com.example.viewtube.managers.VideoDetailsManager;
@@ -85,16 +85,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             videosViewModel.fetchSelectedVideoItem(videoIdentifier);
         }
 
-        // Example usage of userViewModel and commentViewModel
-//        userViewModel.getUserLiveData().observe(this, user -> {
-//            // Update UI with user details
-//        });
-//
-//        commentViewModel.getCommentsLiveData().observe(this, comments -> {
-//            // Update UI with comments
-//        });
-
-
         // Initialize views
         PlayerView playerView = findViewById(R.id.videoPlayer);
         ImageButton playPauseButton = findViewById(R.id.exo_play_pause);
@@ -126,11 +116,13 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         cancelDescriptionButton = findViewById(R.id.cancelDescriptionButton);
         Button btnDelete = findViewById(R.id.btnDelete);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", null);
         // Get current user
-        if (CurrentUserManager.getInstance().getCurrentUser() == null) {
-            this.user = "Guest";
+        if (username != null) {
+            this.user = username;
         } else {
-            this.user = CurrentUserManager.getInstance().getCurrentUser().getUsername();
+            this.user = "Guest";
         }
 
         // Initialize managers
