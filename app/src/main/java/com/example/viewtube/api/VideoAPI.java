@@ -153,8 +153,7 @@ public class VideoAPI {
         });
     }
 
-
-    public void add(VideoItem videoItem, File videoFile) {
+    public void add(VideoItem videoItem, File videoFile, File thumbnailFile) {
         RequestBody videoRequestBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
         MultipartBody.Part videoPart = MultipartBody.Part.createFormData("videoFile", videoFile.getName(), videoRequestBody);
 
@@ -163,7 +162,12 @@ public class VideoAPI {
         RequestBody uploaderBody = RequestBody.create(MediaType.parse("text/plain"), videoItem.getUploader());
         RequestBody durationBody = RequestBody.create(MediaType.parse("text/plain"), videoItem.getDuration());
 
-        Call<VideoItem> call = webServiceAPI.createVideo(videoPart, titleBody, descriptionBody, uploaderBody, durationBody);
+        // Handle the thumbnail file
+        RequestBody thumbnailRequestBody = RequestBody.create(MediaType.parse("image/png"), thumbnailFile);
+        MultipartBody.Part thumbnailPart = MultipartBody.Part.createFormData("thumbnail", thumbnailFile.getName(), thumbnailRequestBody);
+
+        // Make the API call to upload the video and thumbnail
+        Call<VideoItem> call = webServiceAPI.createVideo(videoPart, thumbnailPart, titleBody, descriptionBody, uploaderBody, durationBody);
         call.enqueue(new Callback<VideoItem>() {
             @Override
             public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
@@ -182,6 +186,8 @@ public class VideoAPI {
             }
         });
     }
+
+
 
     public void update(int videoId, String title, String description) {
         Call<VideoItem> call = webServiceAPI.updateVideo(videoId, new VideoUpdate(title, description));

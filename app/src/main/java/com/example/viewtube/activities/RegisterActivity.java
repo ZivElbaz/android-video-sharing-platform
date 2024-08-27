@@ -165,12 +165,12 @@ public class RegisterActivity extends AppCompatActivity {
                 InputStream imageStream = getContentResolver().openInputStream(profilePictureUri);
                 Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
 
-                // Resize the image to a smaller resolution (e.g., 150x150)
-                Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, 150, 150, false);
+                // Resize the image to a smaller resolution (e.g., 350x350)
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, 350, 350, false);
 
-                // Compress the resized image to JPEG format with 70% quality
+                // Compress the resized image to JPEG format
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
 
                 byte[] byteArray = byteArrayOutputStream.toByteArray();
                 String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
@@ -194,6 +194,7 @@ public class RegisterActivity extends AppCompatActivity {
                 // Navigate to the next activity or home screen
                 Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                 startActivity(intent);
+                finish();
             } else {
                 Toast.makeText(this, "Registration failed!", Toast.LENGTH_SHORT).show();
             }
