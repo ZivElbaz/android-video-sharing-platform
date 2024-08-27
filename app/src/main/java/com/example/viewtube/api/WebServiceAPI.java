@@ -55,7 +55,8 @@ public interface WebServiceAPI {
 
     // User APIs
     @POST("users")
-    Call<User> createUser(@Body User user);
+    Call<AuthResponse> createUser(@Body Map<String, String> userMap);
+
 
     @GET("users/{username}")
     Call<User> getUser(@Path("username") String username);
