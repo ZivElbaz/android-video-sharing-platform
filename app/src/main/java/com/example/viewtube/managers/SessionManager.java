@@ -27,22 +27,13 @@ public class SessionManager {
         return instance;
     }
 
-    // Method to get the number of likes for a specific video
-    public int getLikes(String videoId) {
-        Integer likeCount = likes.get(videoId);
-        return likeCount != null ? likeCount : 0;
-    }
 
     // Method to set the number of likes for a specific video
     public void setLikes(String videoId, int likesCount) {
         likes.put(videoId, likesCount);
     }
 
-    // Method to check if a specific video is liked
-    public boolean isLiked(String videoId) {
-        Boolean isLiked = likedVideos.get(videoId);
-        return isLiked != null ? isLiked : false;
-    }
+
 
     // Method to set the liked status of a specific video
     public void setLiked(String videoId, boolean isLiked) {

@@ -63,10 +63,9 @@ public class VideosViewModel extends AndroidViewModel {
         }).start();
     }
 
-    public void addVideoItem(final VideoItem videoItem, File videoFile) {
-        mRepository.add(videoItem, videoFile);
+    public void addVideoItem(final VideoItem videoItem, File videoFile, File thumbnailFile) {
+        mRepository.add(videoItem, videoFile, thumbnailFile);
     }
-
     public void updateVideoItemTitle(int videoId, String title) {
         VideoItem videoItem = selectedVideoItemLiveData.getValue();
         if (videoItem != null) {

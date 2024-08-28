@@ -1,6 +1,8 @@
 package com.example.viewtube.viewmodels;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -12,12 +14,10 @@ import com.example.viewtube.repositories.UserRepository;
 
 public class UserViewModel extends AndroidViewModel {
     private final UserRepository userRepository;
-    private final LiveData<User> authenticatedUserLiveData;
 
     public UserViewModel(@NonNull Application application) {
         super(application);
         userRepository = new UserRepository(application);
-        authenticatedUserLiveData = userRepository.getAuthenticatedUserLiveData();
     }
 
     public LiveData<Boolean> checkUsernameExists(String username) {
@@ -32,9 +32,11 @@ public class UserViewModel extends AndroidViewModel {
         return liveData;
     }
 
-
-    public void logoutUser() {
-        userRepository.clearToken();
-        ((MutableLiveData<User>) authenticatedUserLiveData).setValue(null);
+    public LiveData<User> registerUser(User user, Context context) {
+        MutableLiveData<User> liveData = new MutableLiveData<>();
+        userRepository.registerUser(user, context, liveData);
+        return liveData;
     }
+
+
 }

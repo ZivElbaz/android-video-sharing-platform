@@ -4,6 +4,10 @@ import static com.example.viewtube.activities.MainActivity.context;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -14,8 +18,24 @@ import com.example.viewtube.entities.TokenRequest;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.UsernameCheckResponse;
 
+
 import retrofit2.Call;
 import retrofit2.Callback;
+
+import com.example.viewtube.entities.VideoItem;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -36,39 +56,38 @@ public class UserAPI {
         webServiceAPI = retrofit.create(WebServiceAPI.class);
     }
 
-    public void createUser(User user, MutableLiveData<User> liveData) {
-        Call<User> call = webServiceAPI.createUser(user);
-        call.enqueue(new Callback<User>() {
+    public void registerUser(User user, Context context, MutableLiveData<User> liveData) {
+        Map<String, String> userMap = new HashMap<>();
+        userMap.put("username", user.getUsername());
+        userMap.put("firstName", user.getFirstName());
+        userMap.put("lastName", user.getLastName());
+        userMap.put("password", user.getPassword());
+        userMap.put("image", user.getImage());
+
+
+        Call<AuthResponse> call = webServiceAPI.createUser(userMap);
+        call.enqueue(new Callback<AuthResponse>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    liveData.postValue(response.body());
+                    AuthResponse authResponse = response.body();
+
+                    new Thread(() -> {
+                        // Post the value to LiveData on the main thread
+                        liveData.postValue(authResponse.getUser());
+
+                        // Save the token
+                        saveToken(authResponse.getToken(), context);
+                    }).start();
+
                 } else {
-                    Log.e("UserAPI", "Response error: " + response.errorBody());
+                    liveData.postValue(null);
                 }
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.e("UserAPI", "Request failed", t);
-            }
-        });
-    }
-
-    public void getUser(String username, MutableLiveData<User> liveData) {
-        Call<User> call = webServiceAPI.getUser(username);
-        call.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    liveData.postValue(response.body());
-                } else {
-                    Log.e("UserAPI", "Response error: " + response.errorBody());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                liveData.postValue(null);
                 Log.e("UserAPI", "Request failed", t);
             }
         });
@@ -83,16 +102,6 @@ public class UserAPI {
                     AuthResponse authResponse = response.body();
 
                     new Thread(() -> {
-                        // Check if the user already exists in the database
-                        User existingUser = userDao.getUserByUsername(authResponse.getUser().getUsername());
-
-                        if (existingUser != null) {
-                            // Update the existing user
-                            userDao.update(authResponse.getUser());
-                        } else {
-                            // Insert the new user
-                            userDao.insert(authResponse.getUser());
-                        }
 
                         // Post the value to LiveData on the main thread
                         liveData.postValue(authResponse.getUser());
@@ -112,33 +121,6 @@ public class UserAPI {
             }
         });
     }
-
-
-    public void verifyToken(TokenRequest tokenRequest, MutableLiveData<User> liveData) {
-        Call<AuthResponse> call = webServiceAPI.verifyToken(tokenRequest);
-        call.enqueue(new Callback<AuthResponse>() {
-            @Override
-            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    AuthResponse authResponse = response.body();
-                    User user = authResponse.getUser();
-                    Log.d("UserAPI", "User received: " + (user != null ? user.getUsername() : "null"));
-                    liveData.postValue(user);
-                } else {
-                    Log.e("UserAPI", "Response error or body is null");
-                    liveData.postValue(null);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<AuthResponse> call, Throwable t) {
-                Log.e("UserAPI", "Request failed", t);
-                liveData.postValue(null);
-            }
-        });
-    }
-
-
 
 
     public void saveToken(String token, Context context) {
@@ -168,8 +150,5 @@ public class UserAPI {
             }
         });
     }
-
-
-
 
 }

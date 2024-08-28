@@ -56,8 +56,8 @@ public class VideosRepository {
         return selectedVideoItem;
     }
 
-    public void add(final VideoItem videoItem, File videoFile) {
-        api.add(videoItem, videoFile);
+    public void add(final VideoItem videoItem, File videoFile, File thumbnailFile) {
+        api.add(videoItem, videoFile, thumbnailFile);
     }
 
     public void update(final int videoId, String title, String description) {

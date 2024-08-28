@@ -11,6 +11,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -190,21 +191,23 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             }
         });
 
-        // Handle log out menu item click
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
             // Clear user data from SharedPreferences
+            SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
+
+            // Clear only user-specific data
+            editor.remove("username");
+            editor.remove("firstName");
+            editor.remove("lastName");
+            editor.remove("image");
+
+            // Apply the changes
             editor.apply();
-
-
-            // Clear the authenticated user in the ViewModel
-            userViewModel.logoutUser();
 
             // Update the UI to guest mode
             showGuestUI();
-
 
             return true;
         });
@@ -229,7 +232,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK) {
             // Refresh the list of videos from the server
-            videosViewModel.reload();
+            videosViewModel.fetchAllVideos();
         }
     }
 
@@ -323,7 +326,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         view.startAnimation(animation);
     }
 
-
     private void updateUIWithUserDetails(User user) {
         setUserImage(user, profileImageView);
         usernameView.setText(user.getUsername());
@@ -364,17 +366,26 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     public void setUserImage(User user, ImageView imageView) {
         String base64Image = user.getImage();
         if (base64Image != null) {
-            if (base64Image.startsWith("data:image/jpeg;base64,")) {
-                base64Image = base64Image.substring(23);  // Remove the prefix
+            Log.d("HomeActivity", "Base64 Image String: " + base64Image);
+            try {
+                if (base64Image.startsWith("data:image/jpeg;base64,")) {
+                    base64Image = base64Image.substring(23);  // Remove the prefix for JPEG
+                } else if (base64Image.startsWith("data:image/png;base64,")) {
+                    base64Image = base64Image.substring(22);  // Remove the prefix for PNG
+                }
+                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                Bitmap circularBitmap = getCircularBitmap(decodedByte);
+                imageView.setImageBitmap(circularBitmap);
+            } catch (IllegalArgumentException e) {
+                Log.e("HomeActivity", "Failed to decode Base64 string: " + base64Image, e);
+                imageView.setImageResource(R.drawable.ic_profile_foreground); // Set a default image on failure
             }
-            byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            Bitmap circularBitmap = getCircularBitmap(decodedByte);
-            imageView.setImageBitmap(circularBitmap);
         } else {
             imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
         }
     }
+
 
 
     private Bitmap getCircularBitmap(Bitmap bitmap) {
