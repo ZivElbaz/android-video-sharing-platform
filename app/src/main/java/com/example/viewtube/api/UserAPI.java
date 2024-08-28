@@ -53,28 +53,14 @@ public class UserAPI {
         webServiceAPI = retrofit.create(WebServiceAPI.class);
     }
 
-    public void registerUser(User user, Uri imageUri, Context context, MutableLiveData<User> liveData) {
+    public void registerUser(User user, Context context, MutableLiveData<User> liveData) {
         Map<String, String> userMap = new HashMap<>();
         userMap.put("username", user.getUsername());
         userMap.put("firstName", user.getFirstName());
         userMap.put("lastName", user.getLastName());
         userMap.put("password", user.getPassword());
+        userMap.put("image", user.getImage());
 
-        if (imageUri != null) {
-            try {
-                InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
-                Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                byte[] byteArray = byteArrayOutputStream.toByteArray();
-                String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                userMap.put("image", "data:image/png;base64," + encodedImage);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                liveData.postValue(null); // Return null if image encoding fails
-                return;
-            }
-        }
 
         Call<AuthResponse> call = webServiceAPI.createUser(userMap);
         call.enqueue(new Callback<AuthResponse>() {

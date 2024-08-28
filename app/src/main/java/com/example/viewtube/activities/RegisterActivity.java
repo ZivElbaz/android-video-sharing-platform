@@ -159,8 +159,33 @@ public class RegisterActivity extends AppCompatActivity {
         newUser.setLastName(lastName.getText().toString().trim());
         newUser.setPassword(password.getText().toString().trim());
 
+        // Convert the profile picture to base64
+        if (profilePictureUri != null) {
+            try {
+                InputStream imageStream = getContentResolver().openInputStream(profilePictureUri);
+                Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
+
+                // Resize the image to a smaller resolution (e.g., 150x150)
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, 150, 150, false);
+
+                // Compress the resized image to JPEG format with 70% quality
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
+                String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+                // Store the compressed and encoded image as a Base64 string in the user object
+                newUser.setImage("data:image/jpeg;base64," + encodedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Image encoding failed", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         // Use the ViewModel to register the user
-        userViewModel.registerUser(newUser, profilePictureUri, this).observe(this, registeredUser -> {
+        userViewModel.registerUser(newUser, this).observe(this, registeredUser -> {
             if (registeredUser != null) {
                 // Save user data to SharedPreferences
                 saveUserData(registeredUser);

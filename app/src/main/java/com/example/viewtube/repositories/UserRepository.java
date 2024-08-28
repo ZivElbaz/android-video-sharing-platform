@@ -25,8 +25,8 @@ public class UserRepository {
         userAPI.checkUsernameExists(username, liveData);
     }
 
-    public void registerUser(User user, Uri imageUri, Context context, MutableLiveData<User> liveData) {
-        userAPI.registerUser(user, imageUri, context, liveData);
+    public void registerUser(User user, Context context, MutableLiveData<User> liveData) {
+        userAPI.registerUser(user, context, liveData);
     }
 
 
