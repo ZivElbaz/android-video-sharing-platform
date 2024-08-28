@@ -5,9 +5,9 @@ import android.content.Context;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.viewtube.api.VideoAPI;
 import com.example.viewtube.data.AppDB;
 import com.example.viewtube.data.VideoDao;
-import com.example.viewtube.api.VideoAPI;
 import com.example.viewtube.entities.VideoItem;
 
 import java.io.File;
@@ -75,4 +75,9 @@ public class VideosRepository {
     public void userLiked(int videoId, String username) {
         api.userLiked(videoId, username);
     }
+
+    public LiveData<List<VideoItem>> getVideosByUsername(String username) {
+        return dao.getVideosByUsername(username);
+    }
+
 }
