@@ -41,11 +41,14 @@ public interface WebServiceAPI {
     @POST("videos")
     Call<VideoItem> createVideo(
             @Part MultipartBody.Part videoFile,
+            @Part MultipartBody.Part thumbnail,
             @Part("title") RequestBody title,
             @Part("description") RequestBody description,
             @Part("uploader") RequestBody uploader,
             @Part("duration") RequestBody duration
     );
+
+
 
     @POST("videos/{id}/like")
     Call<Void> userLiked(@Path("id") int id, @Body Map<String, String> body);

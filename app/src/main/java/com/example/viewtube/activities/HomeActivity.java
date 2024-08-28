@@ -221,7 +221,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK) {
             // Refresh the list of videos from the server
-            videosViewModel.reload();
+            videosViewModel.fetchAllVideos();
         }
     }
 
