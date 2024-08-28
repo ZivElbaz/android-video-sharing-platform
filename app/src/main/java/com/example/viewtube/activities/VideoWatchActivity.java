@@ -1,5 +1,7 @@
 package com.example.viewtube.activities;
 
+
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -248,6 +250,16 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         btnShare.setOnClickListener(view -> {
             Uri contentUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", new File(videoUri.getPath()));
             FileUtils.shareVideo(this, contentUri, videoTitle.getText().toString());
+        });
+
+        uploaderProfilePic.setOnClickListener(view -> {
+            Intent profileIntent = new Intent(VideoWatchActivity.this, UserProfileActivity.class);
+            startActivity(profileIntent);
+        });
+
+        uploaderName.setOnClickListener(view -> {
+            Intent profileIntent = new Intent(VideoWatchActivity.this, UserProfileActivity.class);
+            startActivity(profileIntent);
         });
     }
 

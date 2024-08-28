@@ -9,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -23,7 +22,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -64,6 +62,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private ImageView profileImageView;
     private TextView usernameView;
     private BottomNavigationView bottomNavBar;
+    private Boolean isLoggedIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +89,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         searchInputLayout = findViewById(R.id.search_input_layout);
         ImageView menuButton = findViewById(R.id.menu_btn);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        isLoggedIn = false;
 
         // Initialize side bar header views
         View headerView = sideBar.getHeaderView(0);
@@ -211,7 +211,18 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
             return true;
         });
-
+        if (!isLoggedIn){
+            profileImageView.setOnClickListener(view -> {
+                Intent profileIntent = new Intent(HomeActivity.this, RegisterActivity.class);
+                startActivity(profileIntent);
+            });
+        }
+        else {
+            profileImageView.setOnClickListener(view -> {
+                Intent profileIntent = new Intent(HomeActivity.this, UserProfileActivity.class);
+                startActivity(profileIntent);
+            });
+        }
     }
 
     private static final int UPLOAD_REQUEST_CODE = 1001;
@@ -329,6 +340,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
     }
 
+
     // Method to check if a user is logged in and update the UI accordingly
     private void checkLoggedInUser() {
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
@@ -344,7 +356,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setImage(image);
-
+            isLoggedIn = true;
             updateUIWithUserDetails(user);
         } else {
             showGuestUI();

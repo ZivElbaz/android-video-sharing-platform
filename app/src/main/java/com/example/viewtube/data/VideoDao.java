@@ -44,4 +44,8 @@ public interface VideoDao {
     @Query("UPDATE VideoItem SET profilePicture = :profilePicture WHERE id = :id")
     void updateProfilePicture(int id, String profilePicture);
 
+    // New method to get videos by uploader username
+    @Query("SELECT * FROM VideoItem WHERE uploader = :username ORDER BY timestamp ASC")
+    LiveData<List<VideoItem>> getVideosByUsername(String username);
+
 }
