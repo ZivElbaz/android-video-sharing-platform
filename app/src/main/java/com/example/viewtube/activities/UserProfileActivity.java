@@ -31,7 +31,6 @@ public class UserProfileActivity extends AppCompatActivity {
     private TextView userFullNameView;
     private RecyclerView videosRecyclerView;
     private VideoList videoList;
-    private VideosViewModel videosViewModel;
     private UserViewModel userViewModel;
 
     @Override
@@ -43,63 +42,41 @@ public class UserProfileActivity extends AppCompatActivity {
         videosRecyclerView = findViewById(R.id.user_videos_recycler_view);
         userFullNameView = findViewById(R.id.user_fullname);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
-
 
         videoList = new VideoList(this, null);
         videosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         videosRecyclerView.setAdapter(videoList);
 
-        // Load user data
-        checkLoggedInUser();
+        String username = getIntent().getStringExtra("username");
+        String firstName = getIntent().getStringExtra("firstName");
+        String lastName = getIntent().getStringExtra("lastName");
+        String profilePic = getIntent().getStringExtra("profilePic");
+
+        updateUIWithUserDetails(username, firstName, lastName, profilePic);
 
     }
 
-    private void checkLoggedInUser() {
-        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String username = sharedPreferences.getString("username", null);
-        if (username != null) {
-            // User is logged in
-            String firstName = sharedPreferences.getString("firstName", "");
-            String lastName = sharedPreferences.getString("lastName", "");
-            String image = sharedPreferences.getString("image", "");
 
-            User user = new User();
-            user.setUsername(username);
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            user.setImage(image);
 
-            updateUIWithUserDetails(user);
-
-        } else {
-            showGuestUI();
-        }
+    private void updateUIWithUserDetails(String username, String firstName, String lastName, String profilePic) {
+        setUserImage(profilePic, profileImageView);
+        userFullNameView.setText(firstName + " " + lastName);
+        usernameView.setText("@" + username);
+        fetchUserVideos(username);
     }
 
-    private void updateUIWithUserDetails(User user) {
-        setUserImage(user, profileImageView);
-        userFullNameView.setText(user.getFirstName() + " " + user.getLastName());
-        usernameView.setText("@" + user.getUsername());
-        fetchUserVideos(user.getUsername());
-    }
 
-    private void showGuestUI() {
-        profileImageView.setImageResource(R.drawable.ic_profile_foreground);
-        usernameView.setText(R.string.guest);
-    }
     private void fetchUserVideos(String username) {
-        videosViewModel.getVideosByUsername(username).observe(this, videoItems -> {
+        userViewModel.getVideosByUsername(username).observe(this, videoItems -> {
             if (videoItems != null) {
-                videoList.setVideoItems(videoItems); // Assuming this method exists in your adapter
+                videoList.setVideoItems(videoItems);
             }
         });
     }
 
 
-
-    private void setUserImage(User user, ImageView imageView) {
-        String base64Image = user.getImage();
+    private void setUserImage(String profilePic, ImageView imageView) {
+        String base64Image = profilePic;
         if (base64Image != null) {
             if (base64Image.startsWith("data:image/jpeg;base64,")) {
                 base64Image = base64Image.substring(23);  // Remove the prefix

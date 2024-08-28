@@ -19,7 +19,7 @@ import retrofit2.Callback;
 
 public class CommentAPI {
 
-    private static final String BASE_URL = "http://10.0.0.5:12345/";
+    private static final String BASE_URL = "http://192.168.1.100:12345/";
     private WebServiceAPI webServiceAPI;
     private CommentDao commentDao;
 

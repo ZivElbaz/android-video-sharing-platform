@@ -191,6 +191,26 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             }
         });
 
+        profileImageView.setOnClickListener(view -> {
+            if (isLoggedIn) {
+                SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                String username = sharedPreferences.getString("username", null);
+                String firstName = sharedPreferences.getString("firstName", "");
+                String lastName = sharedPreferences.getString("lastName", "");
+                String image = sharedPreferences.getString("image", "");
+
+                Intent profileIntent = new Intent(HomeActivity.this, UserProfileActivity.class);
+                profileIntent.putExtra("username", username);
+                profileIntent.putExtra("firstName", firstName);
+                profileIntent.putExtra("lastName", lastName);
+                profileIntent.putExtra("profilePic", image);
+                startActivity(profileIntent);
+            } else {
+                Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+                startActivity(loginIntent);
+            }
+        });
+
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
             // Clear user data from SharedPreferences
@@ -207,22 +227,12 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             editor.apply();
 
             // Update the UI to guest mode
+            isLoggedIn = false;
             showGuestUI();
 
             return true;
         });
-        if (!isLoggedIn){
-            profileImageView.setOnClickListener(view -> {
-                Intent profileIntent = new Intent(HomeActivity.this, RegisterActivity.class);
-                startActivity(profileIntent);
-            });
-        }
-        else {
-            profileImageView.setOnClickListener(view -> {
-                Intent profileIntent = new Intent(HomeActivity.this, UserProfileActivity.class);
-                startActivity(profileIntent);
-            });
-        }
+
     }
 
     private static final int UPLOAD_REQUEST_CODE = 1001;
@@ -359,6 +369,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             isLoggedIn = true;
             updateUIWithUserDetails(user);
         } else {
+            isLoggedIn = false;
             showGuestUI();
         }
     }

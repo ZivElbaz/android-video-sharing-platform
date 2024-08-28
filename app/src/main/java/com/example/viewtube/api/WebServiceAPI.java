@@ -60,9 +60,8 @@ public interface WebServiceAPI {
     @POST("users")
     Call<AuthResponse> createUser(@Body Map<String, String> userMap);
 
-
     @GET("users/{username}")
-    Call<User> getUser(@Path("username") String username);
+    Call<User> getUserData(@Path("username") String username);
 
     @POST("token")
     Call<AuthResponse> authenticateUser(@Body User user);
@@ -74,10 +73,8 @@ public interface WebServiceAPI {
     Call<UsernameCheckResponse> checkUsernameExists(@Path("username") String username);
 
 
-
     @GET("users/picture/{username}")
     Call<ProfilePictureResponse> getPictureByUsername(@Path("username") String username);
-
 
 
     @PATCH("users/{username}")
@@ -89,8 +86,8 @@ public interface WebServiceAPI {
     @POST("users/password")
     Call<Void> updatePassword(@Body Map<String, String> body);
 
-    @GET("users/{id}/videos")
-    Call<List<VideoItem>> getVideosByUploader(@Path("id") String uploader);
+    @GET("users/{username}/videos")
+    Call<List<VideoItem>> getVideosByUsername(@Path("username") String username);
 
     // Comment APIs
     @POST("comments")

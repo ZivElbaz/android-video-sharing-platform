@@ -76,8 +76,5 @@ public class VideosRepository {
         api.userLiked(videoId, username);
     }
 
-    public LiveData<List<VideoItem>> getVideosByUsername(String username) {
-        return dao.getVideosByUsername(username);
-    }
 
 }

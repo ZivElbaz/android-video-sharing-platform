@@ -12,6 +12,9 @@ import com.example.viewtube.api.UserAPI;
 import com.example.viewtube.data.AppDB;
 import com.example.viewtube.entities.TokenRequest;
 import com.example.viewtube.entities.User;
+import com.example.viewtube.entities.VideoItem;
+
+import java.util.List;
 
 public class UserRepository {
     private final UserAPI userAPI;
@@ -25,15 +28,20 @@ public class UserRepository {
         userAPI.checkUsernameExists(username, liveData);
     }
 
-    public void registerUser(User user, Context context, MutableLiveData<User> liveData) {
-        userAPI.registerUser(user, context, liveData);
-    }
-
-
-
-
     public void authenticateUser(User user, MutableLiveData<User> liveData) {
         userAPI.authenticateUser(user, liveData);
     }
 
+    public void registerUser(User user, Context context, MutableLiveData<User> liveData) {
+        userAPI.registerUser(user, context, liveData);
+    }
+
+    public LiveData<List<VideoItem>> getVideosByUsername(String username, MutableLiveData<List<VideoItem>> userVideosLiveData) {
+        userAPI.getVideosByUsername(username, userVideosLiveData);
+        return userVideosLiveData;
+    }
+
+    public void getUserData(String username, MutableLiveData<User> liveData) {
+        userAPI.getUserData(username, liveData);
+    }
 }
