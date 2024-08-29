@@ -42,7 +42,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UserAPI {
 
-    private static final String BASE_URL = "http://10.0.0.5:12345/";
+    private static final String BASE_URL = "http://192.168.1.100:12345/";
     private WebServiceAPI webServiceAPI;
     private UserDao userDao;
 
@@ -150,5 +150,49 @@ public class UserAPI {
             }
         });
     }
+
+    public void getVideosByUsername(String username, MutableLiveData<List<VideoItem>> liveData) {
+        Call<List<VideoItem>> call = webServiceAPI.getVideosByUsername(username);
+        call.enqueue(new Callback<List<VideoItem>>() {
+            @Override
+            public void onResponse(Call<List<VideoItem>> call, Response<List<VideoItem>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    liveData.postValue(response.body());
+                } else {
+                    Log.e("VideoAPI", "Failed to fetch videos: " + response.errorBody());
+                    liveData.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<VideoItem>> call, Throwable t) {
+                Log.e("VideoAPI", "Request failed", t);
+                liveData.postValue(null);
+            }
+        });
+    }
+
+    public void getUserData(String username, MutableLiveData<User> liveData) {
+        Call<User> call = webServiceAPI.getUserData(username);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    liveData.postValue(response.body());
+                } else {
+                    Log.e("UserAPI", "Failed to fetch user data: " + response.errorBody());
+                    liveData.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.e("UserAPI", "Request failed", t);
+                liveData.postValue(null);
+            }
+        });
+    }
+
+
 
 }

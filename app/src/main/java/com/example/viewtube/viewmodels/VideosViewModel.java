@@ -94,7 +94,4 @@ public class VideosViewModel extends AndroidViewModel {
         mRepository.userLiked(videoId, username);
     }
 
-    public LiveData<List<VideoItem>> getVideosByUsername(String username) {
-        return mRepository.getVideosByUsername(username);
-    }
 }

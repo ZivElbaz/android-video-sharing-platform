@@ -10,7 +10,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.viewtube.entities.User;
+import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.repositories.UserRepository;
+
+import java.util.List;
 
 public class UserViewModel extends AndroidViewModel {
     private final UserRepository userRepository;
@@ -38,5 +41,14 @@ public class UserViewModel extends AndroidViewModel {
         return liveData;
     }
 
+    public LiveData<List<VideoItem>> getVideosByUsername(String username) {
+        MutableLiveData<List<VideoItem>> userVideosLiveData = new MutableLiveData<>();
+        return userRepository.getVideosByUsername(username, userVideosLiveData);
+    }
 
+    public LiveData<User> getUserData(String username) {
+        MutableLiveData<User> userLiveData = new MutableLiveData<>();
+        userRepository.getUserData(username, userLiveData);
+        return userLiveData;
+    }
 }

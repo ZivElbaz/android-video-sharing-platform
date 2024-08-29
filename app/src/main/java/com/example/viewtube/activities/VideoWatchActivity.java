@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
+import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CommentsManager;
 import com.example.viewtube.managers.FileUtils;
@@ -41,7 +42,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private VideoPlayerManager videoPlayerManager;
     private VideoDetailsManager videoDetailsManager;
     private CommentsManager commentsManager;
-
     private Uri videoUri;
 
     private int videoIdentifier;
@@ -50,9 +50,11 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private VideosViewModel videosViewModel;
     private UserViewModel userViewModel;
     private CommentViewModel commentViewModel;
-
     private String user;
-
+    private VideoItem currentVideo;
+    private String currentVideoUploaderFirstName;
+    private String currentVideoUploaderLastName;
+    private boolean synced;
     private EditText editTitleEditText;
     private EditText editDescriptionEditText;
     private Button saveTitleButton;
@@ -79,6 +81,14 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         videosViewModel.getSelectedVideoItemLiveData().observe(this, videoItem -> {
             if (videoItem != null) {
                 updateVideoDetails(videoItem);
+                currentVideo = videoItem;
+
+                userViewModel.getUserData(videoItem.getUploader()).observe(this, user -> {
+                        currentVideoUploaderFirstName = user.getFirstName();
+                        currentVideoUploaderLastName= user.getLastName();
+                        synced = true;
+                });
+
             }
         });
 
@@ -253,13 +263,25 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         uploaderProfilePic.setOnClickListener(view -> {
-            Intent profileIntent = new Intent(VideoWatchActivity.this, UserProfileActivity.class);
-            startActivity(profileIntent);
+            if(synced) {
+                Intent profileIntent = new Intent(VideoWatchActivity.this, UserProfileActivity.class);
+                profileIntent.putExtra("username", currentVideo.getUploader());
+                profileIntent.putExtra("firstName", currentVideoUploaderFirstName);
+                profileIntent.putExtra("lastName", currentVideoUploaderLastName);
+                profileIntent.putExtra("profilePic", currentVideo.getProfilePicture());
+                startActivity(profileIntent);
+            }
         });
 
         uploaderName.setOnClickListener(view -> {
-            Intent profileIntent = new Intent(VideoWatchActivity.this, UserProfileActivity.class);
-            startActivity(profileIntent);
+            if(synced) {
+                Intent profileIntent = new Intent(VideoWatchActivity.this, UserProfileActivity.class);
+                profileIntent.putExtra("username", currentVideo.getUploader());
+                profileIntent.putExtra("firstName", currentVideoUploaderFirstName);
+                profileIntent.putExtra("lastName", currentVideoUploaderLastName);
+                profileIntent.putExtra("profilePic", currentVideo.getProfilePicture());
+                startActivity(profileIntent);
+            }
         });
     }
 
@@ -300,6 +322,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
+        synced = false;
         videosViewModel.setSelectedVideoItem(videoItem);
     }
 
