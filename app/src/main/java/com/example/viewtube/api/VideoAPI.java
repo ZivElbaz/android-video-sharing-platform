@@ -171,9 +171,32 @@ public class VideoAPI {
             @Override
             public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    VideoItem serverVideoItem = response.body();
-                    serverVideoItem.setVideoUrl(getFullVideoUrl(serverVideoItem.getVideoUrl()));
-                    new Thread(() -> videoDao.insert(serverVideoItem)).start();
+                    new Thread(() -> {
+                        VideoItem serverVideoItem = response.body();
+                        serverVideoItem.setVideoUrl(getFullVideoUrl(serverVideoItem.getVideoUrl()));
+                        serverVideoItem.setThumbnail(getFullVideoUrl(serverVideoItem.getThumbnail()));
+                        serverVideoItem.setTimestamp(System.currentTimeMillis());
+
+                        // Fetch profile picture for the uploaded video item
+                        Call<ProfilePictureResponse> pictureCall = webServiceAPI.getPictureByUsername(serverVideoItem.getUploader());
+                        try {
+                            Response<ProfilePictureResponse> pictureResponse = pictureCall.execute();
+                            if (pictureResponse.isSuccessful() && pictureResponse.body() != null) {
+                                String base64Image = pictureResponse.body().getProfilePicture();
+                                if (base64Image != null && base64Image.startsWith("data:image/jpeg;base64,")) {
+                                    base64Image = base64Image.substring(23);  // Remove the prefix
+                                }
+                                serverVideoItem.setProfilePicture(base64Image);
+                            } else {
+                                serverVideoItem.setProfilePicture(null);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            serverVideoItem.setProfilePicture(null);
+                        }
+
+                        videoDao.insert(serverVideoItem);
+                    }).start();
                 } else {
                     Log.e("VideoAPI", "Response error: " + response.errorBody());
                 }
@@ -185,6 +208,7 @@ public class VideoAPI {
             }
         });
     }
+
 
 
 
