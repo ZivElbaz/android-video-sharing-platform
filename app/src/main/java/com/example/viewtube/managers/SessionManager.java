@@ -28,17 +28,6 @@ public class SessionManager {
     }
 
 
-    // Method to set the number of likes for a specific video
-    public void setLikes(String videoId, int likesCount) {
-        likes.put(videoId, likesCount);
-    }
-
-
-
-    // Method to set the liked status of a specific video
-    public void setLiked(String videoId, boolean isLiked) {
-        likedVideos.put(videoId, isLiked);
-    }
 
     // Method to get the map of comments for all videos
     public Map<Integer, List<Comment>> getVideoCommentsMap() {

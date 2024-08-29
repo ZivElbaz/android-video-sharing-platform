@@ -58,7 +58,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private SwipeRefreshLayout swipeRefreshLayout;
     private SharedPreferences sharedPreferences;
     private VideosViewModel videosViewModel;
-    private UserViewModel userViewModel;
     private ImageView profileImageView;
     private TextView usernameView;
     private BottomNavigationView bottomNavBar;
@@ -96,8 +95,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         profileImageView = headerView.findViewById(R.id.current_profile);
         usernameView = headerView.findViewById(R.id.current_user);
 
-        // Initialize ViewModels
-        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
 
         // Setup RecyclerView
@@ -113,7 +110,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
         // Fetch all videos initially
         videosViewModel.fetchAllVideos();
-
 
         // Load logged-in user details from SharedPreferences
         checkLoggedInUser();
@@ -190,6 +186,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
                 drawerLayout.openDrawer(sideBar);
             }
         });
+
 
         profileImageView.setOnClickListener(view -> {
             if (isLoggedIn) {

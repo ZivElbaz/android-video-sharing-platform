@@ -36,6 +36,7 @@ import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.exoplayer2.ui.PlayerView;
 
 import java.io.File;
+import java.util.List;
 
 public class VideoWatchActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
@@ -43,10 +44,9 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
     private VideoDetailsManager videoDetailsManager;
     private CommentsManager commentsManager;
     private Uri videoUri;
-
     private int videoIdentifier;
     private boolean liked = false;
-
+    private Button btnLike;
     private VideosViewModel videosViewModel;
     private UserViewModel userViewModel;
     private CommentViewModel commentViewModel;
@@ -94,6 +94,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
         // Fetch the video details if the videoIdentifier is valid and observe the changes
         if (videoIdentifier != -1) {
+            videosViewModel.incrementViewCount(videoIdentifier);
             videosViewModel.fetchSelectedVideoItem(videoIdentifier);
         }
 
@@ -113,7 +114,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         TextView uploaderName = findViewById(R.id.uploaderName);
         RecyclerView commentsRecyclerView = findViewById(R.id.commentsRecyclerView);
         EditText commentInput = findViewById(R.id.commentInput);
-        Button btnLike = findViewById(R.id.btnLike);
+        btnLike = findViewById(R.id.btnLike);
         Button btnPostComment = findViewById(R.id.btnPostComment);
         Button btnShare = findViewById(R.id.btnShare);
         Button btnDownload = findViewById(R.id.btnDownload);
@@ -236,17 +237,41 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         btnLike.setOnClickListener(view -> {
-            VideoItem currentItem = videosViewModel.getSelectedVideoItemLiveData().getValue();
-            if (currentItem != null) {
-                int newLikes = liked ? currentItem.getLikes() - 1 : currentItem.getLikes() + 1;
-                liked = !liked;
-                btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
-                btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
-                SessionManager.getInstance().setLikes(videoUri.toString(), newLikes);
-                SessionManager.getInstance().setLiked(videoUri.toString(), liked);
-                videoDetailsManager.setVideoDetails(currentItem);
+            if (currentVideo != null) {
+                // Check if the user is a guest
+                if (user.equals("Guest")) {
+                    // Display a message or disable the button functionality for guests
+                    Toast.makeText(this, "Guest users cannot like videos.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Check if the user has already liked the video
+                    List<String> likedBy = currentVideo.getLikedBy();
+                    if (likedBy.contains(user)) {
+                        // User already liked the video, so remove their like
+                        likedBy.remove(user);
+                        currentVideo.setLikedBy(likedBy);
+                        currentVideo.setLikes(currentVideo.getLikes() - 1);
+                        liked = false;
+                    } else {
+                        // User hasn't liked the video yet, so add their like
+                        likedBy.add(user);
+                        currentVideo.setLikedBy(likedBy);
+                        currentVideo.setLikes(currentVideo.getLikes() + 1);
+                        liked = true;
+                    }
+
+                    // Update the video details in the local database
+                    videosViewModel.updateVideo(currentVideo);
+
+                    videosViewModel.userLiked(videoIdentifier, user);
+                    videoDetailsManager.setVideoDetails(currentVideo);
+
+                    // Update the UI
+                    btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
+                    btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
+                }
             }
         });
+
 
         btnPostComment.setOnClickListener(view -> {
             String commentText = commentInput.getText().toString().trim();
@@ -300,6 +325,19 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         videoDetailsManager.setVideoDetails(videoItem);
         videoUri = Uri.parse(videoItem.getVideoUrl());
         initializePlayer();
+
+        // Check if the user has already liked the video
+        if (user != null && !user.equals("Guest")) {
+            List<String> likedBy = videoItem.getLikedBy();
+            liked = likedBy.contains(user);
+            btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
+            btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
+        } else {
+            // If user is a guest, set the button to its default state
+            liked = false;
+            btnLike.setTextColor(ContextCompat.getColor(this, R.color.black));
+            btnLike.setCompoundDrawablesWithIntrinsicBounds(R.drawable.like, 0, 0, 0);
+        }
     }
 
     @Override

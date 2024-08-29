@@ -36,17 +36,11 @@ public class VideosViewModel extends AndroidViewModel {
         mRepository.fetchAllVideos();
     }
 
-    public void fetchVideoDetails(int videoId) {
-        mRepository.fetchVideoDetails(videoId);
-    }
 
     public VideoItem getVideoById(int videoId) {
         return mRepository.getVideoItem(videoId);
     }
 
-    public LiveData<VideoItem> getLiveVideoItem(int videoId) {
-        return mRepository.getLiveVideoItem(videoId);
-    }
 
     public void setSelectedVideoItem(VideoItem videoItem) {
         mRepository.setSelectedVideoItem(videoItem);
@@ -90,8 +84,17 @@ public class VideosViewModel extends AndroidViewModel {
         mRepository.reload();
     }
 
+    public void updateVideo(VideoItem videoItem) {
+        mRepository.updateVideo(videoItem);
+    }
+
+
     public void userLiked(int videoId, String username) {
         mRepository.userLiked(videoId, username);
+    }
+
+    public void incrementViewCount(int videoId) {
+        mRepository.incrementViewCount(videoId);
     }
 
 }
