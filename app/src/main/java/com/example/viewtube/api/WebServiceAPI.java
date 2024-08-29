@@ -48,8 +48,6 @@ public interface WebServiceAPI {
             @Part("duration") RequestBody duration
     );
 
-
-
     @POST("videos/{id}/like")
     Call<Void> userLiked(@Path("id") int id, @Body Map<String, String> body);
 

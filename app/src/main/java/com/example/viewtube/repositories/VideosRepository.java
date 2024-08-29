@@ -40,9 +40,6 @@ public class VideosRepository {
         api.getAll();
     }
 
-    public void fetchVideoDetails(int videoId) {
-        api.getVideo(videoId);
-    }
 
     public void setSelectedVideoItem(VideoItem videoItem) {
         selectedVideoItem.setValue(videoItem);
@@ -51,6 +48,11 @@ public class VideosRepository {
     public void postSelectedVideoItem(VideoItem videoItem) {
         selectedVideoItem.postValue(videoItem);
     }
+
+    public void updateVideo(VideoItem videoItem) {
+        new Thread(() -> dao.update(videoItem)).start();
+    }
+
 
     public LiveData<VideoItem> getSelectedVideoItem() {
         return selectedVideoItem;
@@ -73,8 +75,10 @@ public class VideosRepository {
     }
 
     public void userLiked(int videoId, String username) {
-        api.userLiked(videoId, username);
+        api.toggleLike(videoId, username);
     }
 
-
+    public void incrementViewCount(int videoId) {
+        api.incrementViewCount(videoId);
+    }
 }

@@ -88,70 +88,6 @@ public class VideoAPI {
         });
     }
 
-
-    public void getVideo(int videoId) {
-        Call<VideoItem> call = webServiceAPI.getVideo(videoId);
-        call.enqueue(new Callback<VideoItem>() {
-            @Override
-            public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    VideoItem videoItem = response.body();
-                    videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
-                    videoItem.setThumbnail(getFullVideoUrl(videoItem.getThumbnail()));
-
-                    // Fetch profile picture for the video item
-                    Call<ProfilePictureResponse> pictureCall = webServiceAPI.getPictureByUsername(videoItem.getUploader());
-                    pictureCall.enqueue(new Callback<ProfilePictureResponse>() {
-                        @Override
-                        public void onResponse(Call<ProfilePictureResponse> call, Response<ProfilePictureResponse> pictureResponse) {
-                            if (pictureResponse.isSuccessful() && pictureResponse.body() != null) {
-                                String base64Image = pictureResponse.body().getProfilePicture();
-                                if (base64Image != null && base64Image.startsWith("data:image/jpeg;base64,")) {
-                                    base64Image = base64Image.substring(23);  // Remove the prefix
-                                }
-                                videoItem.setProfilePicture(base64Image);
-                            } else {
-                                videoItem.setProfilePicture(null); // or a default value if you prefer
-                            }
-
-                            new Thread(() -> {
-                                // Check if the video item already exists
-                                VideoItem existingVideoItem = videoDao.getVideoItemSync(videoItem.getId());
-                                if (existingVideoItem == null) {
-                                    videoDao.insert(videoItem);
-                                } else {
-                                    videoDao.update(videoItem);
-                                }
-                            }).start();
-                        }
-
-                        @Override
-                        public void onFailure(Call<ProfilePictureResponse> call, Throwable t) {
-                            videoItem.setProfilePicture(null); // or a default value if you prefer
-
-                            new Thread(() -> {
-                                // Check if the video item already exists
-                                VideoItem existingVideoItem = videoDao.getVideoItemSync(videoItem.getId());
-                                if (existingVideoItem == null) {
-                                    videoDao.insert(videoItem);
-                                } else {
-                                    videoDao.update(videoItem);
-                                }
-                            }).start();
-                        }
-                    });
-                } else {
-                    Log.e("VideoAPI", "Response error: " + response.errorBody());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<VideoItem> call, Throwable t) {
-                Log.e("VideoAPI", "Request failed", t);
-            }
-        });
-    }
-
     public void add(VideoItem videoItem, File videoFile, File thumbnailFile) {
         RequestBody videoRequestBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
         MultipartBody.Part videoPart = MultipartBody.Part.createFormData("videoFile", videoFile.getName(), videoRequestBody);
@@ -210,8 +146,6 @@ public class VideoAPI {
     }
 
 
-
-
     public void update(int videoId, String title, String description) {
         Call<VideoItem> call = webServiceAPI.updateVideo(videoId, new VideoUpdate(title, description));
         call.enqueue(new Callback<VideoItem>() {
@@ -252,14 +186,17 @@ public class VideoAPI {
         });
     }
 
-    public void userLiked(int videoId, String username) {
-        Map<String, String> body = new HashMap<>();
-        body.put("username", username);
-        Call<Void> call = webServiceAPI.userLiked(videoId, body);
+    public void incrementViewCount(int videoId) {
+        Call<Void> call = webServiceAPI.incrementViewCount(videoId);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                // Handle response
+                if (response.isSuccessful()) {
+                    // Handle success, maybe log or update UI accordingly
+                    Log.d("VideoAPI", "View count incremented successfully");
+                } else {
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
+                }
             }
 
             @Override
@@ -268,6 +205,29 @@ public class VideoAPI {
             }
         });
     }
+
+    public void toggleLike(int videoId, String username) {
+        Map<String, String> body = new HashMap<>();
+        body.put("username", username);
+        Call<Void> call = webServiceAPI.userLiked(videoId, body);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Handle success, update UI accordingly
+                    Log.d("VideoAPI", "Like toggled successfully");
+                } else {
+                    Log.e("VideoAPI", "Response error: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("VideoAPI", "Request failed", t);
+            }
+        });
+    }
+
 
     class VideoUpdate {
         private String title;

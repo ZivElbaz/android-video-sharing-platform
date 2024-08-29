@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.List;
+
 @Entity
 public class VideoItem {
 
@@ -20,6 +22,9 @@ public class VideoItem {
     private String thumbnail;
     @ColumnInfo(name = "profilePicture")
     private String profilePicture;
+
+    @ColumnInfo(name = "likedBy")
+    private List<String> likedBy;
 
     //Field to store insertion order
     @ColumnInfo(name = "timestamp")
@@ -134,5 +139,13 @@ public class VideoItem {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public List<String> getLikedBy() {
+        return likedBy;
+    }
+
+    public void setLikedBy(List<String> likedBy) {
+        this.likedBy = likedBy;
     }
 }
