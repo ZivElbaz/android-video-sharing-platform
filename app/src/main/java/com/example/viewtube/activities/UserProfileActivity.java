@@ -1,5 +1,6 @@
 package com.example.viewtube.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,10 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.User;
+import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.viewmodels.UserViewModel;
 import com.example.viewtube.viewmodels.VideosViewModel;
 
-public class UserProfileActivity extends AppCompatActivity {
+public class UserProfileActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
     private ImageView profileImageView;
     private TextView usernameView;
@@ -43,7 +45,7 @@ public class UserProfileActivity extends AppCompatActivity {
         userFullNameView = findViewById(R.id.user_fullname);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
-        videoList = new VideoList(this, null);
+        videoList = new VideoList(this, this);
         videosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         videosRecyclerView.setAdapter(videoList);
 
@@ -56,15 +58,12 @@ public class UserProfileActivity extends AppCompatActivity {
 
     }
 
-
-
     private void updateUIWithUserDetails(String username, String firstName, String lastName, String profilePic) {
         setUserImage(profilePic, profileImageView);
         userFullNameView.setText(firstName + " " + lastName);
         usernameView.setText("@" + username);
         fetchUserVideos(username);
     }
-
 
     private void fetchUserVideos(String username) {
         userViewModel.getVideosByUsername(username).observe(this, videoItems -> {
@@ -73,7 +72,6 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void setUserImage(String profilePic, ImageView imageView) {
         String base64Image = profilePic;
@@ -109,6 +107,13 @@ public class UserProfileActivity extends AppCompatActivity {
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
+    }
+
+    @Override
+    public void onVideoItemClick(VideoItem videoItem) {
+        Intent intent = new Intent(this, VideoWatchActivity.class);
+        intent.putExtra("video_id", videoItem.getId());
+        startActivity(intent);
     }
 
 }

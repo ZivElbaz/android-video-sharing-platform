@@ -14,6 +14,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.viewtube.data.UserDao;
 import com.example.viewtube.entities.AuthResponse;
+import com.example.viewtube.entities.ProfilePictureResponse;
 import com.example.viewtube.entities.TokenRequest;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.UsernameCheckResponse;
@@ -157,7 +158,34 @@ public class UserAPI {
             @Override
             public void onResponse(Call<List<VideoItem>> call, Response<List<VideoItem>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    liveData.postValue(response.body());
+                    new Thread(() -> {
+                        List<VideoItem> videoItems = response.body();
+                        for (VideoItem videoItem : videoItems) {
+                            videoItem.setVideoUrl(getFullVideoUrl(videoItem.getVideoUrl()));
+                            videoItem.setThumbnail(getFullVideoUrl(videoItem.getThumbnail()));
+                            videoItem.setTimestamp(System.currentTimeMillis());
+
+                            // Fetch profile picture for each video item
+                            Call<ProfilePictureResponse> pictureCall = webServiceAPI.getPictureByUsername(videoItem.getUploader());
+                            try {
+                                Response<ProfilePictureResponse> pictureResponse = pictureCall.execute();
+                                if (pictureResponse.isSuccessful() && pictureResponse.body() != null) {
+                                    String base64Image = pictureResponse.body().getProfilePicture();
+                                    if (base64Image != null && base64Image.startsWith("data:image/jpeg;base64,")) {
+                                        base64Image = base64Image.substring(23);  // Remove the prefix
+                                    }
+                                    videoItem.setProfilePicture(base64Image);
+                                } else {
+                                    videoItem.setProfilePicture(null);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                videoItem.setProfilePicture(null);
+                            }
+                        }
+                        // Update LiveData and database
+                        liveData.postValue(videoItems);
+                    }).start();
                 } else {
                     Log.e("VideoAPI", "Failed to fetch videos: " + response.errorBody());
                     liveData.postValue(null);
@@ -171,6 +199,7 @@ public class UserAPI {
             }
         });
     }
+
 
     public void getUserData(String username, MutableLiveData<User> liveData) {
         Call<User> call = webServiceAPI.getUserData(username);
@@ -193,6 +222,8 @@ public class UserAPI {
         });
     }
 
-
+    private String getFullVideoUrl(String relativeUrl) {
+        return BASE_URL + relativeUrl;
+    }
 
 }
