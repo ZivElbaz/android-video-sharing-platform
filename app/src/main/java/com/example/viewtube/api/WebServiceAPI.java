@@ -22,14 +22,12 @@ import retrofit2.http.PATCH;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Body;
+import retrofit2.http.Query;
 
 public interface WebServiceAPI {
-
+    // Video APIs
     @GET("videos")
     Call<List<VideoItem>> getAllVideos();
-
-    @GET("videos/{id}")
-    Call<VideoItem> getVideo(@Path("id") int id);
 
     @PATCH("videos/{id}")
     Call<VideoItem> updateVideo(@Path("id") int id, @Body VideoAPI.VideoUpdate videoUpdate);
@@ -54,6 +52,7 @@ public interface WebServiceAPI {
     @PATCH("videos/{id}/view")
     Call<Void> incrementViewCount(@Path("id") int id);
 
+
     // User APIs
     @POST("users")
     Call<AuthResponse> createUser(@Body Map<String, String> userMap);
@@ -64,16 +63,11 @@ public interface WebServiceAPI {
     @POST("token")
     Call<AuthResponse> authenticateUser(@Body User user);
 
-    @POST("token/verifyToken")
-    Call<AuthResponse> verifyToken(@Body TokenRequest tokenRequest);
-
     @GET("users/check/{username}")
     Call<UsernameCheckResponse> checkUsernameExists(@Path("username") String username);
 
-
     @GET("users/picture/{username}")
     Call<ProfilePictureResponse> getPictureByUsername(@Path("username") String username);
-
 
     @PATCH("users/{username}")
     Call<User> updateUser(@Path("username") String username, @Body User user);
@@ -87,6 +81,7 @@ public interface WebServiceAPI {
     @GET("users/{username}/videos")
     Call<List<VideoItem>> getVideosByUsername(@Path("username") String username);
 
+
     // Comment APIs
     @POST("comments")
     Call<Comment> createComment(@Body Comment comment);
@@ -98,5 +93,7 @@ public interface WebServiceAPI {
     Call<Comment> updateComment(@Path("id") int id, @Body Comment comment);
 
     @DELETE("comments/{id}")
-    Call<Void> deleteComment(@Path("id") int id);
+    Call<Void> deleteComment(@Path("id") int id, @Query("videoId") int videoId);
+
+
 }
