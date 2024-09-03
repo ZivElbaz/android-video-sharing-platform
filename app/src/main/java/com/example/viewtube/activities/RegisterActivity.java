@@ -209,11 +209,5 @@ public class RegisterActivity extends AppCompatActivity {
         editor.putString("image", user.getImage());
         editor.apply();
     }
-
-
-
-
-
-
 }
 

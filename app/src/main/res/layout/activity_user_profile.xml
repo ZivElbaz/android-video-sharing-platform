@@ -5,8 +5,6 @@
     android:padding="16dp">
 
     <!-- Profile Picture -->
-
-    <!-- Username -->
     <ImageView
         android:id="@+id/user_profile_image"
         android:layout_width="100dp"
@@ -15,16 +13,18 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_profile_foreground" />
 
+    <!-- Full Name -->
     <TextView
         android:id="@+id/user_fullname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
-        android:text="Username"
+        android:text="Full Name"
         android:textSize="18sp"
         android:textStyle="bold" />
 
+    <!-- Username -->
     <TextView
         android:id="@+id/user_username"
         android:layout_width="wrap_content"
@@ -34,6 +34,33 @@
         android:text="Username"
         android:textSize="14sp"
         android:textStyle="bold" />
+
+    <!-- Buttons for Updating User Data, Changing Password, and Deleting Account -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btn_update_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Profile" />
+
+        <Button
+            android:id="@+id/btn_change_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change Password" />
+
+        <Button
+            android:id="@+id/btn_delete_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Account"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
 
     <!-- RecyclerView for Videos -->
     <androidx.recyclerview.widget.RecyclerView

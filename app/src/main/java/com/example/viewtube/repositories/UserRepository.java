@@ -44,4 +44,16 @@ public class UserRepository {
     public void getUserData(String username, MutableLiveData<User> liveData) {
         userAPI.getUserData(username, liveData);
     }
+
+    public void updateUserData(String username, String firstName, String lastName, String image, MutableLiveData<User> liveData) {
+        userAPI.updateUserData(username, firstName, lastName, image, liveData);
+    }
+
+    public void updateUserPassword(String username, String currentPassword, String newPassword, MutableLiveData<Boolean> liveData) {
+        userAPI.updateUserPassword(username, currentPassword, newPassword);
+    }
+
+    public void deleteUser(String username, String password, MutableLiveData<Boolean> liveData) {
+        userAPI.deleteUser(username, password, liveData);
+    }
 }

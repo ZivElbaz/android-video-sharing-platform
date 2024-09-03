@@ -400,8 +400,6 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         }
     }
 
-
-
     private Bitmap getCircularBitmap(Bitmap bitmap) {
         int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
 
@@ -421,5 +419,11 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, rect, rect, paint);
         return output;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkLoggedInUser();
     }
 }
