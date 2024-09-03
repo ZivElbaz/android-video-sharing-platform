@@ -15,13 +15,15 @@ public class CommentViewModel extends AndroidViewModel {
     private CommentRepository commentRepository;
     private LiveData<List<Comment>> commentsLiveData;
     private LiveData<Comment> createdCommentLiveData;
+    private LiveData<Comment> updatedCommentLiveData;
     private LiveData<Boolean> deleteCommentLiveData;
 
     public CommentViewModel(@NonNull Application application) {
         super(application);
-        commentRepository = new CommentRepository(application);
+        commentRepository = new CommentRepository();
         commentsLiveData = commentRepository.getCommentsLiveData();
         createdCommentLiveData = commentRepository.getCreatedCommentLiveData();
+        updatedCommentLiveData = commentRepository.getUpdatedCommentLiveData();
         deleteCommentLiveData = commentRepository.getDeleteCommentLiveData();
     }
 
@@ -31,6 +33,10 @@ public class CommentViewModel extends AndroidViewModel {
 
     public LiveData<Comment> getCreatedCommentLiveData() {
         return createdCommentLiveData;
+    }
+
+    public LiveData<Comment> getUpdatedCommentLiveData() {
+        return updatedCommentLiveData;
     }
 
     public LiveData<Boolean> getDeleteCommentLiveData() {
@@ -45,7 +51,11 @@ public class CommentViewModel extends AndroidViewModel {
         commentRepository.getCommentsByVideoId(videoId);
     }
 
-    public void deleteComment(int commentId) {
-        commentRepository.deleteComment(commentId);
+    public void updateComment(Comment comment) {
+        commentRepository.updateComment(comment);
+    }
+
+    public void deleteComment(int commentId, int videoId) {
+        commentRepository.deleteComment(commentId, videoId);
     }
 }

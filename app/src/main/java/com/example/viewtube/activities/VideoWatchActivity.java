@@ -23,11 +23,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
+import com.example.viewtube.entities.Comment;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CommentsManager;
 import com.example.viewtube.managers.FileUtils;
-import com.example.viewtube.managers.SessionManager;
 import com.example.viewtube.managers.VideoDetailsManager;
 import com.example.viewtube.managers.VideoPlayerManager;
 import com.example.viewtube.viewmodels.CommentViewModel;
@@ -69,34 +69,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_watch);
 
-        // Initialize ViewModel
-        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
-        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
-        commentViewModel = new ViewModelProvider(this).get(CommentViewModel.class);
-
         // Retrieve the video ID from the intent
         videoIdentifier = getIntent().getIntExtra("video_id", -1);
-
-        // Observe the selected video item
-        videosViewModel.getSelectedVideoItemLiveData().observe(this, videoItem -> {
-            if (videoItem != null) {
-                updateVideoDetails(videoItem);
-                currentVideo = videoItem;
-
-                userViewModel.getUserData(videoItem.getUploader()).observe(this, user -> {
-                        currentVideoUploaderFirstName = user.getFirstName();
-                        currentVideoUploaderLastName= user.getLastName();
-                        synced = true;
-                });
-
-            }
-        });
-
-        // Fetch the video details if the videoIdentifier is valid and observe the changes
-        if (videoIdentifier != -1) {
-            videosViewModel.incrementViewCount(videoIdentifier);
-            videosViewModel.fetchSelectedVideoItem(videoIdentifier);
-        }
 
         // Initialize views
         PlayerView playerView = findViewById(R.id.videoPlayer);
@@ -129,6 +103,34 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         cancelDescriptionButton = findViewById(R.id.cancelDescriptionButton);
         Button btnDelete = findViewById(R.id.btnDelete);
 
+        // Initialize ViewModel
+        videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        commentViewModel = new ViewModelProvider(this).get(CommentViewModel.class);
+
+        // Observe the selected video item
+        videosViewModel.getSelectedVideoItemLiveData().observe(this, videoItem -> {
+            if (videoItem != null) {
+                updateVideoDetails(videoItem);
+                currentVideo = videoItem;
+
+                userViewModel.getUserData(videoItem.getUploader()).observe(this, user -> {
+                    if(user != null) {
+                        currentVideoUploaderFirstName = user.getFirstName();
+                        currentVideoUploaderLastName= user.getLastName();
+                        synced = true;
+                    }
+                });
+
+            }
+        });
+
+
+        // Fetch the video details if the videoIdentifier is valid and observe the changes
+        if (videoIdentifier != -1) {
+            videosViewModel.incrementViewCount(videoIdentifier);
+            videosViewModel.fetchSelectedVideoItem(videoIdentifier);
+        }
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String username = sharedPreferences.getString("username", null);
         // Get current user
@@ -141,6 +143,8 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         // Initialize managers
         videoPlayerManager = new VideoPlayerManager(playerView, playPauseButton, rewindButton, forwardButton, fullscreenButton, exoPosition, exoDuration);
         videoDetailsManager = new VideoDetailsManager(this, videoTitle, videoDescription, videoDate, videoViews, btnLike, uploaderName, uploaderProfilePic);
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        commentsManager = new CommentsManager(commentViewModel, commentsRecyclerView, user);
 
 
         // Initialize related videos list
@@ -149,8 +153,9 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         recyclerView.setAdapter(relatedVideosList);
         videosViewModel.getVideoItemsLiveData().observe(this, videoItems -> relatedVideosList.setVideoItems(videoItems));
 
-        // Initialize comments manager
-        commentsManager = new CommentsManager(videoIdentifier, SessionManager.getInstance().getVideoCommentsMap(), commentInput, commentsRecyclerView, user);
+        // Fetch and observe comments for the video
+        commentViewModel.getCommentsByVideoId(videoIdentifier);
+
 
         // Show edit buttons if the current user is the author
         if (this.user.equals(uploaderName.getText().toString())) {
@@ -240,7 +245,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             if (currentVideo != null) {
                 // Check if the user is a guest
                 if (user.equals("Guest")) {
-                    // Display a message or disable the button functionality for guests
                     Toast.makeText(this, "Guest users cannot like videos.", Toast.LENGTH_SHORT).show();
                 } else {
                     // Check if the user has already liked the video
@@ -272,10 +276,22 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             }
         });
 
-
+        // Post a comment
         btnPostComment.setOnClickListener(view -> {
-            String commentText = commentInput.getText().toString().trim();
-            commentsManager.addComment(commentText, user);
+            if (user.equals("Guest")) {
+                Toast.makeText(this, "Guest users cannot comment videos.", Toast.LENGTH_SHORT).show();
+            } else {
+                String commentText = commentInput.getText().toString().trim();
+                if (!commentText.isEmpty()) {
+                    Comment newComment = new Comment(); // Create a new Comment object
+                    newComment.setText(commentText);
+                    newComment.setUploader(user); // Set the user as the uploader
+                    newComment.setVideoId(videoIdentifier);
+                    commentViewModel.createComment(newComment); // Send the comment to the server
+                    commentsManager.addCommentToAdapter(newComment);
+                    commentInput.setText(""); // Clear the input field after posting
+                }
+            }
         });
 
         btnDownload.setOnClickListener(view -> {
