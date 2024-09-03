@@ -60,24 +60,24 @@ public class VideosViewModel extends AndroidViewModel {
     public void addVideoItem(final VideoItem videoItem, File videoFile, File thumbnailFile) {
         mRepository.add(videoItem, videoFile, thumbnailFile);
     }
-    public void updateVideoItemTitle(int videoId, String title) {
+    public void updateVideoItemTitle(int videoId, String username, String title) {
         VideoItem videoItem = selectedVideoItemLiveData.getValue();
         if (videoItem != null) {
             videoItem.setTitle(title);
-            mRepository.update(videoId, title, videoItem.getDescription());
+            mRepository.update(videoId, username, title, videoItem.getDescription());
         }
     }
 
-    public void updateVideoItemDescription(int videoId, String description) {
+    public void updateVideoItemDescription(int videoId, String username, String description) {
         VideoItem videoItem = selectedVideoItemLiveData.getValue();
         if (videoItem != null) {
             videoItem.setDescription(description);
-            mRepository.update(videoId, videoItem.getTitle(), description);
+            mRepository.update(videoId, username, videoItem.getTitle(), description);
         }
     }
 
-    public void deleteVideoItem(int videoId) {
-        mRepository.delete(videoId);
+    public void deleteVideoItem(int videoId, String username) {
+        mRepository.delete(videoId, username);
     }
 
     public void reload() {

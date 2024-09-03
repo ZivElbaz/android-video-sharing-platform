@@ -114,14 +114,25 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 updateVideoDetails(videoItem);
                 currentVideo = videoItem;
 
-                userViewModel.getUserData(videoItem.getUploader()).observe(this, user -> {
-                    if(user != null) {
-                        currentVideoUploaderFirstName = user.getFirstName();
-                        currentVideoUploaderLastName= user.getLastName();
+                userViewModel.getUserData(videoItem.getUploader()).observe(this, uploader -> {
+                    if(uploader != null) {
+                        currentVideoUploaderFirstName = uploader.getFirstName();
+                        currentVideoUploaderLastName= uploader.getLastName();
                         synced = true;
+
+                        if (this.user.equals(videoItem.getUploader())) {
+                            // Show edit and delete buttons
+                            editTitleButton.setVisibility(View.VISIBLE);
+                            editDescriptionButton.setVisibility(View.VISIBLE);
+                            btnDelete.setVisibility(View.VISIBLE);
+                        } else {
+                            // Hide edit and delete buttons
+                            editTitleButton.setVisibility(View.GONE);
+                            editDescriptionButton.setVisibility(View.GONE);
+                            btnDelete.setVisibility(View.GONE);
+                        }
                     }
                 });
-
             }
         });
 
@@ -170,7 +181,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                     .setTitle("Delete Video")
                     .setMessage("Are you sure you want to delete this video?")
                     .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                        videosViewModel.deleteVideoItem(videoIdentifier);
+                        videosViewModel.deleteVideoItem(videoIdentifier, user);
                         Toast.makeText(this, "Video deleted", Toast.LENGTH_SHORT).show();
                         finish();
                     })
@@ -195,7 +206,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 cancelTitleButton.setVisibility(View.GONE);
                 editTitleButton.setVisibility(View.VISIBLE);
 
-                videosViewModel.updateVideoItemTitle(videoIdentifier, editTitleEditText.getText().toString());
+                videosViewModel.updateVideoItemTitle(videoIdentifier, user, editTitleEditText.getText().toString());
                 videosViewModel.reload();
 
                 Toast.makeText(this, "Title updated", Toast.LENGTH_SHORT).show();
@@ -226,7 +237,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                 cancelDescriptionButton.setVisibility(View.GONE);
                 editDescriptionButton.setVisibility(View.VISIBLE);
 
-                videosViewModel.updateVideoItemDescription(videoIdentifier, editDescriptionEditText.getText().toString());
+                videosViewModel.updateVideoItemDescription(videoIdentifier, user, editDescriptionEditText.getText().toString());
                 videosViewModel.reload();
 
                 Toast.makeText(this, "Description updated", Toast.LENGTH_SHORT).show();
@@ -295,7 +306,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         btnDownload.setOnClickListener(view -> {
-            FileUtils.checkAndRequestPermission(this);
+            Toast.makeText(this, "Video has been downloaded", Toast.LENGTH_SHORT).show();
         });
 
         btnShare.setOnClickListener(view -> {

@@ -29,11 +29,11 @@ public interface WebServiceAPI {
     @GET("videos")
     Call<List<VideoItem>> getAllVideos();
 
-    @PATCH("videos/{id}")
-    Call<VideoItem> updateVideo(@Path("id") int id, @Body VideoAPI.VideoUpdate videoUpdate);
+    @PATCH("users/{username}/videos/{id}")
+    Call<VideoItem> updateVideo(@Path("username") String username, @Path("id") int id, @Body VideoAPI.VideoUpdate videoUpdate);
 
-    @DELETE("videos/{id}")
-    Call<Void> deleteVideo(@Path("id") int id);
+    @DELETE("users/{username}/videos/{id}")
+    Call<Void> deleteVideo(@Path("username") String username, @Path("id") int id);
 
     @Multipart
     @POST("videos")
