@@ -210,26 +210,30 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
 
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
-            // Clear user data from SharedPreferences
-            SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
+            if(isLoggedIn) {
+                // Clear user data from SharedPreferences
+                SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            // Clear only user-specific data
-            editor.remove("username");
-            editor.remove("firstName");
-            editor.remove("lastName");
-            editor.remove("image");
+                // Clear only user-specific data
+                editor.remove("username");
+                editor.remove("firstName");
+                editor.remove("lastName");
+                editor.remove("image");
 
-            // Apply the changes
-            editor.apply();
+                // Apply the changes
+                editor.apply();
 
-            // Update the UI to guest mode
-            isLoggedIn = false;
-            showGuestUI();
+                // Update the UI to guest mode
+                isLoggedIn = false;
+                showGuestUI();
 
+            } else {
+                Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
+                startActivity(loginIntent);
+            }
             return true;
         });
-
     }
 
     private static final int UPLOAD_REQUEST_CODE = 1001;
@@ -336,6 +340,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private void updateUIWithUserDetails(User user) {
         setUserImage(user, profileImageView);
         usernameView.setText(user.getUsername());
+        sideBar.getMenu().findItem(R.id.nav_logout).setTitle("Logout");
         bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(false);
         bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
     }
@@ -343,6 +348,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     private void showGuestUI() {
         profileImageView.setImageResource(R.drawable.ic_profile_foreground);
         usernameView.setText(R.string.guest);
+        sideBar.getMenu().findItem(R.id.nav_logout).setTitle("Login");
         bottomNavBar.getMenu().findItem(R.id.nav_login).setVisible(true);
         bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(false);
     }

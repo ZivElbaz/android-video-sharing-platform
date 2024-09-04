@@ -62,12 +62,12 @@ public class VideosRepository {
         api.add(videoItem, videoFile, thumbnailFile);
     }
 
-    public void update(final int videoId, String title, String description) {
-        api.update(videoId, title, description);
+    public void update(final int videoId, String username, String title, String description) {
+        api.updateVideo(videoId, username, title, description);
     }
 
-    public void delete(final int videoId) {
-        api.delete(videoId);
+    public void delete(final int videoId, String username) {
+        api.deleteVideo(videoId, username);
     }
 
     public void reload() {

@@ -145,9 +145,8 @@ public class VideoAPI {
         });
     }
 
-
-    public void update(int videoId, String title, String description) {
-        Call<VideoItem> call = webServiceAPI.updateVideo(videoId, new VideoUpdate(title, description));
+    public void updateVideo(int videoId, String username, String title, String description) {
+        Call<VideoItem> call = webServiceAPI.updateVideo(username, videoId, new VideoUpdate(title, description));
         call.enqueue(new Callback<VideoItem>() {
             @Override
             public void onResponse(Call<VideoItem> call, Response<VideoItem> response) {
@@ -167,8 +166,8 @@ public class VideoAPI {
         });
     }
 
-    public void delete(int videoId) {
-        Call<Void> call = webServiceAPI.deleteVideo(videoId);
+    public void deleteVideo(int videoId, String username) {
+        Call<Void> call = webServiceAPI.deleteVideo(username, videoId);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -227,7 +226,6 @@ public class VideoAPI {
             }
         });
     }
-
 
     class VideoUpdate {
         private String title;
