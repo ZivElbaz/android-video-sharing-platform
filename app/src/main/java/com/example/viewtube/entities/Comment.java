@@ -11,6 +11,7 @@ public class Comment {
     private String uploader;
     private int videoId;
 
+    // Getters and setters
     public int getId() {
         return id;
     }

@@ -10,7 +10,6 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-
 
 import com.example.viewtube.R;
 import com.example.viewtube.entities.VideoItem;
@@ -31,9 +29,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Locale;
 
-
-
 public class UploadActivity extends AppCompatActivity {
+
+    // UI components and fields
     private EditText titleEditText, descriptionEditText;
     private FileDescriptor fileDescriptor;
     private static final int PICK_VIDEO_REQUEST = 1;
@@ -46,14 +44,19 @@ public class UploadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload);
 
+        // Initialize UI components
         titleEditText = findViewById(R.id.title_edit_text);
         descriptionEditText = findViewById(R.id.description_edit_text);
         Button selectVideoButton = findViewById(R.id.select_video_button);
         Button uploadButton = findViewById(R.id.upload_button);
 
+        // Initialize ViewModel
         videosViewModel = new ViewModelProvider(this).get(VideosViewModel.class);
 
+        // Handle select video button click
         selectVideoButton.setOnClickListener(v -> openFilePicker());
+
+        // Handle upload button click
         uploadButton.setOnClickListener(v -> {
             String title = titleEditText.getText().toString().trim();
             String description = descriptionEditText.getText().toString().trim();
@@ -61,7 +64,7 @@ public class UploadActivity extends AppCompatActivity {
                 Toast.makeText(UploadActivity.this, "Please fill in all fields and select a video", Toast.LENGTH_SHORT).show();
             } else {
                 try {
-                    uploadVideo(title, description);
+                    uploadVideo(title, description); // Upload video when input is valid
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -69,6 +72,7 @@ public class UploadActivity extends AppCompatActivity {
         });
     }
 
+    // Open file picker to select a video
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("video/*");
@@ -79,10 +83,10 @@ public class UploadActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK && data != null) {
-            videoUri = data.getData();
-            fileDescriptor = uriToFileDescriptor(this, videoUri);
+            videoUri = data.getData(); // Get the video URI
+            fileDescriptor = uriToFileDescriptor(this, videoUri); // Convert URI to FileDescriptor
             try {
-                thumbnailBitmap = createVideoThumbnail(videoUri); // Generate thumbnail immediately
+                thumbnailBitmap = createVideoThumbnail(videoUri); // Generate video thumbnail
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -90,6 +94,7 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
+    // Convert URI to FileDescriptor
     public static FileDescriptor uriToFileDescriptor(Context context, Uri uri) {
         ContentResolver resolver = context.getContentResolver();
         try {
@@ -103,34 +108,38 @@ public class UploadActivity extends AppCompatActivity {
         return null;
     }
 
+    // Upload video and its metadata
     private void uploadVideo(String title, String description) throws IOException {
-        String videoPath = createFileFromDescriptor(fileDescriptor, this);
+        String videoPath = createFileFromDescriptor(fileDescriptor, this); // Create file from descriptor
         if (videoPath == null) {
             Log.e("VideoUpload", "Failed to create video from file descriptor");
             return;
         }
 
         File videoFile = new File(videoPath);
-        File thumbnailFile = saveThumbnail(this, thumbnailBitmap, title);
+        File thumbnailFile = saveThumbnail(this, thumbnailBitmap, title); // Save video thumbnail
 
         if (thumbnailFile == null) {
             Log.e("ThumbnailCreation", "Failed to create or save thumbnail");
             return;
         }
 
+        // Get uploader's username from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String uploader = sharedPreferences.getString("username", null);
-        String duration = getVideoDuration(videoPath);
+        String duration = getVideoDuration(videoPath); // Get video duration
 
+        // Create VideoItem object
         VideoItem videoItem = new VideoItem(0, title, description, uploader, 0, 0, null, duration, null, null);
-        videosViewModel.addVideoItem(videoItem, videoFile, thumbnailFile);
+        videosViewModel.addVideoItem(videoItem, videoFile, thumbnailFile); // Add video to ViewModel
 
-        // Create an Intent to pass back the uploaded video data to HomeActivity
+        // Return to HomeActivity after uploading
         Intent intent = new Intent(UploadActivity.this, HomeActivity.class);
         setResult(RESULT_OK, intent);
-        finish(); // Finish the UploadActivity and return to HomeActivity
+        finish(); // Close UploadActivity
     }
 
+    // Create thumbnail from the selected video
     private Bitmap createVideoThumbnail(Uri videoUri) throws IOException {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
@@ -144,6 +153,7 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
+    // Create video file from a FileDescriptor
     private String createFileFromDescriptor(FileDescriptor fd, Context context) {
         File outputFile = new File(context.getCacheDir(), "video_" + System.currentTimeMillis() + ".mp4");
         try (FileInputStream fis = new FileInputStream(fd);
@@ -160,6 +170,7 @@ public class UploadActivity extends AppCompatActivity {
         return outputFile.getAbsolutePath();
     }
 
+    // Save thumbnail image to internal storage
     private File saveThumbnail(Context context, Bitmap bitmap, String title) {
         File thumbnailFile = new File(context.getFilesDir(), "thumbnail_" + title + ".png");
         try (FileOutputStream fos = new FileOutputStream(thumbnailFile)) {
@@ -171,7 +182,7 @@ public class UploadActivity extends AppCompatActivity {
         return thumbnailFile;
     }
 
-
+    // Get video duration in hours, minutes, and seconds
     private String getVideoDuration(String videoPath) throws IOException {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {

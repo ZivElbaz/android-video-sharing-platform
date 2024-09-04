@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.viewtube.R;
-import com.example.viewtube.activities.HomeActivity;
 
 public class MainActivity extends AppCompatActivity {
     public static Context context;

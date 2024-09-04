@@ -31,9 +31,9 @@ import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.viewmodels.UserViewModel;
 
-
 public class UserProfileActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
+    // UI components
     private ImageView profileImageView;
     private TextView usernameView;
     private TextView userFullNameView;
@@ -45,6 +45,8 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
+
+        // Initialize UI components
         Button btnUpdateProfile = findViewById(R.id.btn_update_profile);
         Button btnChangePassword = findViewById(R.id.btn_change_password);
         Button btnDeleteAccount = findViewById(R.id.btn_delete_account);
@@ -52,23 +54,29 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
         usernameView = findViewById(R.id.user_username);
         videosRecyclerView = findViewById(R.id.user_videos_recycler_view);
         userFullNameView = findViewById(R.id.user_fullname);
+
+        // Initialize ViewModel
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
-
+        // Initialize RecyclerView for user's videos
         videoList = new VideoList(this, this);
         videosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         videosRecyclerView.setAdapter(videoList);
 
+        // Get user data passed via intent
         String username = getIntent().getStringExtra("username");
         String firstName = getIntent().getStringExtra("firstName");
         String lastName = getIntent().getStringExtra("lastName");
         String profilePic = getIntent().getStringExtra("profilePic");
 
+        // Update UI with the user's details
         updateUIWithUserDetails(username, firstName, lastName, profilePic);
 
+        // Get the current logged-in user from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String currentUser = sharedPreferences.getString("username", null);
 
+        // Show or hide profile update options based on whether the user is viewing their own profile
         if (currentUser != null && currentUser.equals(username)) {
             btnUpdateProfile.setVisibility(View.VISIBLE);
             btnChangePassword.setVisibility(View.VISIBLE);
@@ -79,6 +87,7 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
             btnDeleteAccount.setVisibility(View.GONE);
         }
 
+        // Handle profile update button click
         btnUpdateProfile.setOnClickListener(v -> {
             Intent intent = new Intent(UserProfileActivity.this, UpdateProfileActivity.class);
             intent.putExtra("username", username);
@@ -89,16 +98,18 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
             finish();
         });
 
+        // Handle password change button click
         btnChangePassword.setOnClickListener(v -> {
             Intent intent = new Intent(UserProfileActivity.this, ChangePasswordActivity.class);
             intent.putExtra("username", username);
             startActivity(intent);
         });
 
+        // Handle account deletion button click
         btnDeleteAccount.setOnClickListener(v -> showDeleteAccountDialog(username));
     }
 
-
+    // Update UI with user details
     private void updateUIWithUserDetails(String username, String firstName, String lastName, String profilePic) {
         setUserImage(profilePic, profileImageView);
         userFullNameView.setText(firstName + " " + lastName);
@@ -106,6 +117,7 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
         fetchUserVideos(username);
     }
 
+    // Fetch and display user's videos
     private void fetchUserVideos(String username) {
         userViewModel.getVideosByUsername(username).observe(this, videoItems -> {
             if (videoItems != null) {
@@ -114,6 +126,7 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
         });
     }
 
+    // Set user profile image from Base64 string
     private void setUserImage(String profilePic, ImageView imageView) {
         String base64Image = profilePic;
         if (base64Image != null) {
@@ -129,6 +142,7 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
         }
     }
 
+    // Create a circular bitmap from a rectangular bitmap
     private Bitmap getCircularBitmap(Bitmap bitmap) {
         int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
 
@@ -157,6 +171,7 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
         startActivity(intent);
     }
 
+    // Show a dialog to confirm account deletion
     private void showDeleteAccountDialog(String username) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
@@ -169,22 +184,22 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
 
         AlertDialog dialog = builder.create();
 
+        // Handle confirm account deletion
         confirmDeleteButton.setOnClickListener(v -> {
             String password = passwordInput.getText().toString().trim();
             if (!password.isEmpty()) {
                 userViewModel.deleteUser(username, password).observe(this, success -> {
                     if (Boolean.TRUE.equals(success)) {
                         Toast.makeText(this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
+
+                        // Clear user data from SharedPreferences
                         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                        // Clear only user-specific data
                         editor.remove("username");
                         editor.remove("firstName");
                         editor.remove("lastName");
                         editor.remove("image");
-
-                        // Apply the changes
                         editor.apply();
 
                         finish();
@@ -198,10 +213,9 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
             }
         });
 
+        // Handle cancel account deletion
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }
-
-
 }

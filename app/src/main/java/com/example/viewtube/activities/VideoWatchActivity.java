@@ -16,7 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,10 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.Comment;
-import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.managers.CommentsManager;
-import com.example.viewtube.managers.FileUtils;
 import com.example.viewtube.managers.VideoDetailsManager;
 import com.example.viewtube.managers.VideoPlayerManager;
 import com.example.viewtube.viewmodels.CommentViewModel;
@@ -35,7 +33,6 @@ import com.example.viewtube.viewmodels.UserViewModel;
 import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.exoplayer2.ui.PlayerView;
 
-import java.io.File;
 import java.util.List;
 
 public class VideoWatchActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
@@ -136,7 +133,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
             }
         });
 
-
         // Fetch the video details if the videoIdentifier is valid and observe the changes
         if (videoIdentifier != -1) {
             videosViewModel.incrementViewCount(videoIdentifier);
@@ -157,7 +153,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentsManager = new CommentsManager(commentViewModel, commentsRecyclerView, user);
 
-
         // Initialize related videos list
         relatedVideosList = new VideoList(this, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -166,7 +161,6 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
 
         // Fetch and observe comments for the video
         commentViewModel.getCommentsByVideoId(videoIdentifier);
-
 
         // Show edit buttons if the current user is the author
         if (this.user.equals(uploaderName.getText().toString())) {
@@ -277,7 +271,7 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
                     // Update the video details in the local database
                     videosViewModel.updateVideo(currentVideo);
 
-                    videosViewModel.userLiked(videoIdentifier, user);
+                    videosViewModel.userLiked(currentVideo.getId(), user);
                     videoDetailsManager.setVideoDetails(currentVideo);
 
                     // Update the UI
@@ -310,9 +304,15 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
 
         btnShare.setOnClickListener(view -> {
-            Uri contentUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", new File(videoUri.getPath()));
-            FileUtils.shareVideo(this, contentUri, videoTitle.getText().toString());
+            String videoUrl = currentVideo.getVideoUrl();
+            String shareText = "Check out this video: " + videoUrl;
+
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+            startActivity(Intent.createChooser(shareIntent, "Share video via"));
         });
+
 
         uploaderProfilePic.setOnClickListener(view -> {
             if(synced) {
@@ -337,10 +337,13 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         });
     }
 
+    // Initialize the video player
     private void initializePlayer() {
+        // Release the player if it's already initialized
         if (videoPlayerManager != null) {
             videoPlayerManager.releasePlayer();
         }
+        // Check if video URI is valid, then initialize the player
         if (videoUri != null) {
             videoPlayerManager.initializePlayer(this, videoUri);
         } else {
@@ -348,47 +351,66 @@ public class VideoWatchActivity extends AppCompatActivity implements VideoList.V
         }
     }
 
+    // Update video details such as title, description, and play the video
     private void updateVideoDetails(VideoItem videoItem) {
+        // Set the video details (title, description, etc.) using the VideoDetailsManager
         videoDetailsManager.setVideoDetails(videoItem);
+        // Parse the video URL and prepare the player
         videoUri = Uri.parse(videoItem.getVideoUrl());
         initializePlayer();
 
-        // Check if the user has already liked the video
+        // If the user is logged in, check if they have already liked the video
         if (user != null && !user.equals("Guest")) {
             List<String> likedBy = videoItem.getLikedBy();
-            liked = likedBy.contains(user);
+            liked = likedBy.contains(user); // Check if the current user has liked the video
+            // Update the like button appearance based on the like status
             btnLike.setTextColor(ContextCompat.getColor(this, liked ? R.color.red : R.color.black));
             btnLike.setCompoundDrawablesWithIntrinsicBounds(liked ? R.drawable.liked : R.drawable.like, 0, 0, 0);
         } else {
-            // If user is a guest, set the button to its default state
+            // If the user is a guest, reset the like button to its default state
             liked = false;
             btnLike.setTextColor(ContextCompat.getColor(this, R.color.black));
             btnLike.setCompoundDrawablesWithIntrinsicBounds(R.drawable.like, 0, 0, 0);
         }
     }
 
+    // Pause the video player when the activity is paused
     @Override
     protected void onPause() {
         super.onPause();
         videoPlayerManager.releasePlayer();
     }
 
+    // Release the video player when the activity is stopped
     @Override
     protected void onStop() {
         super.onStop();
         videoPlayerManager.releasePlayer();
     }
 
+    // Re-initialize the video player when the activity is resumed
     @Override
     protected void onResume() {
         super.onResume();
         initializePlayer();
     }
 
+    // Handle video item click events
     @Override
     public void onVideoItemClick(VideoItem videoItem) {
-        synced = false;
+        synced = false; // Reset sync status
+        // Set the selected video in the ViewModel
         videosViewModel.setSelectedVideoItem(videoItem);
+
+        // Clear the current comments from the comments manager
+        commentsManager.clearComments();
+
+        // Fetch and display comments for the selected video
+        commentViewModel.getCommentsByVideoId(videoItem.getId());
+
+        // Scroll to the top of the page when a new video is selected
+        NestedScrollView scrollView = findViewById(R.id.scrollView);
+        scrollView.smoothScrollTo(0, 0);
     }
 
 }
