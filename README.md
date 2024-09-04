@@ -23,12 +23,14 @@ Before running the application, make sure you have the following:
 ## Installation
 ### Clone the Repository:
 git clone https://github.com/ZivElbaz/android-video-sharing-platform
-### Open and Run the Project:
+### Open the Project:
 Open Android Studio.
 Import the project you just cloned.
 ### Update the Base URL:
-- Go to the manager/config folder and update the base_url configuration to match the IP address where the server is running.
-- If running the server on the emulator, use 10.0.2.2 as the base URL for the Android emulator, or update it to your machine's IP if testing on a real device.
+- Go to the Config in the manager folder and update the base_url configuration to match the IP address where the server is running.
+- If running on the emulator, use 10.0.2.2 as the base URL
+- If running on a real device use your machine's IP as the base URL
+### Run the Project:
 Build the project and run it on your Android device or emulator.
 
 ## Working Process
