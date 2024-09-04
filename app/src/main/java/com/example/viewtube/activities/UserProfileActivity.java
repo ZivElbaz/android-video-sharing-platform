@@ -11,9 +11,15 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,7 +30,7 @@ import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
 import com.example.viewtube.viewmodels.UserViewModel;
-import com.example.viewtube.viewmodels.VideosViewModel;
+
 
 public class UserProfileActivity extends AppCompatActivity implements VideoList.VideoItemClickListener {
 
@@ -39,11 +45,15 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
+        Button btnUpdateProfile = findViewById(R.id.btn_update_profile);
+        Button btnChangePassword = findViewById(R.id.btn_change_password);
+        Button btnDeleteAccount = findViewById(R.id.btn_delete_account);
         profileImageView = findViewById(R.id.user_profile_image);
         usernameView = findViewById(R.id.user_username);
         videosRecyclerView = findViewById(R.id.user_videos_recycler_view);
         userFullNameView = findViewById(R.id.user_fullname);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+
 
         videoList = new VideoList(this, this);
         videosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -56,7 +66,38 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
 
         updateUIWithUserDetails(username, firstName, lastName, profilePic);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String currentUser = sharedPreferences.getString("username", null);
+
+        if (currentUser != null && currentUser.equals(username)) {
+            btnUpdateProfile.setVisibility(View.VISIBLE);
+            btnChangePassword.setVisibility(View.VISIBLE);
+            btnDeleteAccount.setVisibility(View.VISIBLE);
+        } else {
+            btnUpdateProfile.setVisibility(View.GONE);
+            btnChangePassword.setVisibility(View.GONE);
+            btnDeleteAccount.setVisibility(View.GONE);
+        }
+
+        btnUpdateProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(UserProfileActivity.this, UpdateProfileActivity.class);
+            intent.putExtra("username", username);
+            intent.putExtra("firstName", firstName);
+            intent.putExtra("lastName", lastName);
+            intent.putExtra("profilePic", profilePic);
+            startActivity(intent);
+            finish();
+        });
+
+        btnChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(UserProfileActivity.this, ChangePasswordActivity.class);
+            intent.putExtra("username", username);
+            startActivity(intent);
+        });
+
+        btnDeleteAccount.setOnClickListener(v -> showDeleteAccountDialog(username));
     }
+
 
     private void updateUIWithUserDetails(String username, String firstName, String lastName, String profilePic) {
         setUserImage(profilePic, profileImageView);
@@ -115,5 +156,52 @@ public class UserProfileActivity extends AppCompatActivity implements VideoList.
         intent.putExtra("video_id", videoItem.getId());
         startActivity(intent);
     }
+
+    private void showDeleteAccountDialog(String username) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_delete_account, null);
+        builder.setView(dialogView);
+
+        EditText passwordInput = dialogView.findViewById(R.id.delete_password_input);
+        Button confirmDeleteButton = dialogView.findViewById(R.id.confirm_delete_button);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_delete_button);
+
+        AlertDialog dialog = builder.create();
+
+        confirmDeleteButton.setOnClickListener(v -> {
+            String password = passwordInput.getText().toString().trim();
+            if (!password.isEmpty()) {
+                userViewModel.deleteUser(username, password).observe(this, success -> {
+                    if (Boolean.TRUE.equals(success)) {
+                        Toast.makeText(this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
+                        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                        // Clear only user-specific data
+                        editor.remove("username");
+                        editor.remove("firstName");
+                        editor.remove("lastName");
+                        editor.remove("image");
+
+                        // Apply the changes
+                        editor.apply();
+
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Failed to delete account. Check your password and try again.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                dialog.dismiss();
+            } else {
+                passwordInput.setError("Password is required");
+            }
+        });
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
 
 }

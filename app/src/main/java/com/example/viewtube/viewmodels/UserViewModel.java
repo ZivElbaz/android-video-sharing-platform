@@ -51,4 +51,22 @@ public class UserViewModel extends AndroidViewModel {
         userRepository.getUserData(username, userLiveData);
         return userLiveData;
     }
+
+    public LiveData<User> updateUserData(String username, String firstName, String lastName, String image) {
+        MutableLiveData<User> liveData = new MutableLiveData<>();
+        userRepository.updateUserData(username, firstName, lastName, image, liveData);
+        return liveData;
+    }
+
+    public LiveData<Boolean> updateUserPassword(String username, String currentPassword, String newPassword) {
+        MutableLiveData<Boolean> liveData = new MutableLiveData<>();
+        userRepository.updateUserPassword(username, currentPassword, newPassword, liveData);
+        return liveData;
+    }
+
+    public LiveData<Boolean> deleteUser(String username, String password) {
+        MutableLiveData<Boolean> liveData = new MutableLiveData<>();
+        userRepository.deleteUser(username, password, liveData);
+        return liveData;
+    }
 }

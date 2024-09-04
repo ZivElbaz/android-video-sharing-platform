@@ -222,6 +222,83 @@ public class UserAPI {
         });
     }
 
+    public void updateUserData(String username, String firstName, String lastName, String image, MutableLiveData<User> liveData) {
+        Map<String, String> userData = new HashMap<>();
+        userData.put("firstName", firstName);
+        userData.put("lastName", lastName);
+        userData.put("image", image);
+
+        Call<User> call = webServiceAPI.updateUser(username, userData);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    User updatedUser = response.body();
+                    new Thread(() -> {
+                        // Post the value to LiveData on the main thread
+                        liveData.postValue(updatedUser);
+                    }).start();
+                } else {
+                    Log.e("UserAPI", "Response error: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.e("UserAPI", "Request failed", t);
+            }
+        });
+    }
+
+    public void updateUserPassword(String username, String currentPassword, String newPassword) {
+        Map<String, String> passwordData = new HashMap<>();
+        passwordData.put("username", username);
+        passwordData.put("currentPassword", currentPassword);
+        passwordData.put("newPassword", newPassword);
+
+        Call<AuthResponse> call = webServiceAPI.updatePassword(passwordData);
+        call.enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AuthResponse authResponse = response.body();
+                    // Handle successful password change, e.g., update token or notify user
+                } else {
+                    Log.e("UserAPI", "Response error: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                Log.e("UserAPI", "Request failed", t);
+            }
+        });
+    }
+
+    public void deleteUser(String username, String password, MutableLiveData<Boolean> liveData) {
+        Map<String, String> passwordData = new HashMap<>();
+        passwordData.put("password", password);
+
+        Call<Void> call = webServiceAPI.deleteUser(username, passwordData);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    liveData.postValue(true);
+                } else {
+                    Log.e("UserAPI", "Response error: " + response.errorBody());
+                    liveData.postValue(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("UserAPI", "Request failed", t);
+                liveData.postValue(false);
+            }
+        });
+    }
+
     private String getFullVideoUrl(String relativeUrl) {
         return BASE_URL + relativeUrl;
     }
