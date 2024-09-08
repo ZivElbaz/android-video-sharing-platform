@@ -39,6 +39,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
     private EditText lastNameEditText;
     private ImageView profileImageView;
     private Button saveButton;
+    private Button cancelButton;
     private Uri profilePictureUri;
     private UserViewModel userViewModel;
     private String username;
@@ -56,6 +57,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         lastNameEditText = findViewById(R.id.edit_last_name);
         profileImageView = findViewById(R.id.profile_image_view);
         saveButton = findViewById(R.id.save_button);
+        cancelButton = findViewById(R.id.cancel_button);
         Button selectPictureButton = findViewById(R.id.select_picture_button);
 
         // Get current user details from Intent
@@ -78,6 +80,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
         // Set click listener for save button
         saveButton.setOnClickListener(v -> checkDataEntered());
+        // Set click listener for cancel button
+        cancelButton.setOnClickListener(v ->{
+            Intent homeIntent = new Intent(UpdateProfileActivity.this, HomeActivity.class);
+            startActivity(homeIntent);
+            finish();
+        });
     }
 
     @Override
