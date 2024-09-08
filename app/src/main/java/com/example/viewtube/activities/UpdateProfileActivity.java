@@ -34,6 +34,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE = 1;
 
+    // UI components
     private EditText firstNameEditText;
     private EditText lastNameEditText;
     private ImageView profileImageView;
@@ -47,29 +48,35 @@ public class UpdateProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_profile);
 
+        // Initialize ViewModel
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
+        // Initialize UI components
         firstNameEditText = findViewById(R.id.edit_first_name);
         lastNameEditText = findViewById(R.id.edit_last_name);
         profileImageView = findViewById(R.id.profile_image_view);
         saveButton = findViewById(R.id.save_button);
         Button selectPictureButton = findViewById(R.id.select_picture_button);
 
+        // Get current user details from Intent
         username = getIntent().getStringExtra("username");
         String currentFirstName = getIntent().getStringExtra("firstName");
         String currentLastName = getIntent().getStringExtra("lastName");
         String currentProfilePic = getIntent().getStringExtra("profilePic");
 
+        // Set current user details to UI components
         firstNameEditText.setText(currentFirstName);
         lastNameEditText.setText(currentLastName);
         setUserImage(currentProfilePic, profileImageView);
 
+        // Set click listener for selecting a profile picture
         selectPictureButton.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("image/*");
             startActivityForResult(intent, PICK_IMAGE);
         });
 
+        // Set click listener for save button
         saveButton.setOnClickListener(v -> checkDataEntered());
     }
 
@@ -77,35 +84,41 @@ public class UpdateProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            // Get selected image URI and set it to the profileImageView
             profilePictureUri = data.getData();
             profileImageView.setImageURI(profilePictureUri);
         }
     }
 
+    // Validate if the entered data is correct
     private void checkDataEntered() {
         String firstName = firstNameEditText.getText().toString().trim();
         String lastName = lastNameEditText.getText().toString().trim();
 
+        // Check if first name is empty
         if (TextUtils.isEmpty(firstName)) {
             firstNameEditText.setError("First name is required!");
             return;
         }
 
+        // Check if last name is empty
         if (TextUtils.isEmpty(lastName)) {
             lastNameEditText.setError("Last name is required!");
             return;
         }
 
+        // Proceed to update user profile if data is valid
         updateUserProfile(firstName, lastName);
     }
 
+    // Update user profile with new details
     private void updateUserProfile(String firstName, String lastName) {
         User updatedUser = new User();
         updatedUser.setUsername(username);
         updatedUser.setFirstName(firstName);
         updatedUser.setLastName(lastName);
 
-        // Convert the profile picture to base64
+        // Convert the profile picture to base64 if a new picture is selected
         if (profilePictureUri != null) {
             try {
                 InputStream imageStream = getContentResolver().openInputStream(profilePictureUri);
@@ -134,10 +147,14 @@ public class UpdateProfileActivity extends AppCompatActivity {
             updatedUser.setImage(sharedPreferences.getString("image", null));
         }
 
+        // Update user data using ViewModel
         userViewModel.updateUserData(username, firstName, lastName, updatedUser.getImage()).observe(this, user -> {
             if (user != null) {
+                // Save updated user data
                 saveUserData(user);
                 Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+
+                // Redirect to UserProfileActivity with updated data
                 Intent intent = new Intent(UpdateProfileActivity.this, UserProfileActivity.class);
                 intent.putExtra("username", username);
                 intent.putExtra("firstName", user.getFirstName());
@@ -151,10 +168,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
         });
     }
 
+    // Save updated user data in SharedPreferences
     private void saveUserData(User user) {
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        // Remove old data and save new data
         editor.remove("firstName");
         editor.remove("lastName");
         editor.remove("image");
@@ -165,6 +184,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    // Set user image from Base64 string
     private void setUserImage(String profilePic, ImageView imageView) {
         String base64Image = profilePic;
         if (base64Image != null) {
@@ -176,10 +196,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
             Bitmap circularBitmap = getCircularBitmap(decodedByte);
             imageView.setImageBitmap(circularBitmap);
         } else {
-            imageView.setImageResource(R.drawable.ic_profile_foreground); // Default profile image
+            // Set default profile image if no image is available
+            imageView.setImageResource(R.drawable.ic_profile_foreground);
         }
     }
 
+    // Convert a rectangular Bitmap into a circular Bitmap
     private Bitmap getCircularBitmap(Bitmap bitmap) {
         int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
 

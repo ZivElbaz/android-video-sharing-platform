@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -87,6 +86,7 @@ public class RegisterActivity extends AppCompatActivity {
         return TextUtils.isEmpty(str);
     }
 
+    // Validate if password meets criteria
     boolean isPasswordValid(EditText text) {
         CharSequence str = text.getText().toString();
         if (str.length() < 8) {
@@ -98,6 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
         boolean hasDigit = false;
         boolean hasSpecialChar = false;
 
+        // Check each character in password for criteria
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
             if (Character.isUpperCase(c)) hasUpperCase = true;
@@ -109,10 +110,12 @@ public class RegisterActivity extends AppCompatActivity {
         return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar;
     }
 
+    // Check if password and confirm password match
     boolean isPasswordsMatch(EditText password, EditText confirmPassword) {
         return password.getText().toString().equals(confirmPassword.getText().toString());
     }
 
+    // Validate all fields before registering the user
     void checkDataEntered() {
         if (isEmpty(firstName)) {
             firstName.setError("First name is required!");
@@ -142,6 +145,7 @@ public class RegisterActivity extends AppCompatActivity {
         checkUsernameAndRegister();
     }
 
+    // Check if the username is already taken before registering the user
     private void checkUsernameAndRegister() {
         userViewModel.checkUsernameExists(username.getText().toString()).observe(this, exists -> {
             if (exists != null && exists) {
@@ -152,6 +156,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    // Register the new user in the system
     private void registerUser() {
         User newUser = new User();
         newUser.setUsername(username.getText().toString().trim());
@@ -200,6 +205,8 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
+
+    // Save registered user data in SharedPreferences
     private void saveUserData(User user) {
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

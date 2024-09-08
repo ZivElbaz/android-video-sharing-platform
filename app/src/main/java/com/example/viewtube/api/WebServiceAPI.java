@@ -3,7 +3,6 @@ package com.example.viewtube.api;
 import com.example.viewtube.entities.AuthResponse;
 import com.example.viewtube.entities.Comment;
 import com.example.viewtube.entities.ProfilePictureResponse;
-import com.example.viewtube.entities.TokenRequest;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.UsernameCheckResponse;
 import com.example.viewtube.entities.VideoItem;
@@ -77,10 +76,8 @@ public interface WebServiceAPI {
     @HTTP(method = "DELETE", path = "users/{username}", hasBody = true)
     Call<Void> deleteUser(@Path("username") String username, @Body Map<String, String> passwordData);
 
-
     @POST("users/password")
     Call<AuthResponse> updatePassword(@Body Map<String, String> passwordData);
-
 
     @GET("users/{username}/videos")
     Call<List<VideoItem>> getVideosByUsername(@Path("username") String username);

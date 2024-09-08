@@ -64,18 +64,21 @@ public class VideoList extends RecyclerView.Adapter<VideoList.VideoViewHolder> {
         holder.detailsTextView.setText(videoItem.getUploader() + " - " + videoItem.getViews() + " views - " + videoItem.getDate());
         holder.durationTextView.setText(videoItem.getDuration());
 
-        // Load thumbnail image using Glide
+        // Load thumbnail image using Glide with placeholders
         Glide.with(holder.itemView.getContext())
                 .load(videoItem.getThumbnail())
                 .placeholder(android.R.drawable.screen_background_light_transparent)
-                .error(R.drawable.ic_home_background) // Optional: set error drawable if loading fails
+                .error(R.drawable.ic_home_background)  // Error image if thumbnail fails to load
+                .centerCrop()  // Adjust image scaling
                 .into(holder.thumbnailImageView);
 
+        // Load the uploader's profile picture
         videoDetailsManager.setUploaderImage(videoItem, holder.channelIconImageView);
 
         // Set the click listener for the item view
         holder.itemView.setOnClickListener(v -> videoItemClickListener.onVideoItemClick(videoItem));
     }
+
 
     // Method to get the total number of items in the data set
     @Override

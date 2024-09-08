@@ -37,7 +37,6 @@ import com.example.viewtube.R;
 import com.example.viewtube.adapters.VideoList;
 import com.example.viewtube.entities.User;
 import com.example.viewtube.entities.VideoItem;
-import com.example.viewtube.viewmodels.UserViewModel;
 import com.example.viewtube.viewmodels.VideosViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -187,7 +186,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             }
         });
 
-
+        // Handle profile image click
         profileImageView.setOnClickListener(view -> {
             if (isLoggedIn) {
                 SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
@@ -205,9 +204,11 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             } else {
                 Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
                 startActivity(loginIntent);
+                finish();
             }
         });
 
+        // Handle logout menu item click
         MenuItem logOutItem = sideBar.getMenu().findItem(R.id.nav_logout);
         logOutItem.setOnMenuItemClickListener(item -> {
             if(isLoggedIn) {
@@ -231,6 +232,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
             } else {
                 Intent loginIntent = new Intent(HomeActivity.this, LoginActivity.class);
                 startActivity(loginIntent);
+                finish();
             }
             return true;
         });
@@ -289,6 +291,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         startActivity(intent);
     }
 
+    // Method to expand a view with animation
     private void expandView(final View view) {
         view.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         final int targetHeight = view.getMeasuredHeight();
@@ -337,6 +340,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         view.startAnimation(animation);
     }
 
+    // Update UI with user details if logged in
     private void updateUIWithUserDetails(User user) {
         setUserImage(user, profileImageView);
         usernameView.setText(user.getUsername());
@@ -345,6 +349,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         bottomNavBar.getMenu().findItem(R.id.nav_upload).setVisible(true);
     }
 
+    // Update UI to guest mode if no user is logged in
     private void showGuestUI() {
         profileImageView.setImageResource(R.drawable.ic_profile_foreground);
         usernameView.setText(R.string.guest);
@@ -377,6 +382,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         }
     }
 
+    // Method to set the user's profile image
     public void setUserImage(User user, ImageView imageView) {
         String base64Image = user.getImage();
         if (base64Image != null) {
@@ -400,6 +406,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
         }
     }
 
+    // Convert a Bitmap to a circular Bitmap
     private Bitmap getCircularBitmap(Bitmap bitmap) {
         int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
 
@@ -424,6 +431,7 @@ public class HomeActivity extends AppCompatActivity implements VideoList.VideoIt
     @Override
     protected void onResume() {
         super.onResume();
+        // Check user status on activity resume
         checkLoggedInUser();
     }
 }
